@@ -90,7 +90,7 @@ abstract class AbstractDbMapper implements MapperInterface
             $this->hydrator = new ClassMethods(false);
         }
 
-        $resultSetPrototype = new HydratingResultSet($hydrator, $prototype);
+        $resultSetPrototype = new HydratingResultSet($this->hydrator, $this->prototype);
         $this->tableGateway = new TableGateway($table, $adapter, $features, $resultSetPrototype);
     }
 
