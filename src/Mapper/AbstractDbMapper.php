@@ -25,6 +25,7 @@ use Zend\Hydrator\HydratorInterface;
 use Zend\Paginator\Adapter\DbSelect;
 use Zend\Paginator\AdapterPluginManager;
 use Zend\Paginator\Paginator;
+use Zend\Stdlib\ArrayUtils;
 
 /**
  * Class AbstractDbMapper
@@ -166,7 +167,7 @@ abstract class AbstractDbMapper implements MapperInterface
             /** @var HydratingResultSet $resultSet */
             $resultSet = $this->tableGateway->selectWith($select);
             if ($resultSet && $resultSet->valid()) {
-                $entities = $resultSet->toArray();
+                $entities = ArrayUtils::iteratorToArray($resultSet);
             }
 
             return $entities;
