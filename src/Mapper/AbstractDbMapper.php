@@ -167,7 +167,7 @@ abstract class AbstractDbMapper implements MapperInterface
             /** @var HydratingResultSet $resultSet */
             $resultSet = $this->tableGateway->selectWith($select);
             if ($resultSet && $resultSet->valid()) {
-                $entities = ArrayUtils::iteratorToArray($resultSet);
+                $entities = ArrayUtils::iteratorToArray($resultSet, false);
             }
 
             return $entities;
