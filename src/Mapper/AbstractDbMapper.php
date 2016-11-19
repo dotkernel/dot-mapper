@@ -317,7 +317,8 @@ abstract class AbstractDbMapper implements MapperInterface
             $this->getPaginatorAdapterName(),
             [$this->currentSelect, $this->adapter, $resultSetPrototype]);
 
-        if(!is_subclass_of($paginatorAdapter, $this->getPaginatorAdapterName())) {
+        if(!is_a($paginatorAdapter, $this->getPaginatorAdapterName())
+            && !is_subclass_of($paginatorAdapter, $this->getPaginatorAdapterName())) {
             throw new RuntimeException('Paginator adapter for a db mapper must be an instance of '
                 . $this->getPaginatorAdapterName() . ' or derivative');
         }

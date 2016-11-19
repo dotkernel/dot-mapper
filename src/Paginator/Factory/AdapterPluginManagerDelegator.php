@@ -13,8 +13,8 @@ namespace Dot\Ems\Paginator\Factory;
 use Dot\Ems\Paginator\Adapter\DbSelect;
 use Dot\Ems\Paginator\Adapter\RelationalDbSelect;
 use Interop\Container\ContainerInterface;
+use Zend\Paginator\Adapter\Service\DbSelectFactory;
 use Zend\Paginator\AdapterPluginManager;
-use Zend\ServiceManager\Exception\ServiceNotCreatedException;
 use Zend\ServiceManager\Factory\DelegatorFactoryInterface;
 
 class AdapterPluginManagerDelegator implements DelegatorFactoryInterface
@@ -24,25 +24,9 @@ class AdapterPluginManagerDelegator implements DelegatorFactoryInterface
         /** @var AdapterPluginManager $pluginManager */
         $pluginManager = $callback();
 
-        $pluginManager->setFactory(DbSelect::class, [$this, 'dbSelectFactory']);
-        $pluginManager->setFactory(RelationalDbSelect::class, [$this, 'dbSelectFactory']);
+        $pluginManager->setFactory(DbSelect::class, DbSelectFactory::class);
+        $pluginManager->setFactory(RelationalDbSelect::class, DbSelectFactory::class);
 
         return $pluginManager;
     }
-
-    protected function dbSelectFactory(ContainerInterface $container, $requestedName, array $options = null)
-    {
-        if (null === $options || empty($options)) {
-            throw new ServiceNotCreatedException(sprintf(
-                '%s requires a minimum of zend-db Sql\Select and Adapter instance',
-                DbSelect::class
-            ));
-        }
-        return new $requestedName(
-            $options[0],
-            $options[1],
-            isset($options[2]) ? $options[2] : null
-        );
-    }
-
 }
