@@ -9,7 +9,8 @@
 
 namespace Dot\Ems\Mapper;
 
-use Dot\Ems\Entity\IgnorePropertyProvider;
+use Dot\Ems\Entity\SearchableColumnsProvider;
+use Dot\Ems\Entity\SortableColumnsProvider;
 use Dot\Ems\Exception\InvalidArgumentException;
 use Dot\Ems\ObjectPropertyTrait;
 use Zend\Db\Adapter\Adapter;
@@ -18,6 +19,7 @@ use Zend\Db\Metadata\Source\Factory;
 use Zend\Db\ResultSet\HydratingResultSet;
 use Zend\Db\Sql\Expression;
 use Zend\Db\Sql\Select;
+use Zend\Db\Sql\Where;
 use Zend\Db\TableGateway\Feature\FeatureSet;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Hydrator\ClassMethods;
@@ -51,16 +53,13 @@ abstract class AbstractDbMapper implements MapperInterface
     protected $identifier = 'id';
 
     /** @var  string */
-    protected $paginatorAdapterName;
+    protected $paginatorAdapterName = DbSelect::class;
 
     /** @var  AdapterPluginManager */
     protected $paginatorAdapterManager;
 
     /** @var  MetadataInterface */
     protected $metadata;
-
-    /** @var  string[] */
-    protected $ignoredProperties = [];
 
     /**
      * AbstractDbMapper constructor.
@@ -189,8 +188,10 @@ abstract class AbstractDbMapper implements MapperInterface
     public function create($entity)
     {
         $data = $this->entityToArray($entity, false);
+
         $this->tableGateway->insert($data);
         $this->setProperty($entity, $this->getIdentifierName(), $this->lastInsertValue());
+
         return $this->lastInsertValue();
     }
 
@@ -326,29 +327,17 @@ abstract class AbstractDbMapper implements MapperInterface
     /**
      * @param $entity
      * @param bool $removeNulls
-     * @param array $ignoreProperties
      * @return array
      */
-    protected function entityToArray($entity, $removeNulls = true, $ignoreProperties = [])
+    protected function entityToArray($entity, $removeNulls = true)
     {
         if(!is_object($entity)) {
             throw new InvalidArgumentException('Entity must be and object');
         }
 
         $data = $this->hydrator->extract($entity);
-        if($entity instanceof IgnorePropertyProvider) {
-            $ignoreProperties = $entity->ignoredProperties();
-        }
-
         if($removeNulls) {
             $data = array_filter($data);
-        }
-
-        $ignoreProperties = array_merge($ignoreProperties, $this->ignoredProperties);
-        foreach ($ignoreProperties as $prop) {
-            if(isset($data[$prop])) {
-                unset($data[$prop]);
-            }
         }
 
         return $data;
@@ -365,6 +354,47 @@ abstract class AbstractDbMapper implements MapperInterface
             return $select;
         }
 
+        $select = $this->applySortFilter($select, $filters);
+        $select = $this->applySearchFilters($select, $filters);
+
+        return $select;
+
+    }
+
+    protected function applySearchFilters(Select $select, $filters = [])
+    {
+        $searchableColumns = [];
+
+        $columns = [];
+        $prototype = $this->getPrototype();
+        if($prototype instanceof SearchableColumnsProvider) {
+            $columns = $prototype->searchableColumns();
+        }
+        $tableColumns = $this->metadata->getColumnNames($this->tableGateway->getTable());
+        foreach ($columns as $column) {
+            if(in_array($column, $tableColumns)) {
+                $searchableColumns[] = $column;
+            }
+        }
+
+        if(!empty($searchableColumns)) {
+            $search = isset($filters['search']) ? $filters['search'] : '';
+            if(!empty($search)) {
+                $select->where(function(Where $where) use ($search, $searchableColumns) {
+                    $predicate = $where->nest();
+                    foreach ($searchableColumns as $column) {
+                        $predicate->like($column, '%' . $search . '%')->or;
+                    }
+                    $predicate->unnest();
+                    $where->predicate($predicate);
+                });
+            }
+        }
+
+    }
+
+    protected function applySortFilter(Select $select, $filters = [])
+    {
         //sorting options
         $sort = isset($filters['sort']) ? $filters['sort'] : '';
         $order = isset($filters['order']) ? strtoupper($filters['order']) : 'ASC';
@@ -374,7 +404,14 @@ abstract class AbstractDbMapper implements MapperInterface
             $order = 'ASC';
         }
 
-        if(!empty($sort) && in_array($sort, $this->metadata->getColumnNames($this->tableGateway->getTable()))) {
+        $sortableColumns = [];
+        $prototype = $this->getPrototype();
+        if($prototype instanceof SortableColumnsProvider) {
+            $sortableColumns = $prototype->sortableColumns();
+        }
+
+        if(!empty($sort) && in_array($sort, $this->metadata->getColumnNames($this->tableGateway->getTable()))
+            && in_array($sort, $sortableColumns)) {
             $column = $this->metadata->getColumn($sort, $this->tableGateway->getTable());
             if($column->getDataType() == 'ENUM' || $column->getDataType() == 'SET') {
                 $select->order(new Expression('CAST(' . $this->adapter->getPlatform()->quoteIdentifier($sort)
@@ -386,7 +423,6 @@ abstract class AbstractDbMapper implements MapperInterface
         }
 
         return $select;
-
     }
 
 }

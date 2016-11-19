@@ -9,6 +9,7 @@
 
 namespace Dot\Ems\Mapper;
 
+use Dot\Ems\Entity\IgnorePropertyProvider;
 use Dot\Ems\Mapper\Relation\RelationInterface;
 use Dot\Ems\ObjectPropertyTrait;
 
@@ -64,9 +65,7 @@ class RelationalDbMapper extends AbstractDbMapper
      */
     public function create($entity)
     {
-        $this->ignoredProperties = array_keys($this->relations);
         $id = parent::create($entity);
-
         $this->saveSubEntities($entity, $id);
         return $id;
     }
@@ -77,9 +76,7 @@ class RelationalDbMapper extends AbstractDbMapper
      */
     public function update($entity)
     {
-        $this->ignoredProperties = array_keys($this->relations);
         parent::update($entity);
-
         $this->saveSubEntities($entity, $this->getProperty($entity, $this->getIdentifierName()));
     }
 
@@ -187,6 +184,30 @@ class RelationalDbMapper extends AbstractDbMapper
     {
         $this->deleteCascade = $deleteCascade;
         return $this;
+    }
+
+    /**
+     * @param $entity
+     * @param bool $removeNulls
+     * @return array
+     */
+    protected function entityToArray($entity, $removeNulls = true)
+    {
+        $data = parent::entityToArray($entity, $removeNulls);
+
+        $ignoreProperties = [];
+        if($entity instanceof IgnorePropertyProvider) {
+            $ignoreProperties = $entity->ignoredProperties();
+        }
+
+        $ignoreProperties = array_merge($ignoreProperties, array_keys($this->relations));
+        foreach ($ignoreProperties as $prop) {
+            if(isset($data[$prop])) {
+                unset($data[$prop]);
+            }
+        }
+
+        return $data;
     }
 
 }
