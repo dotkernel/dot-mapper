@@ -12,6 +12,7 @@ namespace Dot\Ems\Mapper;
 use Dot\Ems\Entity\IgnorePropertyProvider;
 use Dot\Ems\Mapper\Relation\RelationInterface;
 use Dot\Ems\ObjectPropertyTrait;
+use Dot\Ems\Paginator\Adapter\RelationalDbSelect;
 
 /**
  * Class AggregateDbMapper
@@ -20,6 +21,9 @@ use Dot\Ems\ObjectPropertyTrait;
 class RelationalDbMapper extends AbstractDbMapper
 {
     use ObjectPropertyTrait;
+
+    /** @var  string */
+    protected $paginatorAdapterName = RelationalDbSelect::class;
 
     /** @var RelationInterface[] */
     protected $relations = [];
@@ -50,7 +54,7 @@ class RelationalDbMapper extends AbstractDbMapper
     public function fetchAll($where = [], $filters = [], $paginated = false)
     {
         $entities = parent::fetchAll($where, $filters, $paginated);
-        if($entities) {
+        if($entities && !$paginated) {
             foreach ($entities as $entity) {
                 $this->buildEntity($entity);
             }
@@ -96,7 +100,7 @@ class RelationalDbMapper extends AbstractDbMapper
      * @param $entity
      * @param $id
      */
-    protected function saveSubEntities($entity, $id)
+    public function saveSubEntities($entity, $id)
     {
         foreach (array_keys($this->relations) as $property) {
             $relation = $this->relations[$property];
@@ -111,7 +115,7 @@ class RelationalDbMapper extends AbstractDbMapper
     /**
      * @param $entity
      */
-    protected function deleteSubEntities($entity)
+    public function deleteSubEntities($entity)
     {
         foreach (array_keys($this->relations) as $property) {
             $relation = $this->relations[$property];
@@ -126,7 +130,7 @@ class RelationalDbMapper extends AbstractDbMapper
     /**
      * @param $entity
      */
-    protected function buildEntity($entity)
+    public function buildEntity($entity)
     {
         if(empty($this->relations)) {
             return;
@@ -184,6 +188,22 @@ class RelationalDbMapper extends AbstractDbMapper
     {
         $this->deleteCascade = $deleteCascade;
         return $this;
+    }
+
+    public function getPaginatorAdapterName()
+    {
+        if(!$this->paginatorAdapterName) {
+            $this->paginatorAdapterName = RelationalDbSelect::class;
+        }
+        return $this->paginatorAdapterName;
+    }
+
+    protected function getPaginatorAdapter()
+    {
+        /** @var RelationalDbSelect $paginatorAdapter */
+        $paginatorAdapter = parent::getPaginatorAdapter();
+        $paginatorAdapter->setRelationalMapper($this);
+        return $paginatorAdapter;
     }
 
     /**

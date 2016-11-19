@@ -10,6 +10,9 @@
 namespace Dot\Ems;
 
 
+use Dot\Ems\Paginator\Factory\AdapterPluginManagerDelegator;
+use Zend\Paginator\AdapterPluginManager;
+
 class ConfigProvider
 {
     public function __invoke()
@@ -24,7 +27,13 @@ class ConfigProvider
     public function getDependencyConfig()
     {
         return [
-            'abstract_factories' => []
+            'abstract_factories' => [],
+
+            'delegators' => [
+                AdapterPluginManager::class => [
+                    AdapterPluginManagerDelegator::class,
+                ]
+            ]
         ];
     }
 }

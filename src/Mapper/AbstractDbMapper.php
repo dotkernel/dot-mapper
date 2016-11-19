@@ -12,7 +12,9 @@ namespace Dot\Ems\Mapper;
 use Dot\Ems\Entity\SearchableColumnsProvider;
 use Dot\Ems\Entity\SortableColumnsProvider;
 use Dot\Ems\Exception\InvalidArgumentException;
+use Dot\Ems\Exception\RuntimeException;
 use Dot\Ems\ObjectPropertyTrait;
+use Dot\Ems\Paginator\Adapter\DbSelect;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Metadata\MetadataInterface;
 use Zend\Db\Metadata\Source\Factory;
@@ -24,7 +26,6 @@ use Zend\Db\TableGateway\Feature\FeatureSet;
 use Zend\Db\TableGateway\TableGateway;
 use Zend\Hydrator\ClassMethods;
 use Zend\Hydrator\HydratorInterface;
-use Zend\Paginator\Adapter\DbSelect;
 use Zend\Paginator\AdapterPluginManager;
 use Zend\Paginator\Paginator;
 use Zend\Stdlib\ArrayUtils;
@@ -60,6 +61,9 @@ abstract class AbstractDbMapper implements MapperInterface
 
     /** @var  MetadataInterface */
     protected $metadata;
+
+    /** @var  Select */
+    protected $currentSelect;
 
     /**
      * AbstractDbMapper constructor.
@@ -156,6 +160,8 @@ abstract class AbstractDbMapper implements MapperInterface
         $entities = null;
 
         $select = $this->tableGateway->getSql()->select();
+        $this->currentSelect = $select;
+
         if (!empty($where)) {
             $select->where($where);
         }
@@ -171,12 +177,7 @@ abstract class AbstractDbMapper implements MapperInterface
 
             return $entities;
         } else {
-            $resultSetPrototype = $this->tableGateway->getResultSetPrototype();
-            $paginatorAdapter = ($this->paginatorAdapterManager instanceof AdapterPluginManager)
-                ? $this->paginatorAdapterManager->get($this->getPaginatorAdapterName(),
-                    [$select, $this->adapter, $resultSetPrototype])
-                : new DbSelect($select, $this->adapter, $resultSetPrototype);
-
+            $paginatorAdapter = $this->getPaginatorAdapter();
             return new Paginator($paginatorAdapter);
         }
     }
@@ -304,6 +305,24 @@ abstract class AbstractDbMapper implements MapperInterface
     {
         $this->paginatorAdapterName = $paginatorAdapterName;
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getPaginatorAdapter()
+    {
+        $resultSetPrototype = $this->tableGateway->getResultSetPrototype();
+        $paginatorAdapter = $this->paginatorAdapterManager->get(
+            $this->getPaginatorAdapterName(),
+            [$this->currentSelect, $this->adapter, $resultSetPrototype]);
+
+        if(!is_subclass_of($paginatorAdapter, $this->getPaginatorAdapterName())) {
+            throw new RuntimeException('Paginator adapter for a db mapper must be an instance of '
+                . $this->getPaginatorAdapterName() . ' or derivative');
+        }
+
+        return $paginatorAdapter;
     }
 
     /**
