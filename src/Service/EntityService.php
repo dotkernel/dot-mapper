@@ -20,6 +20,9 @@ class EntityService implements ServiceInterface
 {
     use ObjectPropertyTrait;
 
+    /** @var bool  */
+    protected $atomicOperations = true;
+
     /** @var  MapperInterface */
     protected $mapper;
 
@@ -55,25 +58,63 @@ class EntityService implements ServiceInterface
     /**
      * @param $entity
      * @return mixed
+     * @throws \Exception
      */
     public function save($entity)
     {
-        $id = $this->getProperty($entity, $this->mapper->getIdentifierName());
-        if($id) {
-            return $this->mapper->update($entity);
-        }
-        else {
-            return $this->mapper->create($entity);
+        try {
+            if($this->atomicOperations) {
+                $this->mapper->beginTransaction();
+            }
+
+            $id = $this->getProperty($entity, $this->mapper->getIdentifierName());
+            if($id) {
+                $result = $this->mapper->update($entity);
+            }
+            else {
+                $result = $this->mapper->create($entity);
+            }
+
+            if($this->atomicOperations) {
+                $this->mapper->commit();
+            }
+
+            return $result;
+            
+        } catch (\Exception $e) {
+            if($this->atomicOperations) {
+                $this->mapper->rollback();
+            }
+
+            throw $e;
         }
     }
 
     /**
      * @param $entity
+     * @throws \Exception
      * @return void
      */
     public function delete($entity)
     {
-        $this->mapper->delete($entity);
+        try {
+            if ($this->atomicOperations) {
+                $this->mapper->beginTransaction();
+            }
+
+            $this->mapper->delete($entity);
+
+            if($this->atomicOperations) {
+                $this->mapper->commit();
+            }
+
+        } catch (\Exception $e) {
+            if($this->atomicOperations) {
+                $this->mapper->rollback();
+            }
+
+            throw $e;
+        }
     }
 
     /**
@@ -94,6 +135,22 @@ class EntityService implements ServiceInterface
         return $this;
     }
 
+    /**
+     * @return boolean
+     */
+    public function isAtomicOperations()
+    {
+        return $this->atomicOperations;
+    }
 
+    /**
+     * @param boolean $atomicOperations
+     * @return EntityService
+     */
+    public function setAtomicOperations($atomicOperations)
+    {
+        $this->atomicOperations = $atomicOperations;
+        return $this;
+    }
 
 }
