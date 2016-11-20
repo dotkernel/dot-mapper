@@ -49,9 +49,10 @@ class OneToManyRelation extends AbstractRelation
                 throw new InvalidArgumentException('Entity collection contains invalid entities');
             }
 
-            $this->setProperty($entity, $this->getRefName(), $refValue);
             $id = $this->getProperty($entity, $this->getMapper()->getIdentifierName());
             if(!$id) {
+                $this->setProperty($entity, $this->getRefName(), $refValue);
+
                 $id = $this->getMapper()->create($entity);
                 $this->setProperty($entity, $this->getMapper()->getIdentifierName(), $id);
             }
