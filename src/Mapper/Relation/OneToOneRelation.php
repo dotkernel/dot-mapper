@@ -25,7 +25,12 @@ class OneToOneRelation extends AbstractRelation
      */
     public function fetchRef($refValue)
     {
-        return $this->getMapper()->fetch([$this->getRefName() => $refValue]);
+        $ref = $this->getMapper()->fetch([$this->getRefName() => $refValue]);
+        if($ref) {
+            return $ref;
+        }
+
+        return null;
     }
 
     /**

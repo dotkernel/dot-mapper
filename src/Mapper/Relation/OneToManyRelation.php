@@ -25,7 +25,12 @@ class OneToManyRelation extends AbstractRelation
      */
     public function fetchRef($refValue)
     {
-        return $this->getMapper()->fetchAll([$this->getRefName() => $refValue]);
+        $refs = $this->getMapper()->fetchAll([$this->getRefName() => $refValue]);
+        if($refs) {
+            return $refs;
+        }
+
+        return null;
     }
 
     /**
