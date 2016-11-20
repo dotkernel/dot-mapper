@@ -80,7 +80,7 @@ class EntityService implements ServiceInterface
             }
 
             return $result;
-            
+
         } catch (\Exception $e) {
             if($this->atomicOperations) {
                 $this->mapper->rollback();

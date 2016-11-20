@@ -40,4 +40,15 @@ interface ServiceInterface
      * @return mixed
      */
     public function delete($entity);
+
+    /**
+     * @param bool $value
+     * @return mixed
+     */
+    public function setAtomicOperations($value);
+
+    /**
+     * @return bool
+     */
+    public function isAtomicOperations();
 }
