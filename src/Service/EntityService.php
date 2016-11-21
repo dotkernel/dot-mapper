@@ -57,7 +57,7 @@ class EntityService implements ServiceInterface
 
     /**
      * @param $entity
-     * @return mixed
+     * @return int
      * @throws \Exception
      */
     public function save($entity)
@@ -93,7 +93,7 @@ class EntityService implements ServiceInterface
     /**
      * @param $entity
      * @throws \Exception
-     * @return void
+     * @return int
      */
     public function delete($entity)
     {
@@ -102,11 +102,13 @@ class EntityService implements ServiceInterface
                 $this->mapper->beginTransaction();
             }
 
-            $this->mapper->delete($entity);
+            $result = $this->mapper->delete($entity);
 
             if($this->atomicOperations) {
                 $this->mapper->commit();
             }
+
+            return $result;
 
         } catch (\Exception $e) {
             if($this->atomicOperations) {

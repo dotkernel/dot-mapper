@@ -190,15 +190,15 @@ abstract class AbstractDbMapper implements MapperInterface
     {
         $data = $this->entityToArray($entity, false);
 
-        $this->tableGateway->insert($data);
+        $affectedRows = $this->tableGateway->insert($data);
         $this->setProperty($entity, $this->getIdentifierName(), $this->lastInsertValue());
 
-        return $this->lastInsertValue();
+        return $affectedRows;
     }
 
     /**
      * @param $entity
-     * @return void
+     * @return int
      */
     public function update($entity)
     {
@@ -211,12 +211,12 @@ abstract class AbstractDbMapper implements MapperInterface
         $id = $data[$this->identifier];
         unset($data[$this->identifier]);
 
-        $this->tableGateway->update($data, [$this->identifier => $id]);
+        return $this->tableGateway->update($data, [$this->identifier => $id]);
     }
 
     /**
      * @param $entity
-     * @return void
+     * @return int
      */
     public function delete($entity)
     {
@@ -228,7 +228,8 @@ abstract class AbstractDbMapper implements MapperInterface
         if(!$id) {
             throw new InvalidArgumentException('Cannot delete an entity without an identifier');
         }
-        $this->tableGateway->delete([$this->getIdentifierName() => $id]);
+
+        return $this->tableGateway->delete([$this->getIdentifierName() => $id]);
     }
 
     /**

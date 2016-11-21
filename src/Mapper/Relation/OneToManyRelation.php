@@ -36,10 +36,11 @@ class OneToManyRelation extends AbstractRelation
     /**
      * @param $entities
      * @param $refValue
-     * @return void
+     * @return int
      */
     public function saveRef($entities, $refValue)
     {
+        $affectedRows = 0;
         if(!is_array($entities)) {
             throw new InvalidArgumentException('Entity must be an array of objects');
         }
@@ -52,22 +53,28 @@ class OneToManyRelation extends AbstractRelation
             $id = $this->getProperty($entity, $this->getMapper()->getIdentifierName());
             if(!$id) {
                 $this->setProperty($entity, $this->getRefName(), $refValue);
-
-                $id = $this->getMapper()->create($entity);
-                $this->setProperty($entity, $this->getMapper()->getIdentifierName(), $id);
+                $r = $this->getMapper()->create($entity);
+                if($r) {
+                    $affectedRows += $r;
+                }
             }
             else {
-                $this->getMapper()->update($entity);
+                $r = $this->getMapper()->update($entity);
+                if($r) {
+                    $affectedRows += $r;
+                }
             }
         }
+        return $affectedRows;
     }
 
     /**
      * @param $entities
-     * @return void
+     * @return int
      */
     public function deleteRef($entities)
     {
+        $affectedRows = 0;
         if(!is_array($entities)) {
             throw new InvalidArgumentException('Entity must be an array of objects');
         }
@@ -79,8 +86,12 @@ class OneToManyRelation extends AbstractRelation
 
             $id = $this->getProperty($entity, $this->getMapper()->getIdentifierName());
             if($id) {
-                $this->getMapper()->delete($entity);
+                $r = $this->getMapper()->delete($entity);
+                if($r) {
+                    $affectedRows += $r;
+                }
             }
         }
+        return $affectedRows;
     }
 }

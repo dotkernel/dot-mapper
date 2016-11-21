@@ -69,62 +69,78 @@ class RelationalDbMapper extends AbstractDbMapper
      */
     public function create($entity)
     {
-        $id = parent::create($entity);
-        $this->saveSubEntities($entity, $id);
-        return $id;
+        $affectedRows = parent::create($entity);
+        if($affectedRows) {
+            $r = $this->saveSubEntities($entity, $this->lastInsertValue());
+            $affectedRows += $r;
+        }
+
+        return $affectedRows;
     }
 
     /**
      * @param $entity
-     * @return void
+     * @return int
      */
     public function update($entity)
     {
-        parent::update($entity);
-        $this->saveSubEntities($entity, $this->getProperty($entity, $this->getIdentifierName()));
+        $affectedRows = parent::update($entity);
+        $r = $this->saveSubEntities($entity, $this->getProperty($entity, $this->getIdentifierName()));
+        return $affectedRows + $r;
     }
 
     /**
      * @param $entity
-     * @return void
+     * @return int
      */
     public function delete($entity)
     {
-        parent::delete($entity);
-        if($this->deleteCascade) {
-            $this->deleteSubEntities($entity);
+        $affectedRows = parent::delete($entity);
+        if($this->deleteCascade && $affectedRows) {
+            $r = $this->deleteSubEntities($entity);
+            $affectedRows += $r;
         }
+
+        return $affectedRows;
     }
 
     /**
      * @param $entity
      * @param $id
+     * @return int
      */
     public function saveSubEntities($entity, $id)
     {
+        $affectedRows = 0;
         foreach (array_keys($this->relations) as $property) {
             $relation = $this->relations[$property];
 
             $subEntity = $this->getProperty($entity, $property);
             if(!empty($subEntity)) {
-                $relation->saveRef($subEntity, $id);
+                $r = $relation->saveRef($subEntity, $id);
+                $affectedRows += $r;
             }
         }
+        return $affectedRows;
     }
 
     /**
      * @param $entity
+     * @return int
      */
     public function deleteSubEntities($entity)
     {
+        $affectedRows = 0;
         foreach (array_keys($this->relations) as $property) {
             $relation = $this->relations[$property];
 
             $subEntity = $this->getProperty($entity, $property);
             if(!empty($subEntity)) {
-                $relation->deleteRef($subEntity);
+                $r = $relation->deleteRef($subEntity);
+                $affectedRows += $r;
             }
         }
+        return $affectedRows;
     }
 
     /**

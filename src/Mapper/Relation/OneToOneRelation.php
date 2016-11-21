@@ -36,7 +36,7 @@ class OneToOneRelation extends AbstractRelation
     /**
      * @param $entity
      * @param $refValue
-     * @return void
+     * @return int
      */
     public function saveRef($entity, $refValue)
     {
@@ -47,18 +47,16 @@ class OneToOneRelation extends AbstractRelation
         $id = $this->getProperty($entity, $this->getMapper()->getIdentifierName());
         if(!$id) {
             $this->setProperty($entity, $this->getRefName(), $refValue);
-
-            $id = $this->getMapper()->create($entity);
-            $this->setProperty($entity, $this->getMapper()->getIdentifierName(), $id);
+            return $this->getMapper()->create($entity);
         }
         else {
-            $this->getMapper()->update($entity);
+            return $this->getMapper()->update($entity);
         }
     }
 
     /**
      * @param $entity
-     * @return void
+     * @return int
      */
     public function deleteRef($entity)
     {
@@ -68,7 +66,9 @@ class OneToOneRelation extends AbstractRelation
 
         $id = $this->getProperty($entity, $this->getMapper()->getIdentifierName());
         if($id) {
-            $this->getMapper()->delete($entity);
+            return $this->getMapper()->delete($entity);
         }
+
+        return 0;
     }
 }

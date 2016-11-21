@@ -8,6 +8,7 @@
  */
 
 namespace Dot\Ems\Service;
+use Dot\Ems\Mapper\MapperInterface;
 
 /**
  * Interface ServiceInterface
@@ -51,4 +52,9 @@ interface ServiceInterface
      * @return bool
      */
     public function isAtomicOperations();
+
+    /**
+     * @return MapperInterface
+     */
+    public function getMapper();
 }
