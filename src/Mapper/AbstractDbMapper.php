@@ -215,21 +215,22 @@ abstract class AbstractDbMapper implements MapperInterface
     }
 
     /**
-     * @param $entity
+     * @param $where
      * @return int
      */
-    public function delete($entity)
+    public function delete($where)
     {
-        if(!is_object($entity)) {
-            throw new InvalidArgumentException('Entity must be an object');
-        }
+        if(is_object($where) && is_a($where, get_class($this->getPrototype()))) {
+            $id = $this->getProperty($where, $this->getIdentifierName());
+            if(!$id) {
+                throw new InvalidArgumentException('Cannot delete an entity without an identifier');
+            }
 
-        $id = $this->getProperty($entity, $this->getIdentifierName());
-        if(!$id) {
-            throw new InvalidArgumentException('Cannot delete an entity without an identifier');
+            return $this->tableGateway->delete([$this->getIdentifierName() => $id]);
         }
-
-        return $this->tableGateway->delete([$this->getIdentifierName() => $id]);
+        else {
+            return $this->tableGateway->delete($where);
+        }
     }
 
     /**

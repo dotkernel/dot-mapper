@@ -68,10 +68,10 @@ interface MapperInterface
     public function update($entity);
 
     /**
-     * @param $entity
+     * @param $where
      * @return mixed
      */
-    public function delete($entity);
+    public function delete($where);
 
     /**
      * @return object

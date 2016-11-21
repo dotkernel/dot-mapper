@@ -91,18 +91,18 @@ class EntityService implements ServiceInterface
     }
 
     /**
-     * @param $entity
+     * @param $where
      * @throws \Exception
      * @return int
      */
-    public function delete($entity)
+    public function delete($where)
     {
         try {
             if ($this->atomicOperations) {
                 $this->mapper->beginTransaction();
             }
 
-            $result = $this->mapper->delete($entity);
+            $result = $this->mapper->delete($where);
 
             if($this->atomicOperations) {
                 $this->mapper->commit();

@@ -90,15 +90,17 @@ class RelationalDbMapper extends AbstractDbMapper
     }
 
     /**
-     * @param $entity
+     * @param $where
      * @return int
      */
-    public function delete($entity)
+    public function delete($where)
     {
-        $affectedRows = parent::delete($entity);
-        if($this->deleteCascade && $affectedRows) {
-            $r = $this->deleteSubEntities($entity);
-            $affectedRows += $r;
+        $affectedRows = parent::delete($where);
+        if(is_object($where) && is_a($where, get_class($this->getPrototype()))) {
+            if($this->deleteCascade && $affectedRows) {
+                $r = $this->deleteSubEntities($where);
+                $affectedRows += $r;
+            }
         }
 
         return $affectedRows;

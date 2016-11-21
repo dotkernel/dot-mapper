@@ -37,10 +37,10 @@ interface ServiceInterface
     public function save($entity);
 
     /**
-     * @param $entity
+     * @param $where
      * @return mixed
      */
-    public function delete($entity);
+    public function delete($where);
 
     /**
      * @param bool $value
