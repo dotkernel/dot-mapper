@@ -57,4 +57,10 @@ interface ServiceInterface
      * @return MapperInterface
      */
     public function getMapper();
+
+    /**
+     * @param MapperInterface $mapper
+     * @return mixed
+     */
+    public function setMapper(MapperInterface $mapper);
 }

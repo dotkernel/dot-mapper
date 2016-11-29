@@ -28,9 +28,9 @@ class EntityService implements ServiceInterface
 
     /**
      * EntityService constructor.
-     * @param MapperInterface $mapper
+     * @param MapperInterface|null $mapper
      */
-    public function __construct(MapperInterface $mapper)
+    public function __construct(MapperInterface $mapper = null)
     {
         $this->mapper = $mapper;
     }

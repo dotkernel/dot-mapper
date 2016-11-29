@@ -180,13 +180,12 @@ class RelationalDbMapper extends AbstractDbMapper
     }
 
     /**
-     * @param $property
      * @param RelationInterface $relation
      * @return $this
      */
-    public function addRelation($property, RelationInterface $relation)
+    public function addRelation(RelationInterface $relation)
     {
-        $this->relations[$property] = $relation;
+        $this->relations[$relation->getFieldName()] = $relation;
         return $this;
     }
 

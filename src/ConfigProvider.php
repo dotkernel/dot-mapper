@@ -10,6 +10,10 @@
 namespace Dot\Ems;
 
 
+use Dot\Ems\Factory\MapperPluginManagerFactory;
+use Dot\Ems\Factory\RelationPluginManagerFactory;
+use Dot\Ems\Mapper\MapperPluginManager;
+use Dot\Ems\Mapper\Relation\RelationPluginManager;
 use Dot\Ems\Paginator\Factory\AdapterPluginManagerDelegator;
 use Zend\Paginator\AdapterPluginManager;
 
@@ -20,13 +24,24 @@ class ConfigProvider
         return [
             'dependencies' => $this->getDependencyConfig(),
 
-            'dot_ems' => [],
+            'dot_ems' => [
+
+                'mapper_manager' => [],
+
+                'relation_manager' => [],
+
+            ],
         ];
     }
 
     public function getDependencyConfig()
     {
         return [
+            'factories' => [
+                MapperPluginManager::class => MapperPluginManagerFactory::class,
+                RelationPluginManager::class => RelationPluginManagerFactory::class,
+            ],
+
             'abstract_factories' => [],
 
             'delegators' => [

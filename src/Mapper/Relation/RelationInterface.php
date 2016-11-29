@@ -32,6 +32,23 @@ interface RelationInterface
     public function getRefName();
 
     /**
+     * @param $refName
+     * @return mixed
+     */
+    public function setRefName($refName);
+
+    /**
+     * @return string
+     */
+    public function getFieldName();
+
+    /**
+     * @param $fieldName
+     * @return mixed
+     */
+    public function setFieldName($fieldName);
+
+    /**
      * @param $refValue
      * @return mixed
      */
@@ -54,4 +71,10 @@ interface RelationInterface
      * @return MapperInterface
      */
     public function getMapper();
+
+    /**
+     * @param MapperInterface $mapper
+     * @return mixed
+     */
+    public function setMapper(MapperInterface $mapper);
 }
