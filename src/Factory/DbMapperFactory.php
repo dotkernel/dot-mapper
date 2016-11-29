@@ -38,11 +38,16 @@ class DbMapperFactory
         }
 
         $hydratorName = isset($config['entity_hydrator']) && is_string($config['entity_hydrator'])
-            ? $config['entity_hydrator'] : ClassMethods::class;
+            ? $config['entity_hydrator'] : null;
 
         //get entity prototype
         $entityPrototype = $this->getEntityPrototype($container, $config['entity_prototype']);
-        $hydrator = $this->getHydrator($container, $hydratorName);
+        if($hydratorName) {
+            $hydrator = $this->getHydrator($container, $hydratorName);
+        }
+        else {
+            $hydrator = new ClassMethods(false);
+        }
 
         $mapper = new DbMapper(
             $config['table'],
