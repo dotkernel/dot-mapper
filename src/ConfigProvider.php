@@ -10,6 +10,8 @@
 namespace Dot\Ems;
 
 
+use Dot\Ems\Factory\EntityServiceAbstractFactory;
+use Dot\Ems\Factory\EntityServiceOptionsAbstractFactory;
 use Dot\Ems\Factory\MapperPluginManagerFactory;
 use Dot\Ems\Factory\RelationPluginManagerFactory;
 use Dot\Ems\Mapper\MapperPluginManager;
@@ -42,7 +44,10 @@ class ConfigProvider
                 RelationPluginManager::class => RelationPluginManagerFactory::class,
             ],
 
-            'abstract_factories' => [],
+            'abstract_factories' => [
+                EntityServiceAbstractFactory::class,
+                EntityServiceOptionsAbstractFactory::class,
+            ],
 
             'delegators' => [
                 AdapterPluginManager::class => [

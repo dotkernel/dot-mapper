@@ -9,17 +9,19 @@
 
 namespace Dot\Ems\Mapper\Relation;
 
-
-use Dot\Ems\Factory\OneToManyRelationFactory;
-use Dot\Ems\Factory\OneToOneRelationFactory;
+use Dot\Ems\Factory\RelationFactory;
 use Zend\ServiceManager\AbstractPluginManager;
 
+/**
+ * Class RelationPluginManager
+ * @package Dot\Ems\Mapper\Relation
+ */
 class RelationPluginManager extends AbstractPluginManager
 {
     protected $instanceOf = RelationInterface::class;
 
     protected $factories = [
-        OneToOneRelation::class => OneToOneRelationFactory::class,
-        OneToManyRelation::class => OneToManyRelationFactory::class
+        OneToOneRelation::class => RelationFactory::class,
+        OneToManyRelation::class => RelationFactory::class
     ];
 }
