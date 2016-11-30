@@ -49,10 +49,15 @@ class DbMapperFactory
             $hydrator = new ClassMethods(false);
         }
 
-        $mapper = new DbMapper(
+        /** @var DbMapper $mapper */
+        $mapper = new $requestedName(
             $config['table'],
             $container->get($config['adapter']),
             $entityPrototype, $hydrator);
+
+        if(!$mapper instanceof DbMapper) {
+            throw new RuntimeException('Requested mapper is not an instance of ' . DbMapper::class);
+        }
 
         $mapper->setPaginatorAdapterManager($container->get(AdapterPluginManager::class));
         if(isset($config['paginator_adapter']) && is_string($config['paginator_adapter'])) {

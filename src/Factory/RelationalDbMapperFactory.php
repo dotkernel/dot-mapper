@@ -50,10 +50,15 @@ class RelationalDbMapperFactory
             $hydrator = new ClassMethods(false);
         }
 
-        $mapper = new RelationalDbMapper(
+        /** @var RelationalDbMapper $mapper */
+        $mapper = new $requestedName(
             $config['table'],
             $container->get($config['adapter']),
             $entityPrototype, $hydrator);
+
+        if(!$mapper instanceof RelationalDbMapper) {
+            throw new RuntimeException('Requested mapper is not an instance of ' . RelationalDbMapper::class);
+        }
 
         //add relations
         /** @var RelationPluginManager $relationManager */
