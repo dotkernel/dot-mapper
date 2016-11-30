@@ -52,8 +52,8 @@ abstract class AbstractServiceFactory implements AbstractFactoryInterface
     protected function getConfig(ContainerInterface $container)
     {
         $config = $container->get('config');
-        if (isset($config[$this->configKey]) && is_array($config[$this->configKey])) {
-            $this->config = $config[$this->configKey];
+        if (isset($config[$this->configKey]['service']) && is_array($config[$this->configKey]['service'])) {
+            $this->config = $config[$this->configKey]['service'];
         }
 
         return $this->config;
