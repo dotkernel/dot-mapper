@@ -28,6 +28,8 @@ class ConfigProvider
 
             'dot_ems' => [
 
+                'service' => [],
+
                 'mapper_manager' => [],
 
                 'relation_manager' => [],
