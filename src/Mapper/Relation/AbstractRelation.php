@@ -33,14 +33,16 @@ abstract class AbstractRelation implements RelationInterface
     protected $fieldName;
 
     /**
-     * AbstractRelationMapper constructor.
-     * @param MapperInterface $mapper
-     * @param $refName
+     * AbstractRelation constructor.
+     * @param MapperInterface|null $mapper
+     * @param null $refName
+     * @param null $fieldName
      */
-    public function __construct(MapperInterface $mapper = null, $refName = null)
+    public function __construct(MapperInterface $mapper = null, $refName = null, $fieldName = null)
     {
         $this->mapper = $mapper;
         $this->refName = $refName;
+        $this->fieldName = $fieldName;
     }
 
     /**
