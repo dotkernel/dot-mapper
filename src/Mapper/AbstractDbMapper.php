@@ -413,6 +413,8 @@ abstract class AbstractDbMapper implements MapperInterface
             }
         }
 
+        return $select;
+
     }
 
     protected function applySortFilter(Select $select, $filters = [])
