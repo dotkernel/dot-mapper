@@ -12,8 +12,17 @@ namespace Dot\Ems\Paginator\Adapter;
 
 use Zend\Stdlib\ArrayUtils;
 
+/**
+ * Class DbSelect
+ * @package Dot\Ems\Paginator\Adapter
+ */
 class DbSelect extends \Zend\Paginator\Adapter\DbSelect
 {
+    /**
+     * @param int $offset
+     * @param int $itemCountPerPage
+     * @return array
+     */
     public function getItems($offset, $itemCountPerPage)
     {
         $items = parent::getItems($offset, $itemCountPerPage);

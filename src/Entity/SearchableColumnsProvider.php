@@ -9,11 +9,14 @@
 
 namespace Dot\Ems\Entity;
 
-
+/**
+ * Interface SearchableColumnsProvider
+ * @package Dot\Ems\Entity
+ */
 interface SearchableColumnsProvider
 {
     /**
-     * @return array
+     * @return string[]
      */
     public function searchableColumns();
 }

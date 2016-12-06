@@ -9,6 +9,7 @@
 
 namespace Dot\Ems\Mapper;
 
+use Dot\Ems\Entity\IgnorePropertyProvider;
 use Dot\Ems\Entity\SearchableColumnsProvider;
 use Dot\Ems\Entity\SortableColumnsProvider;
 use Dot\Ems\Exception\InvalidArgumentException;
@@ -357,9 +358,20 @@ abstract class AbstractDbMapper implements MapperInterface
             throw new InvalidArgumentException('Entity must be and object');
         }
 
+        $ignoreProperties = [];
+        if($entity instanceof IgnorePropertyProvider) {
+            $ignoreProperties = $entity->ignoredProperties();
+        }
+
         $data = $this->hydrator->extract($entity);
         if($removeNulls) {
             $data = array_filter($data);
+        }
+
+        foreach ($ignoreProperties as $prop) {
+            if(isset($data[$prop])) {
+                unset($data[$prop]);
+            }
         }
 
         return $data;
@@ -383,6 +395,11 @@ abstract class AbstractDbMapper implements MapperInterface
 
     }
 
+    /**
+     * @param Select $select
+     * @param array $filters
+     * @return Select
+     */
     protected function applySearchFilters(Select $select, $filters = [])
     {
         $searchableColumns = [];
@@ -417,6 +434,11 @@ abstract class AbstractDbMapper implements MapperInterface
 
     }
 
+    /**
+     * @param Select $select
+     * @param array $filters
+     * @return Select
+     */
     protected function applySortFilter(Select $select, $filters = [])
     {
         //sorting options

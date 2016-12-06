@@ -9,7 +9,10 @@
 
 namespace Dot\Ems\Entity;
 
-
+/**
+ * Interface SortableColumnsProvider
+ * @package Dot\Ems\Entity
+ */
 interface SortableColumnsProvider
 {
     /**

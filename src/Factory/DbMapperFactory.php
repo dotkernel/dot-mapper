@@ -12,6 +12,7 @@ namespace Dot\Ems\Factory;
 
 use Dot\Ems\Exception\RuntimeException;
 use Dot\Ems\Mapper\DbMapper;
+use Dot\Helpers\DependencyHelperTrait;
 use Interop\Container\ContainerInterface;
 use Zend\Hydrator\ClassMethods;
 use Zend\Hydrator\HydratorInterface;
@@ -23,6 +24,8 @@ use Zend\Paginator\AdapterPluginManager;
  */
 class DbMapperFactory
 {
+    use DependencyHelperTrait;
+
     public function __invoke(ContainerInterface $container, $requestedName, $config = [])
     {
         if(!isset($config['adapter']) || isset($config['adapter']) && !is_string($config['adapter'])) {
@@ -38,14 +41,15 @@ class DbMapperFactory
         }
 
         $hydratorName = isset($config['entity_hydrator']) && is_string($config['entity_hydrator'])
-            ? $config['entity_hydrator'] : null;
+            ? $config['entity_hydrator'] : '';
 
-        //get entity prototype
-        $entityPrototype = $this->getEntityPrototype($container, $config['entity_prototype']);
-        if($hydratorName) {
-            $hydrator = $this->getHydrator($container, $hydratorName);
+        $entityPrototype = $this->getDependencyObject($container, $config['entity_prototype']);
+        $hydrator = $this->getDependencyObject($container, $hydratorName);
+
+        if(!is_object($entityPrototype)) {
+            throw new RuntimeException('Entity prototype is not an object');
         }
-        else {
+        if(!$hydrator instanceof HydratorInterface) {
             $hydrator = new ClassMethods(false);
         }
 
@@ -70,41 +74,5 @@ class DbMapperFactory
 
         return $mapper;
 
-    }
-
-    protected function getEntityPrototype(ContainerInterface $container, $name)
-    {
-        $entityPrototype = $name;
-        if($container->has($entityPrototype)) {
-            $entityPrototype = $container->get($entityPrototype);
-        }
-
-        if(is_string($entityPrototype) && class_exists($entityPrototype)) {
-            $entityPrototype = new $entityPrototype;
-        }
-
-        if(!is_object($entityPrototype)) {
-            throw new RuntimeException('Entity prototype is not an object');
-        }
-
-        return $entityPrototype;
-    }
-
-    protected function getHydrator(ContainerInterface $container, $name)
-    {
-        $hydrator = $name;
-        if($container->has($hydrator)) {
-            $hydrator = $container->get($hydrator);
-        }
-
-        if(is_string($hydrator) && class_exists($hydrator)) {
-            $hydrator = new $hydrator;
-        }
-
-        if(!$hydrator instanceof HydratorInterface) {
-            throw new RuntimeException('Entity hydrator is not an instance of ' . HydratorInterface::class);
-        }
-
-        return $hydrator;
     }
 }

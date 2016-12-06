@@ -9,7 +9,6 @@
 
 namespace Dot\Ems\Mapper;
 
-use Dot\Ems\Entity\IgnorePropertyProvider;
 use Dot\Ems\Mapper\Relation\RelationInterface;
 use Dot\Ems\ObjectPropertyTrait;
 use Dot\Ems\Paginator\Adapter\RelationalDbSelect;
@@ -232,12 +231,7 @@ class RelationalDbMapper extends AbstractDbMapper
     {
         $data = parent::entityToArray($entity, $removeNulls);
 
-        $ignoreProperties = [];
-        if($entity instanceof IgnorePropertyProvider) {
-            $ignoreProperties = $entity->ignoredProperties();
-        }
-
-        $ignoreProperties = array_merge($ignoreProperties, array_keys($this->relations));
+        $ignoreProperties = array_keys($this->relations);
         foreach ($ignoreProperties as $prop) {
             if(isset($data[$prop])) {
                 unset($data[$prop]);

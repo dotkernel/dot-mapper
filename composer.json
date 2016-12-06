@@ -18,7 +18,9 @@
     "zendframework/zend-hydrator": "^2.2",
     "zendframework/zend-paginator": "^2.7",
     "zendframework/zend-stdlib": "^3.0",
-    "zendframework/zend-validator": "^2.8"
+    "zendframework/zend-validator": "^2.8",
+
+    "dotkernel/dot-helpers": "0.6.x-dev"
   },
   "require-dev": {
     "phpunit/phpunit": "^4.8",

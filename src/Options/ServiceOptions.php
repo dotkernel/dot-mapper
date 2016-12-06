@@ -9,10 +9,13 @@
 
 namespace Dot\Ems\Options;
 
-
 use Dot\Ems\Service\EntityService;
 use Zend\Stdlib\AbstractOptions;
 
+/**
+ * Class ServiceOptions
+ * @package Dot\Ems\Options
+ */
 class ServiceOptions extends AbstractOptions
 {
     /** @var bool  */

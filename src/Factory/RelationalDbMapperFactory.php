@@ -13,6 +13,7 @@ namespace Dot\Ems\Factory;
 use Dot\Ems\Exception\RuntimeException;
 use Dot\Ems\Mapper\Relation\RelationPluginManager;
 use Dot\Ems\Mapper\RelationalDbMapper;
+use Dot\Helpers\DependencyHelperTrait;
 use Interop\Container\ContainerInterface;
 use Zend\Hydrator\ClassMethods;
 use Zend\Hydrator\HydratorInterface;
@@ -24,6 +25,8 @@ use Zend\Paginator\AdapterPluginManager;
  */
 class RelationalDbMapperFactory
 {
+    use DependencyHelperTrait;
+
     public function __invoke(ContainerInterface $container, $requestedName, $config = [])
     {
         if(!isset($config['adapter']) || isset($config['adapter']) && !is_string($config['adapter'])) {
@@ -39,14 +42,15 @@ class RelationalDbMapperFactory
         }
 
         $hydratorName = isset($config['entity_hydrator']) && is_string($config['entity_hydrator'])
-            ? $config['entity_hydrator'] : null;
+            ? $config['entity_hydrator'] : '';
 
-        //get entity prototype
-        $entityPrototype = $this->getEntityPrototype($container, $config['entity_prototype']);
-        if($hydratorName) {
-            $hydrator = $this->getHydrator($container, $hydratorName);
+        $entityPrototype = $this->getDependencyObject($container, $config['entity_prototype']);
+        $hydrator = $this->getDependencyObject($container, $hydratorName);
+
+        if(!is_object($entityPrototype)) {
+            throw new RuntimeException('Entity prototype is not an object');
         }
-        else {
+        if(!$hydrator instanceof HydratorInterface) {
             $hydrator = new ClassMethods(false);
         }
 
@@ -72,6 +76,7 @@ class RelationalDbMapperFactory
 
         $mapper->setDeleteCascade(isset($config['delete_cascade']) ? (bool) $config['delete_cascade'] : false);
         $mapper->setPaginatorAdapterManager($container->get(AdapterPluginManager::class));
+
         if(isset($config['paginator_adapter']) && is_string($config['paginator_adapter'])) {
             $mapper->setPaginatorAdapterName($config['paginator_adapter']);
         }
@@ -81,41 +86,5 @@ class RelationalDbMapperFactory
         }
 
         return $mapper;
-    }
-
-    protected function getEntityPrototype(ContainerInterface $container, $name)
-    {
-        $entityPrototype = $name;
-        if($container->has($entityPrototype)) {
-            $entityPrototype = $container->get($entityPrototype);
-        }
-
-        if(is_string($entityPrototype) && class_exists($entityPrototype)) {
-            $entityPrototype = new $entityPrototype;
-        }
-
-        if(!is_object($entityPrototype)) {
-            throw new RuntimeException('Entity prototype is not an object');
-        }
-
-        return $entityPrototype;
-    }
-
-    protected function getHydrator(ContainerInterface $container, $name)
-    {
-        $hydrator = $name;
-        if($container->has($hydrator)) {
-            $hydrator = $container->get($hydrator);
-        }
-
-        if(is_string($hydrator) && class_exists($hydrator)) {
-            $hydrator = new $hydrator;
-        }
-
-        if(!$hydrator instanceof HydratorInterface) {
-            throw new RuntimeException('Entity hydrator is not an instance of ' . HydratorInterface::class);
-        }
-
-        return $hydrator;
     }
 }
