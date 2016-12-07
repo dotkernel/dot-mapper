@@ -17,7 +17,7 @@ use Dot\Ems\Paginator\Adapter\RelationalDbSelect;
  * Class AggregateDbMapper
  * @package Dot\Ems\Mapper
  */
-class RelationalDbMapper extends AbstractDbMapper
+class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInterface
 {
     use ObjectPropertyTrait;
 
