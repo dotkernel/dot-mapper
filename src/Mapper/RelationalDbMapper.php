@@ -70,8 +70,7 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     {
         $affectedRows = parent::create($entity);
         if($affectedRows) {
-            $r = $this->saveSubEntities($entity, $this->lastInsertValue());
-            $affectedRows += $r;
+            $affectedRows += $this->saveSubEntities($entity, $this->lastInsertValue());
         }
 
         return $affectedRows;
@@ -84,8 +83,8 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     public function update($entity)
     {
         $affectedRows = parent::update($entity);
-        $r = $this->saveSubEntities($entity, $this->getProperty($entity, $this->getIdentifierName()));
-        return $affectedRows + $r;
+        $affectedRows += $this->saveSubEntities($entity, $this->getProperty($entity, $this->getIdentifierName()));
+        return $affectedRows;
     }
 
     /**
@@ -97,8 +96,7 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
         $affectedRows = parent::delete($where);
         if(is_object($where) && is_a($where, get_class($this->getPrototype()))) {
             if($this->deleteCascade && $affectedRows) {
-                $r = $this->deleteSubEntities($where);
-                $affectedRows += $r;
+                $affectedRows += $this->deleteSubEntities($where, true);
             }
         }
 
@@ -118,8 +116,7 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
 
             $subEntity = $this->getProperty($entity, $property);
             if(!empty($subEntity)) {
-                $r = $relation->saveRef($subEntity, $id);
-                $affectedRows += $r;
+                $affectedRows += $relation->saveRef($subEntity, $id);
             }
         }
         return $affectedRows;
@@ -127,18 +124,25 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
 
     /**
      * @param $entity
-     * @return int
+     * @param bool $bulk
+     * @return int|mixed
      */
-    public function deleteSubEntities($entity)
+    public function deleteSubEntities($entity, $bulk = true)
     {
         $affectedRows = 0;
+        $id = $this->getProperty($entity, $this->getIdentifierName());
+
         foreach (array_keys($this->relations) as $property) {
             $relation = $this->relations[$property];
 
-            $subEntity = $this->getProperty($entity, $property);
-            if(!empty($subEntity)) {
-                $r = $relation->deleteRef($subEntity);
-                $affectedRows += $r;
+            if($bulk) {
+                $affectedRows += $relation->deleteRef($id);
+            }
+            else {
+                $subEntity = $this->getProperty($entity, $property);
+                if(!empty($subEntity)) {
+                    $affectedRows += $relation->deleteRef($subEntity, $id);
+                }
             }
         }
         return $affectedRows;

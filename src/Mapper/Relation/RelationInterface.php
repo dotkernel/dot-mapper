@@ -63,9 +63,10 @@ interface RelationInterface
 
     /**
      * @param $entity
+     * @param $parentId
      * @return mixed
      */
-    public function deleteRef($entity);
+    public function deleteRef($entity, $parentId = null);
 
     /**
      * @return MapperInterface

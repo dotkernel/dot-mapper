@@ -9,7 +9,6 @@
 
 namespace Dot\Ems\Mapper\Relation;
 
-use Dot\Ems\Exception\InvalidArgumentException;
 
 /**
  * Class OneToOneRelation
@@ -31,44 +30,5 @@ class OneToOneRelation extends AbstractRelation
         }
 
         return null;
-    }
-
-    /**
-     * @param $entity
-     * @param $refValue
-     * @return int
-     */
-    public function saveRef($entity, $refValue)
-    {
-        if(!is_object($entity)) {
-            throw new InvalidArgumentException('Entity must be an object value');
-        }
-
-        $id = $this->getProperty($entity, $this->getMapper()->getIdentifierName());
-        if(!$id) {
-            $this->setProperty($entity, $this->getRefName(), $refValue);
-            return $this->getMapper()->create($entity);
-        }
-        else {
-            return $this->getMapper()->update($entity);
-        }
-    }
-
-    /**
-     * @param $entity
-     * @return int
-     */
-    public function deleteRef($entity)
-    {
-        if(!is_object($entity)) {
-            throw new InvalidArgumentException('Entity must be an object value');
-        }
-
-        $id = $this->getProperty($entity, $this->getMapper()->getIdentifierName());
-        if($id) {
-            return $this->getMapper()->delete($entity);
-        }
-
-        return 0;
     }
 }
