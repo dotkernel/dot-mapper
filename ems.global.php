@@ -81,13 +81,46 @@ return [
 
                                     ]
                                 ],
+                            ],
 
+                            /**
+                             * This relation will use its mapper to fetch an array of objects that are linked to the parent entity through an intersection table
+                             */
+                            \Dot\Ems\Mapper\Relation\ManyToManyRelation::class => [
+
+                                'field_name' => 'property name of the parent object which will be populated by this relation',
+
+                                'ref_name' => 'column name which links the table to the intersection table',
+                                'target_ref_name' => 'column name which links the intersection table to the target table',
+
+                                'intersection_mapper' => [
+                                    \Dot\Ems\Mapper\DbMapper::class => [
+                                        'adapter' => 'database',
+                                        'table' => 'intersection table name',
+
+                                        'entity_prototype' => 'class name or service name of the entity object',
+                                    ]
+                                ],
+
+                                'target_mapper' => [
+                                    \Dot\Ems\Mapper\DbMapper::class => [
+
+                                        'adapter' => 'database',
+                                        'table' => 'target table_name',
+
+                                        //optional field name of the entity identifier, defaults to `id`
+                                        //'identifier_name' => 'id',
+
+                                        'entity_prototype' => 'class name or service name of the entity object',
+                                        //'entity_hydrator' => 'optional entity hydrator class or service name, defaults to ClassMethods',
+
+                                    ],
+                                ],
                             ]
                         ],
                     ]
                 ],
             ],
-
         ],
     ],
 ];
