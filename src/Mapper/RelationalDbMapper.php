@@ -237,7 +237,7 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
 
         $ignoreProperties = array_keys($this->relations);
         foreach ($ignoreProperties as $prop) {
-            if(isset($data[$prop])) {
+            if(array_key_exists($prop, $data)) {
                 unset($data[$prop]);
             }
         }
