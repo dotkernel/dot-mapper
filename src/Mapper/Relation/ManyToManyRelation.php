@@ -81,13 +81,16 @@ class ManyToManyRelation extends OneToManyRelation
                 }
 
                 $id = $this->getProperty($ref, $this->targetMapper->getIdentifierName());
-                if($id) {
-                    $intersectionEntity = $this->getMapper()->getPrototype();
-                    $this->setProperty($intersectionEntity, $this->getRefName(), $refValue);
-                    $this->setProperty($intersectionEntity, $this->targetRefName, $id);
-
-                    $affectedRows += $this->getMapper()->create($intersectionEntity);
+                if(!$id) {
+                    $this->targetMapper->create($ref);
+                    $id = $this->getProperty($ref, $this->targetMapper->getIdentifierName());
                 }
+
+                $intersectionEntity = $this->getMapper()->getPrototype();
+                $this->setProperty($intersectionEntity, $this->getRefName(), $refValue);
+                $this->setProperty($intersectionEntity, $this->targetRefName, $id);
+
+                $affectedRows += $this->getMapper()->create($intersectionEntity);
             }
         }
         else {
