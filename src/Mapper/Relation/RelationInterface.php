@@ -55,18 +55,18 @@ interface RelationInterface
     public function fetchRef($refValue);
 
     /**
-     * @param $entity
+     * @param $ref
      * @param $refValue
      * @return mixed
      */
-    public function saveRef($entity, $refValue);
+    public function saveRef($ref, $refValue);
 
     /**
-     * @param $entity
-     * @param $parentId
+     * @param $ref
+     * @param $refValue
      * @return mixed
      */
-    public function deleteRef($entity, $parentId = null);
+    public function deleteRef($ref, $refValue = null);
 
     /**
      * @return MapperInterface

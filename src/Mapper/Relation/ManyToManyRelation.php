@@ -9,6 +9,7 @@
 
 namespace Dot\Ems\Mapper\Relation;
 
+use Dot\Ems\Exception\InvalidArgumentException;
 use Dot\Ems\Mapper\MapperInterface;
 
 
@@ -50,9 +51,9 @@ class ManyToManyRelation extends OneToManyRelation
      */
     public function fetchRef($refValue)
     {
-        $refs = [];
         $linkEntities = parent::fetchRef($refValue);
         if($linkEntities) {
+            $refs = [];
             foreach ($linkEntities as $linkEntity) {
                 $targetRefValue = $this->getProperty($linkEntity, $this->targetRefName);
                 $ref = $this->targetMapper->fetch([$this->targetMapper->getIdentifierName() => $targetRefValue]);
@@ -60,47 +61,69 @@ class ManyToManyRelation extends OneToManyRelation
                     $refs[] = $ref;
                 }
             }
+
+            return $refs;
         }
 
-        return $refs;
+        return null;
     }
 
     public function saveRef($refs, $refValue)
     {
+        $affectedRows = 0;
         if(is_array($refs)) {
+            //we delete and create the intersection entries from scratch
+            $this->deleteRef($refValue);
+
             foreach ($refs as $ref) {
+                if (!is_object($ref)) {
+                    throw new InvalidArgumentException('References to delete contains invalid entities');
+                }
+
                 $id = $this->getProperty($ref, $this->targetMapper->getIdentifierName());
-                
+                if($id) {
+                    $intersectionEntity = $this->getMapper()->getPrototype();
+                    $this->setProperty($intersectionEntity, $this->getRefName(), $refValue);
+                    $this->setProperty($intersectionEntity, $this->targetRefName, $id);
+
+                    $affectedRows += $this->getMapper()->create($intersectionEntity);
+                }
             }
         }
         else {
-
+            throw new InvalidArgumentException('Invalid parameter refs to save');
         }
+
+        return $affectedRows;
     }
 
     /**
      * It deletes only the intersection table entries, the target entities should be managed in its own mapper-service
      * @param $refs
-     * @param null $parentId
+     * @param null $refValue
      * @return int|mixed
      * @throws \Exception
      */
-    public function deleteRef($refs, $parentId = null)
+    public function deleteRef($refs, $refValue = null)
     {
         $affectedRows = 0;
         if(is_scalar($refs)) {
             $affectedRows = $this->getMapper()->delete([$this->getRefName() => $refs]);
         }
-        elseif(is_array($refs) && $parentId !== null) {
+        elseif(is_array($refs) && $refValue !== null) {
             foreach ($refs as $ref) {
+                if (!is_object($ref)) {
+                    throw new InvalidArgumentException('References to delete contains invalid entities');
+                }
+
                 $id = $this->getProperty($ref, $this->targetMapper->getIdentifierName());
                 if($id) {
-                    $affectedRows += $this->getMapper()->delete([$this->getRefName() => $parentId, $this->targetRefName => $id]);
+                    $affectedRows += $this->getMapper()->delete([$this->getRefName() => $refValue, $this->targetRefName => $id]);
                 }
             }
         }
         else {
-            throw new \Exception('Invalid parameter refs to delete');
+            throw new InvalidArgumentException('Invalid parameter refs to delete');
         }
 
         return $affectedRows;

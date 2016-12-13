@@ -10,6 +10,7 @@
 namespace Dot\Ems\Mapper\Relation;
 
 use Dot\Ems\Exception\InvalidArgumentException;
+use Dot\Ems\Exception\RuntimeException;
 use Dot\Ems\Mapper\MapperInterface;
 use Dot\Ems\ObjectPropertyTrait;
 
@@ -107,95 +108,4 @@ abstract class AbstractRelation implements RelationInterface
         $this->fieldName = $fieldName;
         return $this;
     }
-
-    /**
-     * @param $data
-     * @param $refValue
-     * @return int|mixed
-     */
-    public function saveRef($data, $refValue)
-    {
-        $affectedRows = 0;
-        if(is_object($data)) {
-            $id = $this->getProperty($data, $this->getMapper()->getIdentifierName());
-            if(!$id) {
-                $this->setProperty($data, $this->getRefName(), $refValue);
-                $affectedRows = $this->getMapper()->create($data);
-            }
-            else {
-                $affectedRows = $this->getMapper()->update($data);
-            }
-        }
-        elseif(is_array($data)) {
-            $toDelete = [];
-            $originalRefs = $this->fetchRef($refValue);
-            foreach ($originalRefs as $ref) {
-                $id = $this->getProperty($ref, $this->getMapper()->getIdentifierName());
-                $toDelete[$id] = $ref;
-            }
-
-            foreach ($data as $entity) {
-                if(!is_object($entity)) {
-                    throw new InvalidArgumentException('Entity collection contains invalid entities');
-                }
-
-                $id = $this->getProperty($entity, $this->getMapper()->getIdentifierName());
-                if(!$id) {
-                    $this->setProperty($entity, $this->getRefName(), $refValue);
-                    $affectedRows += $this->getMapper()->create($entity);
-                }
-                else {
-                    if(isset($toDelete[$id])) {
-                        unset($toDelete[$id]);
-                    }
-                    $affectedRows += $this->getMapper()->update($entity);
-                }
-            }
-
-            $affectedRows += $this->deleteRef($toDelete);
-        }
-        else {
-            throw new InvalidArgumentException('Invalid parameter. Must be an object or an array of objects to save');
-        }
-
-        return $affectedRows;
-    }
-
-    /**
-     * @param $data
-     * @param null $parentId
-     * @return int|mixed
-     */
-    public function deleteRef($data, $parentId = null)
-    {
-        $affectedRows = 0;
-        if(is_scalar($data)) {
-            //we delete all entities bulk, consider $data as the refValue to delete
-            $affectedRows = $this->getMapper()->delete([$this->getRefName() => $data]);
-        }
-        elseif(is_array($data)) {
-            foreach ($data as $entity) {
-                if (!is_object($entity)) {
-                    throw new InvalidArgumentException('Entity collection contains invalid entities');
-                }
-
-                $id = $this->getProperty($entity, $this->getMapper()->getIdentifierName());
-                if($id) {
-                    $affectedRows += $this->getMapper()->delete($entity);
-                }
-            }
-        }
-        elseif(is_object($data)) {
-            $id = $this->getProperty($data, $this->getMapper()->getIdentifierName());
-            if($id) {
-                $affectedRows += $this->getMapper()->delete($data);
-            }
-        }
-        else {
-            throw new InvalidArgumentException('Invalid parameter entity to delete.');
-        }
-
-        return $affectedRows;
-    }
-
 }
