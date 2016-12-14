@@ -22,7 +22,10 @@ trait ObjectPropertyTrait
      */
     protected function getProperty($object, $property)
     {
-        return call_user_func([$object, $this->getter($property)]);
+        if(method_exists($object, $this->getter($property))) {
+            return call_user_func([$object, $this->getter($property)]);
+        }
+        return null;
     }
 
     /**
@@ -32,7 +35,9 @@ trait ObjectPropertyTrait
      */
     protected function setProperty($object, $property, $value)
     {
-        call_user_func([$object, $this->setter($property)], $value);
+        if(method_exists($object, $this->setter($property))) {
+            call_user_func([$object, $this->setter($property)], $value);
+        }
     }
 
     /**
