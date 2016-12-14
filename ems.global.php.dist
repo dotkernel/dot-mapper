@@ -93,6 +93,9 @@ return [
                                 'ref_name' => 'column name which links the table to the intersection table',
                                 'target_ref_name' => 'column name which links the intersection table to the target table',
 
+                                //if a linked entity is new, enable creation
+                                'create_target_entities' => true,
+
                                 'intersection_mapper' => [
                                     \Dot\Ems\Mapper\DbMapper::class => [
                                         'adapter' => 'database',
