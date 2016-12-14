@@ -27,6 +27,9 @@ class ManyToManyRelation extends OneToManyRelation
     /** @var  string */
     protected $targetRefName;
 
+    /** @var bool  */
+    protected $createTargetEntities = true;
+
     /**
      * ManyToManyRelation constructor.
      * @param MapperInterface $mapper
@@ -81,16 +84,18 @@ class ManyToManyRelation extends OneToManyRelation
                 }
 
                 $id = $this->getProperty($ref, $this->targetMapper->getIdentifierName());
-                if(!$id) {
+                if(!$id && $this->createTargetEntities) {
                     $this->targetMapper->create($ref);
                     $id = $this->getProperty($ref, $this->targetMapper->getIdentifierName());
                 }
 
-                $intersectionEntity = $this->getMapper()->getPrototype();
-                $this->setProperty($intersectionEntity, $this->getRefName(), $refValue);
-                $this->setProperty($intersectionEntity, $this->targetRefName, $id);
+                if($id) {
+                    $intersectionEntity = $this->getMapper()->getPrototype();
+                    $this->setProperty($intersectionEntity, $this->getRefName(), $refValue);
+                    $this->setProperty($intersectionEntity, $this->targetRefName, $id);
 
-                $affectedRows += $this->getMapper()->create($intersectionEntity);
+                    $affectedRows += $this->getMapper()->create($intersectionEntity);
+                }
             }
         }
         else {
@@ -130,6 +135,24 @@ class ManyToManyRelation extends OneToManyRelation
         }
 
         return $affectedRows;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isCreateTargetEntities()
+    {
+        return $this->createTargetEntities;
+    }
+
+    /**
+     * @param boolean $createTargetEntities
+     * @return ManyToManyRelation
+     */
+    public function setCreateTargetEntities($createTargetEntities)
+    {
+        $this->createTargetEntities = $createTargetEntities;
+        return $this;
     }
 
 }

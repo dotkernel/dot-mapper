@@ -8,12 +8,15 @@
 
 namespace Dot\Ems\Factory;
 
-
 use Dot\Ems\Exception\RuntimeException;
 use Dot\Ems\Mapper\MapperPluginManager;
 use Dot\Ems\Mapper\Relation\ManyToManyRelation;
 use Interop\Container\ContainerInterface;
 
+/**
+ * Class ManyToManyRelationFactory
+ * @package Dot\Ems\Factory
+ */
 class ManyToManyRelationFactory
 {
     public function __invoke(ContainerInterface $container, $requestedName, $config = [])
@@ -58,6 +61,10 @@ class ManyToManyRelationFactory
             $intersectionMapper, $config['ref_name'],
             $targetMapper, $config['target_ref_name'],
             $config['field_name']);
+
+        if(isset($config['create_target_entities'])) {
+            $relation->setCreateTargetEntities((bool) $config['create_target_entities']);
+        }
 
         return $relation;
     }

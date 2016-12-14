@@ -9,8 +9,6 @@
 
 namespace Dot\Ems\Mapper\Relation;
 
-use Dot\Ems\Exception\InvalidArgumentException;
-use Dot\Ems\Exception\RuntimeException;
 use Dot\Ems\Mapper\MapperInterface;
 use Dot\Ems\ObjectPropertyTrait;
 
@@ -40,7 +38,7 @@ abstract class AbstractRelation implements RelationInterface
      * @param null $refName
      * @param null $fieldName
      */
-    public function __construct(MapperInterface $mapper = null, $refName = null, $fieldName = null)
+    public function __construct(MapperInterface $mapper, $refName, $fieldName)
     {
         $this->mapper = $mapper;
         $this->refName = $refName;
