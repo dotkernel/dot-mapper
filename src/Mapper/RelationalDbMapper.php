@@ -115,8 +115,12 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
             $relation = $this->relations[$property];
 
             $subEntity = $this->getProperty($entity, $property);
-            if(!empty($subEntity)) {
+            if($subEntity !== null) {
                 $affectedRows += $relation->saveRef($subEntity, $id);
+            }
+            else {
+                //just make sure we clear any trace
+                $affectedRows += $relation->deleteRef($id);
             }
         }
         return $affectedRows;
