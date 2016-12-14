@@ -9,7 +9,6 @@
 
 namespace Dot\Ems\Mapper\Relation;
 
-use Dot\Ems\Mapper\MapperInterface;
 
 /**
  * Interface RelationInterface
@@ -25,17 +24,6 @@ interface RelationInterface
      * @return mixed
      */
     public function getType();
-
-    /**
-     * @return mixed
-     */
-    public function getRefName();
-
-    /**
-     * @param $refName
-     * @return mixed
-     */
-    public function setRefName($refName);
 
     /**
      * @return string
@@ -67,15 +55,4 @@ interface RelationInterface
      * @return mixed
      */
     public function deleteRef($ref, $refValue = null);
-
-    /**
-     * @return MapperInterface
-     */
-    public function getMapper();
-
-    /**
-     * @param MapperInterface $mapper
-     * @return mixed
-     */
-    public function setMapper(MapperInterface $mapper);
 }
