@@ -37,11 +37,22 @@ interface RelationalMapperInterface extends MapperInterface
     /**
      * @return bool
      */
-    public function isDeleteCascade();
+    public function isDeleteRefs();
 
     /**
-     * @param bool $deleteCascade
+     * @param bool $deleteRefs
      * @return mixed
      */
-    public function setDeleteCascade($deleteCascade);
+    public function setDeleteRefs($deleteRefs);
+
+    /**
+     * @return mixed
+     */
+    public function isModifyRefs();
+
+    /**
+     * @param $modifyRefs
+     * @return mixed
+     */
+    public function setModifyRefs($modifyRefs);
 }

@@ -74,7 +74,8 @@ class RelationalDbMapperFactory
             }
         }
 
-        $mapper->setDeleteCascade(isset($config['delete_cascade']) ? (bool) $config['delete_cascade'] : false);
+        $mapper->setDeleteRefs(isset($config['delete_refs']) ? (bool) $config['delete_refs'] : false);
+        $mapper->setDeleteRefs(isset($config['modify_refs']) ? (bool) $config['modify_refs'] : false);
         $mapper->setPaginatorAdapterManager($container->get(AdapterPluginManager::class));
 
         if(isset($config['paginator_adapter']) && is_string($config['paginator_adapter'])) {

@@ -28,7 +28,10 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     protected $relations = [];
 
     /** @var bool  */
-    protected $deleteCascade = false;
+    protected $deleteRefs = false;
+
+    /** @var bool  */
+    protected $modifyRefs = true;
 
     /**
      * @param $where
@@ -69,7 +72,7 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     public function create($entity)
     {
         $affectedRows = parent::create($entity);
-        if($affectedRows) {
+        if($affectedRows && $this->modifyRefs) {
             $affectedRows += $this->saveSubEntities($entity, $this->lastInsertValue());
         }
 
@@ -83,7 +86,9 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     public function update($entity)
     {
         $affectedRows = parent::update($entity);
-        $affectedRows += $this->saveSubEntities($entity, $this->getProperty($entity, $this->getIdentifierName()));
+        if($this->modifyRefs) {
+            $affectedRows += $this->saveSubEntities($entity, $this->getProperty($entity, $this->getIdentifierName()));
+        }
         return $affectedRows;
     }
 
@@ -95,7 +100,7 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     {
         $affectedRows = parent::delete($where);
         if(is_object($where) && is_a($where, get_class($this->getPrototype()))) {
-            if($this->deleteCascade && $affectedRows) {
+            if($this->deleteRefs && $affectedRows) {
                 $affectedRows += $this->deleteSubEntities($where, true);
             }
         }
@@ -199,21 +204,42 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     /**
      * @return boolean
      */
-    public function isDeleteCascade()
+    public function isDeleteRefs()
     {
-        return $this->deleteCascade;
+        return $this->deleteRefs;
     }
 
     /**
-     * @param boolean $deleteCascade
+     * @param boolean $deleteRefs
      * @return RelationalDbMapper
      */
-    public function setDeleteCascade($deleteCascade)
+    public function setDeleteRefs($deleteRefs)
     {
-        $this->deleteCascade = $deleteCascade;
+        $this->deleteRefs = $deleteRefs;
         return $this;
     }
 
+    /**
+     * @return boolean
+     */
+    public function isModifyRefs()
+    {
+        return $this->modifyRefs;
+    }
+
+    /**
+     * @param boolean $modifyRefs
+     * @return RelationalDbMapper
+     */
+    public function setModifyRefs($modifyRefs)
+    {
+        $this->modifyRefs = $modifyRefs;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
     public function getPaginatorAdapterName()
     {
         if(!$this->paginatorAdapterName) {
@@ -222,6 +248,9 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
         return $this->paginatorAdapterName;
     }
 
+    /**
+     * @return RelationalDbSelect
+     */
     protected function getPaginatorAdapter()
     {
         /** @var RelationalDbSelect $paginatorAdapter */
