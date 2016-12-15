@@ -27,12 +27,6 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     /** @var RelationInterface[] */
     protected $relations = [];
 
-    /** @var bool  */
-    protected $deleteRefs = false;
-
-    /** @var bool  */
-    protected $modifyRefs = true;
-
     /**
      * @param $where
      * @return null|object
@@ -72,7 +66,7 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     public function create($entity)
     {
         $affectedRows = parent::create($entity);
-        if($affectedRows && $this->modifyRefs) {
+        if($affectedRows) {
             $affectedRows += $this->saveSubEntities($entity, $this->lastInsertValue());
         }
 
@@ -86,9 +80,8 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     public function update($entity)
     {
         $affectedRows = parent::update($entity);
-        if($this->modifyRefs) {
-            $affectedRows += $this->saveSubEntities($entity, $this->getProperty($entity, $this->getIdentifierName()));
-        }
+        $affectedRows += $this->saveSubEntities($entity, $this->getProperty($entity, $this->getIdentifierName()));
+
         return $affectedRows;
     }
 
@@ -100,12 +93,12 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     {
         $affectedRows = parent::delete($where);
         if(is_object($where) && is_a($where, get_class($this->getPrototype()))) {
-            if($this->deleteRefs && $affectedRows) {
+            if($affectedRows) {
                 $affectedRows += $this->deleteSubEntities($where, true);
             }
         }
         elseif(is_array($where)) {
-            if(isset($where[$this->getIdentifierName()]) && $this->deleteRefs) {
+            if(isset($where[$this->getIdentifierName()])) {
                 $affectedRows += $this->deleteSubEntities($where[$this->getIdentifierName()]);
             }
         }
@@ -209,42 +202,6 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     public function addRelation(RelationInterface $relation)
     {
         $this->relations[$relation->getFieldName()] = $relation;
-        return $this;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isDeleteRefs()
-    {
-        return $this->deleteRefs;
-    }
-
-    /**
-     * @param boolean $deleteRefs
-     * @return RelationalDbMapper
-     */
-    public function setDeleteRefs($deleteRefs)
-    {
-        $this->deleteRefs = $deleteRefs;
-        return $this;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isModifyRefs()
-    {
-        return $this->modifyRefs;
-    }
-
-    /**
-     * @param boolean $modifyRefs
-     * @return RelationalDbMapper
-     */
-    public function setModifyRefs($modifyRefs)
-    {
-        $this->modifyRefs = $modifyRefs;
         return $this;
     }
 

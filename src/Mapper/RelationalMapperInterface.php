@@ -33,26 +33,4 @@ interface RelationalMapperInterface extends MapperInterface
      * @return mixed
      */
     public function addRelation(RelationInterface $relation);
-
-    /**
-     * @return bool
-     */
-    public function isDeleteRefs();
-
-    /**
-     * @param bool $deleteRefs
-     * @return mixed
-     */
-    public function setDeleteRefs($deleteRefs);
-
-    /**
-     * @return mixed
-     */
-    public function isModifyRefs();
-
-    /**
-     * @param $modifyRefs
-     * @return mixed
-     */
-    public function setModifyRefs($modifyRefs);
 }

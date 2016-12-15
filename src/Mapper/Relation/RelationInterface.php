@@ -37,6 +37,28 @@ interface RelationInterface
     public function setFieldName($fieldName);
 
     /**
+     * @return bool
+     */
+    public function isDeleteRefs();
+
+    /**
+     * @param bool $deleteRefs
+     * @return mixed
+     */
+    public function setDeleteRefs($deleteRefs);
+
+    /**
+     * @return mixed
+     */
+    public function isChangeRefs();
+
+    /**
+     * @param $changeRefs
+     * @return mixed
+     */
+    public function setChangeRefs($changeRefs);
+
+    /**
      * @param $refValue
      * @return mixed
      */

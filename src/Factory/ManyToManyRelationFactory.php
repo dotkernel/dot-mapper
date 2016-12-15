@@ -62,9 +62,8 @@ class ManyToManyRelationFactory
             $targetMapper, $config['target_ref_name'],
             $config['field_name']);
 
-        if(isset($config['create_target_entities'])) {
-            $relation->setCreateTargetEntities((bool) $config['create_target_entities']);
-        }
+        $relation->setChangeRefs(isset($config['change_refs']) ? (bool) $config['change_refs'] : true);
+        $relation->setDeleteRefs(isset($config['delete_refs']) ? (bool) $config['delete_refs'] : false);
 
         return $relation;
     }

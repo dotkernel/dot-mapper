@@ -32,6 +32,12 @@ abstract class AbstractRelation implements RelationInterface
     /** @var  string */
     protected $fieldName;
 
+    /** @var bool  */
+    protected $deleteRefs = false;
+
+    /** @var bool  */
+    protected $changeRefs = true;
+
     /**
      * AbstractRelation constructor.
      * @param MapperInterface|null $mapper
@@ -104,6 +110,42 @@ abstract class AbstractRelation implements RelationInterface
     public function setFieldName($fieldName)
     {
         $this->fieldName = $fieldName;
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isDeleteRefs()
+    {
+        return $this->deleteRefs;
+    }
+
+    /**
+     * @param boolean $deleteRefs
+     * @return AbstractRelation
+     */
+    public function setDeleteRefs($deleteRefs)
+    {
+        $this->deleteRefs = $deleteRefs;
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isChangeRefs()
+    {
+        return $this->changeRefs;
+    }
+
+    /**
+     * @param boolean $changeRefs
+     * @return AbstractRelation
+     */
+    public function setChangeRefs($changeRefs)
+    {
+        $this->changeRefs = $changeRefs;
         return $this;
     }
 }

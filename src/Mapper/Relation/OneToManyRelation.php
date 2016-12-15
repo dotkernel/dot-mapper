@@ -41,6 +41,10 @@ class OneToManyRelation extends AbstractRelation
      */
     public function saveRef($refs, $refValue)
     {
+        if(!$this->changeRefs) {
+            return 0;
+        }
+
         $affectedRows = 0;
         if(is_array($refs)) {
             $toDelete = [];
@@ -97,6 +101,10 @@ class OneToManyRelation extends AbstractRelation
      */
     public function deleteRef($refs, $refValue = null)
     {
+        if(!$this->deleteRefs) {
+            return 0;
+        }
+
         $affectedRows = 0;
         if(is_scalar($refs)) {
             //we delete all entities bulk, consider $data as the refValue to delete

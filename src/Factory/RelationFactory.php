@@ -52,6 +52,8 @@ class RelationFactory
         if(!$relation instanceof RelationInterface) {
             throw new RuntimeException('Relation object must implement ' . RelationInterface::class);
         }
+        $relation->setChangeRefs(isset($config['change_refs']) ? (bool) $config['change_refs'] : true);
+        $relation->setDeleteRefs(isset($config['delete_refs']) ? (bool) $config['delete_refs'] : false);
 
         return $relation;
     }

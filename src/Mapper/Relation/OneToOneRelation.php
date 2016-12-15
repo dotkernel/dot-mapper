@@ -40,6 +40,10 @@ class OneToOneRelation extends AbstractRelation
      */
     public function saveRef($ref, $refValue)
     {
+        if(!$this->changeRefs) {
+            return 0;
+        }
+
         if(is_object($ref)) {
             $id = $this->getProperty($ref, $this->getMapper()->getIdentifierName());
             if(!$id) {
@@ -64,6 +68,10 @@ class OneToOneRelation extends AbstractRelation
      */
     public function deleteRef($ref, $refValue = null)
     {
+        if(!$this->deleteRefs) {
+            return 0;
+        }
+
         $affectedRows = 0;
         if(is_scalar($ref)) {
             //we delete all entities bulk, consider $data as the refValue to delete

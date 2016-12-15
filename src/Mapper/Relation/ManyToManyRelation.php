@@ -27,9 +27,6 @@ class ManyToManyRelation extends OneToManyRelation
     /** @var  string */
     protected $targetRefName;
 
-    /** @var bool  */
-    protected $createTargetEntities = true;
-
     /**
      * ManyToManyRelation constructor.
      * @param MapperInterface $mapper
@@ -84,7 +81,7 @@ class ManyToManyRelation extends OneToManyRelation
                 }
 
                 $id = $this->getProperty($ref, $this->targetMapper->getIdentifierName());
-                if(!$id && $this->createTargetEntities) {
+                if(!$id && $this->changeRefs) {
                     $this->targetMapper->create($ref);
                     $id = $this->getProperty($ref, $this->targetMapper->getIdentifierName());
                 }
@@ -135,24 +132,6 @@ class ManyToManyRelation extends OneToManyRelation
         }
 
         return $affectedRows;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isCreateTargetEntities()
-    {
-        return $this->createTargetEntities;
-    }
-
-    /**
-     * @param boolean $createTargetEntities
-     * @return ManyToManyRelation
-     */
-    public function setCreateTargetEntities($createTargetEntities)
-    {
-        $this->createTargetEntities = $createTargetEntities;
-        return $this;
     }
 
 }

@@ -24,12 +24,6 @@ return [
                         'entity_prototype' => 'class name or service name of the entity object',
                         //'entity_hydrator' => 'optional entity hydrator class or service name, defaults to ClassMethods',
 
-                        //enables cascade delete of sub-entities
-                        'delete_refs' => true,
-
-                        //enables updates in linked sub-entities
-                        'modify_refs' => true,
-
                         'relations' => [
 
                             /**
@@ -39,6 +33,12 @@ return [
 
                                 'field_name' => 'property name of the parent object which will be populated by this relation',
                                 'ref_name' => 'column name which links the mappers',
+
+                                //delete references when parent entity is deleted
+                                'delete_refs' => false,
+
+                                //create/update references when parent is updated
+                                'change_refs' => true,
 
                                 /**
                                  * Associated mapper, note you can use nested relational db mappers in order to create a hierarchy of objects
@@ -68,6 +68,12 @@ return [
                                 'field_name' => 'property name of the parent object which will be populated by this relation',
                                 'ref_name' => 'column name which links the tables',
 
+                                //delete references when parent entity is deleted
+                                'delete_refs' => false,
+
+                                //create/update references when parent is updated
+                                'change_refs' => true,
+
                                 'mapper' => [
                                     \Dot\Ems\Mapper\DbMapper::class => [
 
@@ -96,6 +102,9 @@ return [
 
                                 'ref_name' => 'column name which links the table to the intersection table',
                                 'target_ref_name' => 'column name which links the intersection table to the target table',
+
+                                //in case of this relation, this flag enables creation of linked entities if it detects is a new one added
+                                'change_refs' => true,
 
                                 //if a linked entity is new, enable creation
                                 'create_target_entities' => true,
