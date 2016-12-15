@@ -104,6 +104,11 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
                 $affectedRows += $this->deleteSubEntities($where, true);
             }
         }
+        elseif(is_array($where)) {
+            if(isset($where[$this->getIdentifierName()]) && $this->deleteRefs) {
+                $affectedRows += $this->deleteSubEntities($where[$this->getIdentifierName()]);
+            }
+        }
 
         return $affectedRows;
     }
@@ -139,18 +144,24 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     public function deleteSubEntities($entity, $bulk = true)
     {
         $affectedRows = 0;
-        $id = $this->getProperty($entity, $this->getIdentifierName());
 
         foreach (array_keys($this->relations) as $property) {
             $relation = $this->relations[$property];
 
-            if($bulk) {
-                $affectedRows += $relation->deleteRef($id);
+            if(is_scalar($entity)) {
+                $affectedRows += $relation->deleteRef($entity);
             }
             else {
-                $subEntity = $this->getProperty($entity, $property);
-                if(!empty($subEntity)) {
-                    $affectedRows += $relation->deleteRef($subEntity, $id);
+                $id = $this->getProperty($entity, $this->getIdentifierName());
+
+                if($bulk) {
+                    $affectedRows += $relation->deleteRef($id);
+                }
+                else {
+                    $subEntity = $this->getProperty($entity, $property);
+                    if(!empty($subEntity)) {
+                        $affectedRows += $relation->deleteRef($subEntity, $id);
+                    }
                 }
             }
         }
