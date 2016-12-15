@@ -103,8 +103,15 @@ return [
                                 'ref_name' => 'column name which links the table to the intersection table',
                                 'target_ref_name' => 'column name which links the intersection table to the target table',
 
-                                //in case of this relation, this flag enables creation of linked entities if it detects is a new one added
+                                //delete references when parent entity is deleted(in this case link from intersection table)
+                                'delete_refs' => false,
+
+                                //create/update link in the intersection table when parent property is changed
                                 'change_refs' => true,
+
+                                //enables creation of linked entities, only if they are detected as new
+                                //no other operation is made through this relation on the linked entities
+                                'create_target_refs' => true,
 
                                 //if a linked entity is new, enable creation
                                 'create_target_entities' => true,

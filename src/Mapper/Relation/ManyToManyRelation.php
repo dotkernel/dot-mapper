@@ -27,6 +27,9 @@ class ManyToManyRelation extends OneToManyRelation
     /** @var  string */
     protected $targetRefName;
 
+    /** @var  bool */
+    protected $createTargetRefs = true;
+
     /**
      * ManyToManyRelation constructor.
      * @param MapperInterface $mapper
@@ -70,6 +73,10 @@ class ManyToManyRelation extends OneToManyRelation
 
     public function saveRef($refs, $refValue)
     {
+        if(!$this->changeRefs) {
+            return 0;
+        }
+
         $affectedRows = 0;
         if(is_array($refs)) {
             //we delete and create the intersection entries from scratch
@@ -81,7 +88,7 @@ class ManyToManyRelation extends OneToManyRelation
                 }
 
                 $id = $this->getProperty($ref, $this->targetMapper->getIdentifierName());
-                if(!$id && $this->changeRefs) {
+                if(!$id && $this->createTargetRefs) {
                     $this->targetMapper->create($ref);
                     $id = $this->getProperty($ref, $this->targetMapper->getIdentifierName());
                 }
@@ -111,6 +118,10 @@ class ManyToManyRelation extends OneToManyRelation
      */
     public function deleteRef($refs, $refValue = null)
     {
+        if(!$this->deleteRefs) {
+            return 0;
+        }
+
         $affectedRows = 0;
         if(is_scalar($refs)) {
             $affectedRows = $this->getMapper()->delete([$this->getRefName() => $refs]);
@@ -132,6 +143,24 @@ class ManyToManyRelation extends OneToManyRelation
         }
 
         return $affectedRows;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isCreateTargetRefs()
+    {
+        return $this->createTargetRefs;
+    }
+
+    /**
+     * @param boolean $createTargetRefs
+     * @return ManyToManyRelation
+     */
+    public function setCreateTargetRefs($createTargetRefs)
+    {
+        $this->createTargetRefs = $createTargetRefs;
+        return $this;
     }
 
 }
