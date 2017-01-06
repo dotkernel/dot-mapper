@@ -15,6 +15,8 @@ use Dot\Ems\Options\ServiceOptions;
 use Dot\Ems\Service\EntityService;
 use Dot\Ems\Service\ServiceInterface;
 use Interop\Container\ContainerInterface;
+use Zend\EventManager\EventManager;
+use Zend\EventManager\EventManagerInterface;
 
 /**
  * Class EntityServiceAbstractFactory
@@ -59,6 +61,11 @@ class EntityServiceAbstractFactory extends AbstractServiceFactory
         $mapper = $mapperManager->get(key($mapperOptions), current($mapperOptions));
         $service->setMapper($mapper);
         $service->setAtomicOperations($serviceOptions->isAtomicOperations());
+
+        $eventManager = $container->has(EventManagerInterface::class)
+            ? $container->get(EventManagerInterface::class)
+            : new EventManager();
+        $service->setEventManager($eventManager);
 
         return $service;
 

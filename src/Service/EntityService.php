@@ -9,8 +9,10 @@
 
 namespace Dot\Ems\Service;
 
+use Dot\Ems\Event\EntityEvent;
 use Dot\Ems\Mapper\MapperInterface;
 use Dot\Ems\ObjectPropertyTrait;
+use Zend\EventManager\EventManagerAwareTrait;
 
 /**
  * Class EntityService
@@ -19,6 +21,7 @@ use Dot\Ems\ObjectPropertyTrait;
 class EntityService implements ServiceInterface
 {
     use ObjectPropertyTrait;
+    use EventManagerAwareTrait;
 
     /** @var bool  */
     protected $atomicOperations = true;
@@ -62,6 +65,7 @@ class EntityService implements ServiceInterface
      */
     public function save($entity)
     {
+        $type = 0;
         try {
             if($this->atomicOperations) {
                 $this->mapper->beginTransaction();
@@ -69,10 +73,30 @@ class EntityService implements ServiceInterface
 
             $id = $this->getProperty($entity, $this->mapper->getIdentifierName());
             if($id) {
+                $type = 1;
+
+                $this->getEventManager()->triggerEvent($this->createEntityEvent(
+                    EntityEvent::EVENT_ENTITY_UPDATE_PRE, $entity
+                ));
+
                 $result = $this->mapper->update($entity);
+
+                $this->getEventManager()->triggerEvent($this->createEntityEvent(
+                    EntityEvent::EVENT_ENTITY_UPDATE_POST, $entity
+                ));
             }
             else {
+                $type = 2;
+
+                $this->getEventManager()->triggerEvent($this->createEntityEvent(
+                    EntityEvent::EVENT_ENTITY_CREATE_PRE, $entity
+                ));
+
                 $result = $this->mapper->create($entity);
+
+                $this->getEventManager()->triggerEvent($this->createEntityEvent(
+                    EntityEvent::EVENT_ENTITY_CREATE_POST, $entity
+                ));
             }
 
             if($this->atomicOperations) {
@@ -85,6 +109,12 @@ class EntityService implements ServiceInterface
             if($this->atomicOperations) {
                 $this->mapper->rollback();
             }
+
+            $name = $type === 1 ? EntityEvent::EVENT_ENTITY_UPDATE_ERROR : EntityEvent::EVENT_ENTITY_CREATE_ERROR;
+            $this->getEventManager()->triggerEvent($this->createEntityEvent(
+                $name, $entity, $e
+            ));
+
 
             throw $e;
         }
@@ -102,7 +132,15 @@ class EntityService implements ServiceInterface
                 $this->mapper->beginTransaction();
             }
 
+            $this->getEventManager()->triggerEvent($this->createEntityEvent(
+                EntityEvent::EVENT_ENTITY_DELETE_PRE, $where
+            ));
+
             $result = $this->mapper->delete($where);
+
+            $this->getEventManager()->triggerEvent($this->createEntityEvent(
+                EntityEvent::EVENT_ENTITY_DELETE_POST, $where
+            ));
 
             if($this->atomicOperations) {
                 $this->mapper->commit();
@@ -114,6 +152,10 @@ class EntityService implements ServiceInterface
             if($this->atomicOperations) {
                 $this->mapper->rollback();
             }
+
+            $this->getEventManager()->triggerEvent($this->createEntityEvent(
+                EntityEvent::EVENT_ENTITY_DELETE_ERROR, $where, $e
+            ));
 
             throw $e;
         }
@@ -153,6 +195,21 @@ class EntityService implements ServiceInterface
     {
         $this->atomicOperations = $atomicOperations;
         return $this;
+    }
+
+    protected function createEntityEvent($name, $data = null, $errors = null, $params = null)
+    {
+        $event = new EntityEvent($name, $this, $params);
+
+        if($data) {
+            $event->setData($data);
+        }
+
+        if($errors) {
+            $event->setErrors($errors);
+        }
+
+        return $event;
     }
 
 }
