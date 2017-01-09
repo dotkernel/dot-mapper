@@ -9,7 +9,7 @@
 
 namespace Dot\Ems\Service;
 use Dot\Ems\Mapper\MapperInterface;
-use Zend\EventManager\EventManager;
+use Zend\EventManager\EventManagerInterface;
 
 /**
  * Interface ServiceInterface
@@ -66,8 +66,8 @@ interface ServiceInterface
     public function setMapper(MapperInterface $mapper);
 
     /**
-     * @param EventManager $eventManager
+     * @param EventManagerInterface $eventManager
      * @return mixed
      */
-    public function setEventManager(EventManager $eventManager);
+    public function setEventManager(EventManagerInterface $eventManager);
 }
