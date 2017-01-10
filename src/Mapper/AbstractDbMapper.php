@@ -79,8 +79,8 @@ abstract class AbstractDbMapper implements MapperInterface
         Adapter $adapter,
         $prototype,
         HydratorInterface $hydrator = null,
-        FeatureSet $features = null)
-    {
+        FeatureSet $features = null
+    ) {
         $this->adapter = $adapter;
         $this->prototype = $prototype;
         $this->hydrator = $hydrator;
@@ -97,14 +97,6 @@ abstract class AbstractDbMapper implements MapperInterface
 
         $resultSetPrototype = new HydratingResultSet($this->hydrator, $this->prototype);
         $this->tableGateway = new TableGateway($table, $adapter, $features, $resultSetPrototype);
-    }
-
-    /**
-     * @return int
-     */
-    public function lastInsertValue()
-    {
-        return $this->tableGateway->getLastInsertValue();
     }
 
     /**
@@ -145,7 +137,7 @@ abstract class AbstractDbMapper implements MapperInterface
         $resultSet = $this->tableGateway->select($where);
         if ($resultSet && $resultSet->valid()) {
             $result = $resultSet->current();
-            if($result) {
+            if ($result) {
                 $entity = $result;
             }
         }
@@ -208,7 +200,7 @@ abstract class AbstractDbMapper implements MapperInterface
     {
         $data = $this->entityToArray($entity);
 
-        if(!isset($data[$this->identifier])) {
+        if (!isset($data[$this->identifier])) {
             throw new InvalidArgumentException('Cannot update entity without and identifier');
         }
 
@@ -224,17 +216,138 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     public function delete($where)
     {
-        if(is_object($where) && is_a($where, get_class($this->getPrototype()))) {
+        if (is_object($where) && is_a($where, get_class($this->getPrototype()))) {
             $id = $this->getProperty($where, $this->getIdentifierName());
-            if(!$id) {
+            if (!$id) {
                 throw new InvalidArgumentException('Cannot delete an entity without an identifier');
             }
 
             return $this->tableGateway->delete([$this->getIdentifierName() => $id]);
-        }
-        else {
+        } else {
             return $this->tableGateway->delete($where);
         }
+    }
+
+    /**
+     * @param $entity
+     * @param bool $removeNulls
+     * @return array
+     */
+    protected function entityToArray($entity, $removeNulls = true)
+    {
+        if (!is_object($entity)) {
+            throw new InvalidArgumentException('Entity must be and object');
+        }
+
+        $ignoreProperties = [];
+        if ($entity instanceof IgnorePropertyProvider) {
+            $ignoreProperties = $entity->ignoredProperties();
+        }
+
+        $data = $this->hydrator->extract($entity);
+        if ($removeNulls) {
+            $data = array_filter($data);
+        }
+
+        foreach ($ignoreProperties as $prop) {
+            if (array_key_exists($prop, $data)) {
+                unset($data[$prop]);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param Select $select
+     * @param array $filters
+     * @return Select
+     */
+    protected function applyFilters(Select $select, $filters = [])
+    {
+        if (empty($filters)) {
+            return $select;
+        }
+
+        $select = $this->applySortFilter($select, $filters);
+        $select = $this->applySearchFilters($select, $filters);
+
+        return $select;
+    }
+
+    /**
+     * @param Select $select
+     * @param array $filters
+     * @return Select
+     */
+    protected function applySearchFilters(Select $select, $filters = [])
+    {
+        $searchableColumns = [];
+
+        $columns = [];
+        $prototype = $this->getPrototype();
+        if ($prototype instanceof SearchableColumnsProvider) {
+            $columns = $prototype->searchableColumns();
+        }
+        $tableColumns = $this->metadata->getColumnNames($this->tableGateway->getTable());
+        foreach ($columns as $column) {
+            if (in_array($column, $tableColumns)) {
+                $searchableColumns[] = $column;
+            }
+        }
+
+        if (!empty($searchableColumns)) {
+            $search = isset($filters['search']) ? $filters['search'] : '';
+            if (!empty($search)) {
+                $select->where(function (Where $where) use ($search, $searchableColumns) {
+                    $predicate = $where->nest();
+                    foreach ($searchableColumns as $column) {
+                        $predicate->like($column, '%' . $search . '%')->or;
+                    }
+                    $predicate->unnest();
+                    $where->predicate($predicate);
+                });
+            }
+        }
+
+        return $select;
+    }
+
+    /**
+     * @param Select $select
+     * @param array $filters
+     * @return Select
+     */
+    protected function applySortFilter(Select $select, $filters = [])
+    {
+        //sorting options
+        $sort = isset($filters['sort']) ? $filters['sort'] : '';
+        $order = isset($filters['order']) ? strtoupper($filters['order']) : 'ASC';
+
+        //make sure order param is just the allowed ones
+        if (!in_array($order, ['ASC', 'DESC'])) {
+            $order = 'ASC';
+        }
+
+        $sortableColumns = [];
+        $prototype = $this->getPrototype();
+        if ($prototype instanceof SortableColumnsProvider) {
+            $sortableColumns = $prototype->sortableColumns();
+        }
+
+        if (!empty($sort) && in_array($sort, $this->metadata->getColumnNames($this->tableGateway->getTable()))
+            && in_array($sort, $sortableColumns)
+        ) {
+            $column = $this->metadata->getColumn($sort, $this->tableGateway->getTable());
+            if ($column->getDataType() == 'ENUM' || $column->getDataType() == 'SET') {
+                $select->order(new Expression('CAST(' . $this->adapter->getPlatform()->quoteIdentifier($sort)
+                    . ' as CHAR) ' . $order));
+            } else {
+                $select->order([$sort => $order]);
+            }
+        }
+
+        return $select;
     }
 
     /**
@@ -246,14 +359,45 @@ abstract class AbstractDbMapper implements MapperInterface
     }
 
     /**
-     * @return ClassMethods|HydratorInterface
+     * @return string
      */
-    public function getHydrator()
+    public function getPaginatorAdapterName()
     {
-        if (!$this->hydrator instanceof HydratorInterface) {
-            $this->hydrator = new ClassMethods(false);
+        if (!$this->paginatorAdapterName) {
+            $this->paginatorAdapterName = DbSelect::class;
         }
-        return $this->hydrator;
+        return $this->paginatorAdapterName;
+    }
+
+    /**
+     * @param string $paginatorAdapterName
+     * @return AbstractDbMapper
+     */
+    public function setPaginatorAdapterName($paginatorAdapterName)
+    {
+        $this->paginatorAdapterName = $paginatorAdapterName;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function getPaginatorAdapter()
+    {
+        $resultSetPrototype = $this->tableGateway->getResultSetPrototype();
+        $paginatorAdapter = $this->paginatorAdapterManager->get(
+            $this->getPaginatorAdapterName(),
+            [$this->currentSelect, $this->adapter, $resultSetPrototype]
+        );
+
+        if (!is_a($paginatorAdapter, $this->getPaginatorAdapterName())
+            && !is_subclass_of($paginatorAdapter, $this->getPaginatorAdapterName())
+        ) {
+            throw new RuntimeException('Paginator adapter for a db mapper must be an instance of '
+                . $this->getPaginatorAdapterName() . ' or derivative');
+        }
+
+        return $paginatorAdapter;
     }
 
     /**
@@ -262,6 +406,25 @@ abstract class AbstractDbMapper implements MapperInterface
     public function getIdentifierName()
     {
         return $this->identifier;
+    }
+
+    /**
+     * @return int
+     */
+    public function lastInsertValue()
+    {
+        return $this->tableGateway->getLastInsertValue();
+    }
+
+    /**
+     * @return ClassMethods|HydratorInterface
+     */
+    public function getHydrator()
+    {
+        if (!$this->hydrator instanceof HydratorInterface) {
+            $this->hydrator = new ClassMethods(false);
+        }
+        return $this->hydrator;
     }
 
     /**
@@ -293,46 +456,6 @@ abstract class AbstractDbMapper implements MapperInterface
     }
 
     /**
-     * @return string
-     */
-    public function getPaginatorAdapterName()
-    {
-        if(!$this->paginatorAdapterName) {
-            $this->paginatorAdapterName = DbSelect::class;
-        }
-        return $this->paginatorAdapterName;
-    }
-
-    /**
-     * @param string $paginatorAdapterName
-     * @return AbstractDbMapper
-     */
-    public function setPaginatorAdapterName($paginatorAdapterName)
-    {
-        $this->paginatorAdapterName = $paginatorAdapterName;
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    protected function getPaginatorAdapter()
-    {
-        $resultSetPrototype = $this->tableGateway->getResultSetPrototype();
-        $paginatorAdapter = $this->paginatorAdapterManager->get(
-            $this->getPaginatorAdapterName(),
-            [$this->currentSelect, $this->adapter, $resultSetPrototype]);
-
-        if(!is_a($paginatorAdapter, $this->getPaginatorAdapterName())
-            && !is_subclass_of($paginatorAdapter, $this->getPaginatorAdapterName())) {
-            throw new RuntimeException('Paginator adapter for a db mapper must be an instance of '
-                . $this->getPaginatorAdapterName() . ' or derivative');
-        }
-
-        return $paginatorAdapter;
-    }
-
-    /**
      * @return AdapterPluginManager
      */
     public function getPaginatorAdapterManager()
@@ -349,129 +472,4 @@ abstract class AbstractDbMapper implements MapperInterface
         $this->paginatorAdapterManager = $paginatorAdapterManager;
         return $this;
     }
-
-    /**
-     * @param $entity
-     * @param bool $removeNulls
-     * @return array
-     */
-    protected function entityToArray($entity, $removeNulls = true)
-    {
-        if(!is_object($entity)) {
-            throw new InvalidArgumentException('Entity must be and object');
-        }
-
-        $ignoreProperties = [];
-        if($entity instanceof IgnorePropertyProvider) {
-            $ignoreProperties = $entity->ignoredProperties();
-        }
-
-        $data = $this->hydrator->extract($entity);
-        if($removeNulls) {
-            $data = array_filter($data);
-        }
-
-        foreach ($ignoreProperties as $prop) {
-            if(array_key_exists($prop, $data)) {
-                unset($data[$prop]);
-            }
-        }
-
-        return $data;
-    }
-
-    /**
-     * @param Select $select
-     * @param array $filters
-     * @return Select
-     */
-    protected function applyFilters(Select $select, $filters = [])
-    {
-        if(empty($filters)) {
-            return $select;
-        }
-
-        $select = $this->applySortFilter($select, $filters);
-        $select = $this->applySearchFilters($select, $filters);
-
-        return $select;
-
-    }
-
-    /**
-     * @param Select $select
-     * @param array $filters
-     * @return Select
-     */
-    protected function applySearchFilters(Select $select, $filters = [])
-    {
-        $searchableColumns = [];
-
-        $columns = [];
-        $prototype = $this->getPrototype();
-        if($prototype instanceof SearchableColumnsProvider) {
-            $columns = $prototype->searchableColumns();
-        }
-        $tableColumns = $this->metadata->getColumnNames($this->tableGateway->getTable());
-        foreach ($columns as $column) {
-            if(in_array($column, $tableColumns)) {
-                $searchableColumns[] = $column;
-            }
-        }
-
-        if(!empty($searchableColumns)) {
-            $search = isset($filters['search']) ? $filters['search'] : '';
-            if(!empty($search)) {
-                $select->where(function(Where $where) use ($search, $searchableColumns) {
-                    $predicate = $where->nest();
-                    foreach ($searchableColumns as $column) {
-                        $predicate->like($column, '%' . $search . '%')->or;
-                    }
-                    $predicate->unnest();
-                    $where->predicate($predicate);
-                });
-            }
-        }
-
-        return $select;
-
-    }
-
-    /**
-     * @param Select $select
-     * @param array $filters
-     * @return Select
-     */
-    protected function applySortFilter(Select $select, $filters = [])
-    {
-        //sorting options
-        $sort = isset($filters['sort']) ? $filters['sort'] : '';
-        $order = isset($filters['order']) ? strtoupper($filters['order']) : 'ASC';
-
-        //make sure order param is just the allowed ones
-        if(!in_array($order, ['ASC', 'DESC'])) {
-            $order = 'ASC';
-        }
-
-        $sortableColumns = [];
-        $prototype = $this->getPrototype();
-        if($prototype instanceof SortableColumnsProvider) {
-            $sortableColumns = $prototype->sortableColumns();
-        }
-
-        if(!empty($sort) && in_array($sort, $this->metadata->getColumnNames($this->tableGateway->getTable()))
-            && in_array($sort, $sortableColumns)) {
-            $column = $this->metadata->getColumn($sort, $this->tableGateway->getTable());
-            if($column->getDataType() == 'ENUM' || $column->getDataType() == 'SET') {
-                $select->order(new Expression('CAST(' . $this->adapter->getPlatform()->quoteIdentifier($sort)
-                    . ' as CHAR) ' . $order));
-            }
-            else {
-                $select->order([$sort => $order]);
-            }
-        }
-
-        return $select;
-    }
-
 }

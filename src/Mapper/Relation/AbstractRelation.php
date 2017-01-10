@@ -32,10 +32,10 @@ abstract class AbstractRelation implements RelationInterface
     /** @var  string */
     protected $fieldName;
 
-    /** @var bool  */
+    /** @var bool */
     protected $deleteRefs = false;
 
-    /** @var bool  */
+    /** @var bool */
     protected $changeRefs = true;
 
     /**

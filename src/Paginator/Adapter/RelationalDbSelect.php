@@ -28,7 +28,7 @@ class RelationalDbSelect extends DbSelect
      */
     public function getItems($offset, $itemCountPerPage)
     {
-        if(!$this->relationalDbMapper instanceof RelationalDbMapper) {
+        if (!$this->relationalDbMapper instanceof RelationalDbMapper) {
             throw new RuntimeException('No RelationalDbMapper was set in paginator adapter');
         }
 

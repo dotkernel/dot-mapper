@@ -9,7 +9,6 @@
 
 namespace Dot\Ems\Factory;
 
-
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 
@@ -18,10 +17,10 @@ abstract class AbstractServiceFactory implements AbstractFactoryInterface
     const DOT_EMS_PART = 'dot-ems';
     const SPECIFIC_PART = '';
 
-    /** @var string  */
+    /** @var string */
     protected $configKey = 'dot_ems';
 
-    /** @var array  */
+    /** @var array */
     protected $config = [];
 
     /**

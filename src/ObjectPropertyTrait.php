@@ -22,10 +22,19 @@ trait ObjectPropertyTrait
      */
     protected function getProperty($object, $property)
     {
-        if(method_exists($object, $this->getter($property))) {
+        if (method_exists($object, $this->getter($property))) {
             return call_user_func([$object, $this->getter($property)]);
         }
         return null;
+    }
+
+    /**
+     * @param $propertyName
+     * @return string
+     */
+    protected function getter($propertyName)
+    {
+        return 'get' . ucfirst($propertyName);
     }
 
     /**
@@ -35,7 +44,7 @@ trait ObjectPropertyTrait
      */
     protected function setProperty($object, $property, $value)
     {
-        if(method_exists($object, $this->setter($property))) {
+        if (method_exists($object, $this->setter($property))) {
             call_user_func([$object, $this->setter($property)], $value);
         }
     }
@@ -47,14 +56,5 @@ trait ObjectPropertyTrait
     protected function setter($propertyName)
     {
         return 'set' . ucfirst($propertyName);
-    }
-
-    /**
-     * @param $propertyName
-     * @return string
-     */
-    protected function getter($propertyName)
-    {
-        return 'get' . ucfirst($propertyName);
     }
 }

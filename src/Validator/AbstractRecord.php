@@ -77,6 +77,18 @@ abstract class AbstractRecord extends AbstractValidator
     }
 
     /**
+     * Grab the user from the mapper
+     *
+     * @param string $value
+     * @return mixed
+     */
+    protected function query($value)
+    {
+        $result = $this->service->find([$this->getKey() => $value]);
+        return $result;
+    }
+
+    /**
      * Get key.
      *
      * @return string
@@ -96,17 +108,5 @@ abstract class AbstractRecord extends AbstractValidator
     {
         $this->key = $key;
         return $this;
-    }
-
-    /**
-     * Grab the user from the mapper
-     *
-     * @param string $value
-     * @return mixed
-     */
-    protected function query($value)
-    {
-        $result = $this->service->find([$this->getKey() => $value]);
-        return $result;
     }
 }

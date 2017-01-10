@@ -8,6 +8,7 @@
  */
 
 namespace Dot\Ems\Service;
+
 use Dot\Ems\Mapper\MapperInterface;
 use Zend\EventManager\EventManagerInterface;
 
@@ -44,6 +45,17 @@ interface ServiceInterface
     public function delete($where);
 
     /**
+     * @return string
+     */
+    public function getName();
+
+    /**
+     * @param $name
+     * @return mixed
+     */
+    public function setName($name);
+
+    /**
      * @param bool $value
      * @return mixed
      */
@@ -53,6 +65,17 @@ interface ServiceInterface
      * @return bool
      */
     public function isAtomicOperations();
+
+    /**
+     * @param bool $value
+     * @return mixed
+     */
+    public function setEnableEvents($value);
+
+    /**
+     * @return bool
+     */
+    public function isEnableEvents();
 
     /**
      * @return MapperInterface

@@ -9,7 +9,6 @@
 
 namespace Dot\Ems\Mapper\Relation;
 
-
 /**
  * Interface RelationInterface
  * @package Dot\Ems\Mapper\Relation

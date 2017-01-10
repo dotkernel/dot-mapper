@@ -26,7 +26,7 @@ class OneToOneRelation extends AbstractRelation
     public function fetchRef($refValue)
     {
         $ref = $this->getMapper()->fetch([$this->getRefName() => $refValue]);
-        if($ref) {
+        if ($ref) {
             return $ref;
         }
 
@@ -40,21 +40,19 @@ class OneToOneRelation extends AbstractRelation
      */
     public function saveRef($ref, $refValue)
     {
-        if(!$this->changeRefs) {
+        if (!$this->changeRefs) {
             return 0;
         }
 
-        if(is_object($ref)) {
+        if (is_object($ref)) {
             $id = $this->getProperty($ref, $this->getMapper()->getIdentifierName());
-            if(!$id) {
+            if (!$id) {
                 $this->setProperty($ref, $this->getRefName(), $refValue);
                 $affectedRows = $this->getMapper()->create($ref);
-            }
-            else {
+            } else {
                 $affectedRows = $this->getMapper()->update($ref);
             }
-        }
-        else {
+        } else {
             throw new InvalidArgumentException('Entity parameter must be of type object');
         }
 
@@ -68,22 +66,20 @@ class OneToOneRelation extends AbstractRelation
      */
     public function deleteRef($ref, $refValue = null)
     {
-        if(!$this->deleteRefs) {
+        if (!$this->deleteRefs) {
             return 0;
         }
 
         $affectedRows = 0;
-        if(is_scalar($ref)) {
+        if (is_scalar($ref)) {
             //we delete all entities bulk, consider $data as the refValue to delete
             $affectedRows += $this->getMapper()->delete([$this->getRefName() => $ref]);
-        }
-        elseif(is_object($ref)) {
+        } elseif (is_object($ref)) {
             $id = $this->getProperty($ref, $this->getMapper()->getIdentifierName());
-            if($id) {
+            if ($id) {
                 $affectedRows += $this->getMapper()->delete($ref);
             }
-        }
-        else {
+        } else {
             throw new InvalidArgumentException('Invalid parameter entity to delete.');
         }
 

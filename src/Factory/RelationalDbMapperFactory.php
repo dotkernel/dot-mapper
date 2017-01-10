@@ -9,7 +9,6 @@
 
 namespace Dot\Ems\Factory;
 
-
 use Dot\Ems\Exception\RuntimeException;
 use Dot\Ems\Mapper\Relation\RelationPluginManager;
 use Dot\Ems\Mapper\RelationalDbMapper;
@@ -29,15 +28,15 @@ class RelationalDbMapperFactory
 
     public function __invoke(ContainerInterface $container, $requestedName, $config = [])
     {
-        if(!isset($config['adapter']) || isset($config['adapter']) && !is_string($config['adapter'])) {
+        if (!isset($config['adapter']) || isset($config['adapter']) && !is_string($config['adapter'])) {
             throw new RuntimeException('No db adapter specified');
         }
 
-        if(!isset($config['table']) || isset($config['table']) && !is_string($config['table'])) {
+        if (!isset($config['table']) || isset($config['table']) && !is_string($config['table'])) {
             throw new RuntimeException('No table name specified');
         }
 
-        if(!isset($config['entity_prototype'])) {
+        if (!isset($config['entity_prototype'])) {
             throw new RuntimeException('No entity prototype specified');
         }
 
@@ -47,10 +46,10 @@ class RelationalDbMapperFactory
         $entityPrototype = $this->getDependencyObject($container, $config['entity_prototype']);
         $hydrator = $this->getDependencyObject($container, $hydratorName);
 
-        if(!is_object($entityPrototype)) {
+        if (!is_object($entityPrototype)) {
             throw new RuntimeException('Entity prototype is not an object');
         }
-        if(!$hydrator instanceof HydratorInterface) {
+        if (!$hydrator instanceof HydratorInterface) {
             $hydrator = new ClassMethods(false);
         }
 
@@ -60,14 +59,14 @@ class RelationalDbMapperFactory
             $container->get($config['adapter']),
             $entityPrototype, $hydrator);
 
-        if(!$mapper instanceof RelationalDbMapper) {
+        if (!$mapper instanceof RelationalDbMapper) {
             throw new RuntimeException('Requested mapper is not an instance of ' . RelationalDbMapper::class);
         }
 
         //add relations
         /** @var RelationPluginManager $relationManager */
         $relationManager = $container->get(RelationPluginManager::class);
-        if(isset($config['relations']) && is_array($config['relations'])) {
+        if (isset($config['relations']) && is_array($config['relations'])) {
             foreach ($config['relations'] as $relationClass => $relationConfig) {
                 $relation = $relationManager->get($relationClass, $relationConfig);
                 $mapper->addRelation($relation);
@@ -76,11 +75,11 @@ class RelationalDbMapperFactory
 
         $mapper->setPaginatorAdapterManager($container->get(AdapterPluginManager::class));
 
-        if(isset($config['paginator_adapter']) && is_string($config['paginator_adapter'])) {
+        if (isset($config['paginator_adapter']) && is_string($config['paginator_adapter'])) {
             $mapper->setPaginatorAdapterName($config['paginator_adapter']);
         }
 
-        if(isset($config['identifier_name']) && is_string($config['identifier_name'])) {
+        if (isset($config['identifier_name']) && is_string($config['identifier_name'])) {
             $mapper->setIdentifierName($config['identifier_name']);
         }
 
