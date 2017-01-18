@@ -9,7 +9,6 @@
 
 namespace Dot\Ems\Factory;
 
-
 use Dot\Ems\Mapper\MapperPluginManager;
 use Interop\Container\ContainerInterface;
 

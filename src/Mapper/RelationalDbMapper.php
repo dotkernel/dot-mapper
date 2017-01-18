@@ -34,11 +34,27 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     public function fetch($where)
     {
         $entity = parent::fetch($where);
-        if($entity) {
+        if ($entity) {
             $this->buildEntity($entity);
         }
 
         return $entity;
+    }
+
+    /**
+     * @param $entity
+     */
+    public function buildEntity($entity)
+    {
+        if (empty($this->relations)) {
+            return;
+        }
+
+        $id = $this->getProperty($entity, $this->getIdentifierName());
+        foreach ($this->relations as $property => $relation) {
+            $subEntity = $relation->fetchRef($id);
+            $this->setProperty($entity, $property, $subEntity);
+        }
     }
 
     /**
@@ -50,7 +66,7 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     public function fetchAll($where = [], $filters = [], $paginated = false)
     {
         $entities = parent::fetchAll($where, $filters, $paginated);
-        if($entities && !$paginated) {
+        if ($entities && !$paginated) {
             foreach ($entities as $entity) {
                 $this->buildEntity($entity);
             }
@@ -66,10 +82,32 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     public function create($entity)
     {
         $affectedRows = parent::create($entity);
-        if($affectedRows) {
+        if ($affectedRows) {
             $affectedRows += $this->saveSubEntities($entity, $this->lastInsertValue());
         }
 
+        return $affectedRows;
+    }
+
+    /**
+     * @param $entity
+     * @param $id
+     * @return int
+     */
+    public function saveSubEntities($entity, $id)
+    {
+        $affectedRows = 0;
+        foreach (array_keys($this->relations) as $property) {
+            $relation = $this->relations[$property];
+
+            $subEntity = $this->getProperty($entity, $property);
+            if ($subEntity !== null) {
+                $affectedRows += $relation->saveRef($subEntity, $id);
+            } else {
+                //just make sure we clear any trace
+                $affectedRows += $relation->deleteRef($id);
+            }
+        }
         return $affectedRows;
     }
 
@@ -92,40 +130,16 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
     public function delete($where)
     {
         $affectedRows = parent::delete($where);
-        if(is_object($where) && is_a($where, get_class($this->getPrototype()))) {
-            if($affectedRows) {
+        if (is_object($where) && is_a($where, get_class($this->getPrototype()))) {
+            if ($affectedRows) {
                 $affectedRows += $this->deleteSubEntities($where, true);
             }
-        }
-        elseif(is_array($where)) {
-            if(isset($where[$this->getIdentifierName()])) {
+        } elseif (is_array($where)) {
+            if (isset($where[$this->getIdentifierName()])) {
                 $affectedRows += $this->deleteSubEntities($where[$this->getIdentifierName()]);
             }
         }
 
-        return $affectedRows;
-    }
-
-    /**
-     * @param $entity
-     * @param $id
-     * @return int
-     */
-    public function saveSubEntities($entity, $id)
-    {
-        $affectedRows = 0;
-        foreach (array_keys($this->relations) as $property) {
-            $relation = $this->relations[$property];
-
-            $subEntity = $this->getProperty($entity, $property);
-            if($subEntity !== null) {
-                $affectedRows += $relation->saveRef($subEntity, $id);
-            }
-            else {
-                //just make sure we clear any trace
-                $affectedRows += $relation->deleteRef($id);
-            }
-        }
         return $affectedRows;
     }
 
@@ -141,40 +155,22 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
         foreach (array_keys($this->relations) as $property) {
             $relation = $this->relations[$property];
 
-            if(is_scalar($entity)) {
+            if (is_scalar($entity)) {
                 $affectedRows += $relation->deleteRef($entity);
-            }
-            else {
+            } else {
                 $id = $this->getProperty($entity, $this->getIdentifierName());
 
-                if($bulk) {
+                if ($bulk) {
                     $affectedRows += $relation->deleteRef($id);
-                }
-                else {
+                } else {
                     $subEntity = $this->getProperty($entity, $property);
-                    if(!empty($subEntity)) {
+                    if (!empty($subEntity)) {
                         $affectedRows += $relation->deleteRef($subEntity, $id);
                     }
                 }
             }
         }
         return $affectedRows;
-    }
-
-    /**
-     * @param $entity
-     */
-    public function buildEntity($entity)
-    {
-        if(empty($this->relations)) {
-            return;
-        }
-
-        $id = $this->getProperty($entity, $this->getIdentifierName());
-        foreach ($this->relations as $property => $relation) {
-            $subEntity = $relation->fetchRef($id);
-            $this->setProperty($entity, $property, $subEntity);
-        }
     }
 
     /**
@@ -210,7 +206,7 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
      */
     public function getPaginatorAdapterName()
     {
-        if(!$this->paginatorAdapterName) {
+        if (!$this->paginatorAdapterName) {
             $this->paginatorAdapterName = RelationalDbSelect::class;
         }
         return $this->paginatorAdapterName;
@@ -238,12 +234,11 @@ class RelationalDbMapper extends AbstractDbMapper implements RelationalMapperInt
 
         $ignoreProperties = array_keys($this->relations);
         foreach ($ignoreProperties as $prop) {
-            if(array_key_exists($prop, $data)) {
+            if (array_key_exists($prop, $data)) {
                 unset($data[$prop]);
             }
         }
 
         return $data;
     }
-
 }

@@ -9,7 +9,6 @@
 
 namespace Dot\Ems\Paginator\Adapter;
 
-
 use Zend\Stdlib\ArrayUtils;
 
 /**

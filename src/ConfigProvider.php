@@ -9,7 +9,6 @@
 
 namespace Dot\Ems;
 
-
 use Dot\Ems\Factory\EntityServiceAbstractFactory;
 use Dot\Ems\Factory\EntityServiceOptionsAbstractFactory;
 use Dot\Ems\Factory\MapperPluginManagerFactory;

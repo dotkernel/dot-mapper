@@ -12,7 +12,6 @@ namespace Dot\Ems\Mapper\Relation;
 use Dot\Ems\Exception\InvalidArgumentException;
 use Dot\Ems\Mapper\MapperInterface;
 
-
 /**
  * Class ManyToManyRelation
  * @package Dot\Ems\Mapper\Relation
@@ -39,10 +38,12 @@ class ManyToManyRelation extends OneToManyRelation
      * @param $fieldName
      */
     public function __construct(
-        MapperInterface $mapper, $refName,
-        MapperInterface $targetMapper, $targetRefName,
-        $fieldName)
-    {
+        MapperInterface $mapper,
+        $refName,
+        MapperInterface $targetMapper,
+        $targetRefName,
+        $fieldName
+    ) {
         parent::__construct($mapper, $refName, $fieldName);
         $this->targetMapper = $targetMapper;
         $this->targetRefName = $targetRefName;
@@ -55,12 +56,12 @@ class ManyToManyRelation extends OneToManyRelation
     public function fetchRef($refValue)
     {
         $linkEntities = parent::fetchRef($refValue);
-        if($linkEntities) {
+        if ($linkEntities) {
             $refs = [];
             foreach ($linkEntities as $linkEntity) {
                 $targetRefValue = $this->getProperty($linkEntity, $this->targetRefName);
                 $ref = $this->targetMapper->fetch([$this->targetMapper->getIdentifierName() => $targetRefValue]);
-                if($ref) {
+                if ($ref) {
                     $refs[] = $ref;
                 }
             }
@@ -73,12 +74,12 @@ class ManyToManyRelation extends OneToManyRelation
 
     public function saveRef($refs, $refValue)
     {
-        if(!$this->changeRefs) {
+        if (!$this->changeRefs) {
             return 0;
         }
 
         $affectedRows = 0;
-        if(is_array($refs)) {
+        if (is_array($refs)) {
             //we delete and create the intersection entries from scratch
             $this->deleteRef($refValue);
 
@@ -88,12 +89,12 @@ class ManyToManyRelation extends OneToManyRelation
                 }
 
                 $id = $this->getProperty($ref, $this->targetMapper->getIdentifierName());
-                if(!$id && $this->createTargetRefs) {
+                if (!$id && $this->createTargetRefs) {
                     $this->targetMapper->create($ref);
                     $id = $this->getProperty($ref, $this->targetMapper->getIdentifierName());
                 }
 
-                if($id) {
+                if ($id) {
                     $intersectionEntity = $this->getMapper()->getPrototype();
                     $this->setProperty($intersectionEntity, $this->getRefName(), $refValue);
                     $this->setProperty($intersectionEntity, $this->targetRefName, $id);
@@ -101,8 +102,7 @@ class ManyToManyRelation extends OneToManyRelation
                     $affectedRows += $this->getMapper()->create($intersectionEntity);
                 }
             }
-        }
-        else {
+        } else {
             throw new InvalidArgumentException('Invalid parameter refs to save');
         }
 
@@ -118,27 +118,28 @@ class ManyToManyRelation extends OneToManyRelation
      */
     public function deleteRef($refs, $refValue = null)
     {
-        if(!$this->deleteRefs) {
+        if (!$this->deleteRefs) {
             return 0;
         }
 
         $affectedRows = 0;
-        if(is_scalar($refs)) {
+        if (is_scalar($refs)) {
             $affectedRows = $this->getMapper()->delete([$this->getRefName() => $refs]);
-        }
-        elseif(is_array($refs) && $refValue !== null) {
+        } elseif (is_array($refs) && $refValue !== null) {
             foreach ($refs as $ref) {
                 if (!is_object($ref)) {
                     throw new InvalidArgumentException('References to delete contains invalid entities');
                 }
 
                 $id = $this->getProperty($ref, $this->targetMapper->getIdentifierName());
-                if($id) {
-                    $affectedRows += $this->getMapper()->delete([$this->getRefName() => $refValue, $this->targetRefName => $id]);
+                if ($id) {
+                    $affectedRows += $this->getMapper()->delete([
+                        $this->getRefName() => $refValue,
+                        $this->targetRefName => $id
+                    ]);
                 }
             }
-        }
-        else {
+        } else {
             throw new InvalidArgumentException('Invalid parameter refs to delete');
         }
 
@@ -162,5 +163,4 @@ class ManyToManyRelation extends OneToManyRelation
         $this->createTargetRefs = $createTargetRefs;
         return $this;
     }
-
 }

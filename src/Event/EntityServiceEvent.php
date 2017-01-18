@@ -9,25 +9,24 @@
 
 namespace Dot\Ems\Event;
 
-
 use Dot\Event\Event;
 
 /**
  * Class EntityEvent
  * @package Dot\Ems\Event
  */
-class EntityEvent extends Event
+class EntityServiceEvent extends Event
 {
-    const EVENT_ENTITY_CREATE_PRE = 'event.entity.create.pre';
-    const EVENT_ENTITY_CREATE_POST = 'event.entity.create.post';
+    const EVENT_ENTITY_PRE_CREATE = 'event.entity.pre.create';
+    const EVENT_ENTITY_POST_CREATE = 'event.entity.post.create';
     const EVENT_ENTITY_CREATE_ERROR = 'event.entity.create.error';
 
-    const EVENT_ENTITY_UPDATE_PRE = 'event.entity.update.pre';
-    const EVENT_ENTITY_UPDATE_POST = 'event.entity.update.post';
+    const EVENT_ENTITY_PRE_UPDATE = 'event.entity.pre.update';
+    const EVENT_ENTITY_POST_UPDATE = 'event.entity.post.update';
     const EVENT_ENTITY_UPDATE_ERROR = 'event.entity.update.error';
 
-    const EVENT_ENTITY_DELETE_PRE = 'event.entity.delete.pre';
-    const EVENT_ENTITY_DELETE_POST = 'event.entity.delete.post';
+    const EVENT_ENTITY_PRE_DELETE = 'event.entity.pre.delete';
+    const EVENT_ENTITY_POST_DELETE = 'event.entity.post.delete';
     const EVENT_ENTITY_DELETE_ERROR = 'event.entity.delete.error';
 
     /**
@@ -38,7 +37,7 @@ class EntityEvent extends Event
     /**
      * @var mixed
      */
-    protected $errors;
+    protected $error;
 
     /**
      * @return mixed
@@ -50,7 +49,7 @@ class EntityEvent extends Event
 
     /**
      * @param mixed $data
-     * @return EntityEvent
+     * @return EntityServiceEvent
      */
     public function setData($data)
     {
@@ -61,19 +60,18 @@ class EntityEvent extends Event
     /**
      * @return mixed
      */
-    public function getErrors()
+    public function getError()
     {
-        return $this->errors;
+        return $this->error;
     }
 
     /**
-     * @param mixed $errors
-     * @return EntityEvent
+     * @param mixed $error
+     * @return EntityServiceEvent
      */
-    public function setErrors($errors)
+    public function setError($error)
     {
-        $this->errors = $errors;
+        $this->error = $error;
         return $this;
     }
-
 }

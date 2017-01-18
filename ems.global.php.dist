@@ -6,6 +6,14 @@ return [
         'service' => [
             'foo_service' => [
 
+                //enable events triggering for create/update/delete(operations that do change the state of the application
+                'enable_events' => true,
+
+                'service_listeners' => [
+                    //list of entity service listeners as class names or service names
+
+                ],
+
                 'atomic_operations' => true,
                 //'type' => 'optional concrete implementation class name, defaults to EntityService',
 
