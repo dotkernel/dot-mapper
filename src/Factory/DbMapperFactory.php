@@ -25,6 +25,12 @@ class DbMapperFactory
 {
     use DependencyHelperTrait;
 
+    /**
+     * @param ContainerInterface $container
+     * @param $requestedName
+     * @param array $config
+     * @return DbMapper
+     */
     public function __invoke(ContainerInterface $container, $requestedName, $config = [])
     {
         if (!isset($config['adapter']) || isset($config['adapter']) && !is_string($config['adapter'])) {
@@ -56,7 +62,9 @@ class DbMapperFactory
         $mapper = new $requestedName(
             $config['table'],
             $container->get($config['adapter']),
-            $entityPrototype, $hydrator);
+            $entityPrototype,
+            $hydrator
+        );
 
         if (!$mapper instanceof DbMapper) {
             throw new RuntimeException('Requested mapper is not an instance of ' . DbMapper::class);

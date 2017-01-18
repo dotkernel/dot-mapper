@@ -18,6 +18,10 @@ use Interop\Container\ContainerInterface;
  */
 class RelationPluginManagerFactory
 {
+    /**
+     * @param ContainerInterface $container
+     * @return RelationPluginManager
+     */
     public function __invoke(ContainerInterface $container)
     {
         return new RelationPluginManager($container, $container->get('config')['dot_ems']['relation_manager']);

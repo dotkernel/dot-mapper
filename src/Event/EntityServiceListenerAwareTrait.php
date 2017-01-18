@@ -19,7 +19,7 @@ trait EntityServiceListenerAwareTrait
 {
     use EventManagerAwareTrait;
 
-    /** @var EntityServiceListenerInterface[]  */
+    /** @var EntityServiceListenerInterface[] */
     protected $listeners = [];
 
     /**

@@ -179,86 +179,6 @@ abstract class AbstractDbMapper implements MapperInterface
     }
 
     /**
-     * @param $entity
-     * @return int
-     */
-    public function create($entity)
-    {
-        $data = $this->entityToArray($entity, false);
-
-        $affectedRows = $this->tableGateway->insert($data);
-        $this->setProperty($entity, $this->getIdentifierName(), $this->lastInsertValue());
-
-        return $affectedRows;
-    }
-
-    /**
-     * @param $entity
-     * @return int
-     */
-    public function update($entity)
-    {
-        $data = $this->entityToArray($entity);
-
-        if (!isset($data[$this->identifier])) {
-            throw new InvalidArgumentException('Cannot update entity without and identifier');
-        }
-
-        $id = $data[$this->identifier];
-        unset($data[$this->identifier]);
-
-        return $this->tableGateway->update($data, [$this->identifier => $id]);
-    }
-
-    /**
-     * @param $where
-     * @return int
-     */
-    public function delete($where)
-    {
-        if (is_object($where) && is_a($where, get_class($this->getPrototype()))) {
-            $id = $this->getProperty($where, $this->getIdentifierName());
-            if (!$id) {
-                throw new InvalidArgumentException('Cannot delete an entity without an identifier');
-            }
-
-            return $this->tableGateway->delete([$this->getIdentifierName() => $id]);
-        } else {
-            return $this->tableGateway->delete($where);
-        }
-    }
-
-    /**
-     * @param $entity
-     * @param bool $removeNulls
-     * @return array
-     */
-    protected function entityToArray($entity, $removeNulls = true)
-    {
-        if (!is_object($entity)) {
-            throw new InvalidArgumentException('Entity must be and object');
-        }
-
-        $ignoreProperties = [];
-        if ($entity instanceof IgnorePropertyProvider) {
-            $ignoreProperties = $entity->ignoredProperties();
-        }
-
-        $data = $this->hydrator->extract($entity);
-        if ($removeNulls) {
-            $data = array_filter($data);
-        }
-
-        foreach ($ignoreProperties as $prop) {
-            if (array_key_exists($prop, $data)) {
-                unset($data[$prop]);
-            }
-        }
-
-        return $data;
-    }
-
-    /**
      * @param Select $select
      * @param array $filters
      * @return Select
@@ -271,44 +191,6 @@ abstract class AbstractDbMapper implements MapperInterface
 
         $select = $this->applySortFilter($select, $filters);
         $select = $this->applySearchFilters($select, $filters);
-
-        return $select;
-    }
-
-    /**
-     * @param Select $select
-     * @param array $filters
-     * @return Select
-     */
-    protected function applySearchFilters(Select $select, $filters = [])
-    {
-        $searchableColumns = [];
-
-        $columns = [];
-        $prototype = $this->getPrototype();
-        if ($prototype instanceof SearchableColumnsProvider) {
-            $columns = $prototype->searchableColumns();
-        }
-        $tableColumns = $this->metadata->getColumnNames($this->tableGateway->getTable());
-        foreach ($columns as $column) {
-            if (in_array($column, $tableColumns)) {
-                $searchableColumns[] = $column;
-            }
-        }
-
-        if (!empty($searchableColumns)) {
-            $search = isset($filters['search']) ? $filters['search'] : '';
-            if (!empty($search)) {
-                $select->where(function (Where $where) use ($search, $searchableColumns) {
-                    $predicate = $where->nest();
-                    foreach ($searchableColumns as $column) {
-                        $predicate->like($column, '%' . $search . '%')->or;
-                    }
-                    $predicate->unnest();
-                    $where->predicate($predicate);
-                });
-            }
-        }
 
         return $select;
     }
@@ -359,24 +241,41 @@ abstract class AbstractDbMapper implements MapperInterface
     }
 
     /**
-     * @return string
+     * @param Select $select
+     * @param array $filters
+     * @return Select
      */
-    public function getPaginatorAdapterName()
+    protected function applySearchFilters(Select $select, $filters = [])
     {
-        if (!$this->paginatorAdapterName) {
-            $this->paginatorAdapterName = DbSelect::class;
-        }
-        return $this->paginatorAdapterName;
-    }
+        $searchableColumns = [];
 
-    /**
-     * @param string $paginatorAdapterName
-     * @return AbstractDbMapper
-     */
-    public function setPaginatorAdapterName($paginatorAdapterName)
-    {
-        $this->paginatorAdapterName = $paginatorAdapterName;
-        return $this;
+        $columns = [];
+        $prototype = $this->getPrototype();
+        if ($prototype instanceof SearchableColumnsProvider) {
+            $columns = $prototype->searchableColumns();
+        }
+        $tableColumns = $this->metadata->getColumnNames($this->tableGateway->getTable());
+        foreach ($columns as $column) {
+            if (in_array($column, $tableColumns)) {
+                $searchableColumns[] = $column;
+            }
+        }
+
+        if (!empty($searchableColumns)) {
+            $search = isset($filters['search']) ? $filters['search'] : '';
+            if (!empty($search)) {
+                $select->where(function (Where $where) use ($search, $searchableColumns) {
+                    $predicate = $where->nest();
+                    foreach ($searchableColumns as $column) {
+                        $predicate->like($column, '%' . $search . '%')->or;
+                    }
+                    $predicate->unnest();
+                    $where->predicate($predicate);
+                });
+            }
+        }
+
+        return $select;
     }
 
     /**
@@ -403,6 +302,71 @@ abstract class AbstractDbMapper implements MapperInterface
     /**
      * @return string
      */
+    public function getPaginatorAdapterName()
+    {
+        if (!$this->paginatorAdapterName) {
+            $this->paginatorAdapterName = DbSelect::class;
+        }
+        return $this->paginatorAdapterName;
+    }
+
+    /**
+     * @param string $paginatorAdapterName
+     * @return AbstractDbMapper
+     */
+    public function setPaginatorAdapterName($paginatorAdapterName)
+    {
+        $this->paginatorAdapterName = $paginatorAdapterName;
+        return $this;
+    }
+
+    /**
+     * @param $entity
+     * @return int
+     */
+    public function create($entity)
+    {
+        $data = $this->entityToArray($entity, false);
+
+        $affectedRows = $this->tableGateway->insert($data);
+        $this->setProperty($entity, $this->getIdentifierName(), $this->lastInsertValue());
+
+        return $affectedRows;
+    }
+
+    /**
+     * @param $entity
+     * @param bool $removeNulls
+     * @return array
+     */
+    protected function entityToArray($entity, $removeNulls = true)
+    {
+        if (!is_object($entity)) {
+            throw new InvalidArgumentException('Entity must be and object');
+        }
+
+        $ignoreProperties = [];
+        if ($entity instanceof IgnorePropertyProvider) {
+            $ignoreProperties = $entity->ignoredProperties();
+        }
+
+        $data = $this->hydrator->extract($entity);
+        if ($removeNulls) {
+            $data = array_filter($data);
+        }
+
+        foreach ($ignoreProperties as $prop) {
+            if (array_key_exists($prop, $data)) {
+                unset($data[$prop]);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * @return string
+     */
     public function getIdentifierName()
     {
         return $this->identifier;
@@ -414,6 +378,42 @@ abstract class AbstractDbMapper implements MapperInterface
     public function lastInsertValue()
     {
         return $this->tableGateway->getLastInsertValue();
+    }
+
+    /**
+     * @param $entity
+     * @return int
+     */
+    public function update($entity)
+    {
+        $data = $this->entityToArray($entity);
+
+        if (!isset($data[$this->identifier])) {
+            throw new InvalidArgumentException('Cannot update entity without and identifier');
+        }
+
+        $id = $data[$this->identifier];
+        unset($data[$this->identifier]);
+
+        return $this->tableGateway->update($data, [$this->identifier => $id]);
+    }
+
+    /**
+     * @param $where
+     * @return int
+     */
+    public function delete($where)
+    {
+        if (is_object($where) && is_a($where, get_class($this->getPrototype()))) {
+            $id = $this->getProperty($where, $this->getIdentifierName());
+            if (!$id) {
+                throw new InvalidArgumentException('Cannot delete an entity without an identifier');
+            }
+
+            return $this->tableGateway->delete([$this->getIdentifierName() => $id]);
+        } else {
+            return $this->tableGateway->delete($where);
+        }
     }
 
     /**
