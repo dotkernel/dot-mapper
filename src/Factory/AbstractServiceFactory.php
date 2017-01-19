@@ -12,6 +12,10 @@ namespace Dot\Ems\Factory;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 
+/**
+ * Class AbstractServiceFactory
+ * @package Dot\Ems\Factory
+ */
 abstract class AbstractServiceFactory implements AbstractFactoryInterface
 {
     const DOT_EMS_PART = 'dot-ems';

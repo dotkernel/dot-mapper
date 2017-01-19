@@ -20,6 +20,12 @@ class EntityServiceOptionsAbstractFactory extends AbstractServiceFactory
 {
     const SPECIFIC_PART = 'options';
 
+    /**
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param array|null $options
+     * @return ServiceOptions
+     */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
         $specificServiceName = explode('.', $requestedName)[2];

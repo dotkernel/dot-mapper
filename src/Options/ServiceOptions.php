@@ -18,7 +18,7 @@ use Zend\Stdlib\AbstractOptions;
  */
 class ServiceOptions extends AbstractOptions
 {
-    /** @var bool  */
+    /** @var bool */
     protected $enableEvents = true;
 
     /** @var bool */
@@ -30,7 +30,7 @@ class ServiceOptions extends AbstractOptions
     /** @var  array */
     protected $mapper;
 
-    /** @var array  */
+    /** @var array */
     protected $serviceListeners = [];
 
     /**
@@ -119,7 +119,7 @@ class ServiceOptions extends AbstractOptions
      */
     public function setServiceListeners($serviceListeners)
     {
-        $this->serviceListeners = (array) $serviceListeners;
+        $this->serviceListeners = (array)$serviceListeners;
         return $this;
     }
 }

@@ -30,7 +30,7 @@ class EntityService implements ServiceInterface, EntityServiceListenerAwareInter
     /** @var bool */
     protected $atomicOperations = true;
 
-    /** @var bool  */
+    /** @var bool */
     protected $enableEvents = true;
 
     /** @var  MapperInterface */
@@ -144,6 +144,24 @@ class EntityService implements ServiceInterface, EntityServiceListenerAwareInter
 
             throw $e;
         }
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isEnableEvents()
+    {
+        return $this->enableEvents;
+    }
+
+    /**
+     * @param boolean $enableEvents
+     * @return EntityService
+     */
+    public function setEnableEvents($enableEvents)
+    {
+        $this->enableEvents = $enableEvents;
+        return $this;
     }
 
     protected function createEntityServiceEvent($name, $data = null, $error = null, $params = null)
@@ -264,24 +282,6 @@ class EntityService implements ServiceInterface, EntityServiceListenerAwareInter
     public function setAtomicOperations($atomicOperations)
     {
         $this->atomicOperations = $atomicOperations;
-        return $this;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isEnableEvents()
-    {
-        return $this->enableEvents;
-    }
-
-    /**
-     * @param boolean $enableEvents
-     * @return EntityService
-     */
-    public function setEnableEvents($enableEvents)
-    {
-        $this->enableEvents = $enableEvents;
         return $this;
     }
 }

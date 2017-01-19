@@ -21,6 +21,12 @@ use Zend\ServiceManager\Exception\InvalidServiceException;
  */
 class RelationFactory
 {
+    /**
+     * @param ContainerInterface $container
+     * @param $requestedName
+     * @param array $config
+     * @return RelationInterface
+     */
     public function __invoke(ContainerInterface $container, $requestedName, $config = [])
     {
         if (!class_exists($requestedName)) {

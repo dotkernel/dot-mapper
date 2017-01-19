@@ -76,8 +76,8 @@ class ManyToManyRelationFactory
         $relation->setDeleteRefs(isset($config['delete_refs']) ? (bool)$config['delete_refs'] : false);
         $relation->setCreateTargetRefs(
             isset($config['create_target_refs'])
-            ? (bool)$config['create_target_refs']
-            : true
+                ? (bool)$config['create_target_refs']
+                : true
         );
 
         return $relation;

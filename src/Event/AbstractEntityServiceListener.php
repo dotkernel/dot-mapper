@@ -19,7 +19,7 @@ use Zend\EventManager\EventManagerInterface;
 abstract class AbstractEntityServiceListener extends AbstractListenerAggregate implements
     EntityServiceListenerInterface
 {
-    /** @var array  */
+    /** @var array */
     protected $listeners = [];
 
     /**
