@@ -3,7 +3,7 @@
 return [
     'dot_ems' => [
 
-        'service' => [
+        'services' => [
             'foo_service' => [
 
                 //enable events triggering for create/update/delete(operations that do change the state of the application

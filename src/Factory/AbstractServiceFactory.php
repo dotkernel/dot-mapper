@@ -24,6 +24,9 @@ abstract class AbstractServiceFactory implements AbstractFactoryInterface
     /** @var string */
     protected $configKey = 'dot_ems';
 
+    /** @var string  */
+    protected $subConfigKey = 'services';
+
     /** @var array */
     protected $config = [];
 
@@ -55,8 +58,9 @@ abstract class AbstractServiceFactory implements AbstractFactoryInterface
     protected function getConfig(ContainerInterface $container)
     {
         $config = $container->get('config');
-        if (isset($config[$this->configKey]['service']) && is_array($config[$this->configKey]['service'])) {
-            $this->config = $config[$this->configKey]['service'];
+        if (isset($config[$this->configKey][$this->subConfigKey])
+            && is_array($config[$this->configKey][$this->subConfigKey])) {
+            $this->config = $config[$this->configKey][$this->subConfigKey];
         }
 
         return $this->config;
