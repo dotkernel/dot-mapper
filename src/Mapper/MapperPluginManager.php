@@ -26,4 +26,9 @@ class MapperPluginManager extends AbstractPluginManager
         DbMapper::class => DbMapperFactory::class,
         RelationalDbMapper::class => RelationalDbMapperFactory::class,
     ];
+
+    protected $aliases = [
+        'DbMapper' => DbMapper::class,
+        'RelationalDbMapper' => RelationalDbMapper::class,
+    ];
 }

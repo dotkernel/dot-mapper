@@ -26,4 +26,13 @@ class RelationPluginManager extends AbstractPluginManager
         OneToManyRelation::class => RelationFactory::class,
         ManyToManyRelation::class => ManyToManyRelationFactory::class,
     ];
+
+    protected $aliases = [
+        'OneToOne' => OneToOneRelation::class,
+        'OneToMany' => OneToManyRelation::class,
+        'ManyToMany' => ManyToManyRelation::class,
+
+        'HasOne' => OneToOneRelation::class,
+        'HasMany' => OneToManyRelation::class,
+    ];
 }
