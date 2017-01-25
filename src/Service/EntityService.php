@@ -12,8 +12,13 @@ namespace Dot\Ems\Service;
 use Dot\Ems\Event\EntityServiceEvent;
 use Dot\Ems\Event\EntityServiceListenerAwareInterface;
 use Dot\Ems\Event\EntityServiceListenerAwareTrait;
+use Dot\Ems\Event\EntityServiceListenerInterface;
+use Dot\Ems\Exception\InvalidArgumentException;
+use Dot\Ems\Exception\RuntimeException;
 use Dot\Ems\Mapper\MapperInterface;
 use Dot\Ems\ObjectPropertyTrait;
+use Zend\EventManager\EventManagerInterface;
+use Zend\Stdlib\ArrayUtils;
 
 /**
  * Class EntityService
@@ -25,7 +30,7 @@ class EntityService implements ServiceInterface, EntityServiceListenerAwareInter
     use EntityServiceListenerAwareTrait;
 
     /** @var  string */
-    protected $name;
+    protected $name = '';
 
     /** @var bool */
     protected $atomicOperations = true;
@@ -38,11 +43,45 @@ class EntityService implements ServiceInterface, EntityServiceListenerAwareInter
 
     /**
      * EntityService constructor.
-     * @param MapperInterface|null $mapper
+     * @param array $options
      */
-    public function __construct(MapperInterface $mapper = null)
+    public function __construct($options = [])
     {
-        $this->mapper = $mapper;
+        if ($options instanceof \Traversable) {
+            $options = ArrayUtils::iteratorToArray($options);
+        }
+
+        if (!is_array($options)) {
+            throw new InvalidArgumentException('Options must be an array or an object implementing \Traversable ');
+        }
+
+        if (isset($options['name']) && is_string($options['name'])) {
+            $this->setName($options['name']);
+        }
+
+        if (isset($options['event_manager']) && $options['event_manager'] instanceof EventManagerInterface) {
+            $this->setEventManager($options['event_manager']);
+        }
+
+        if (isset($options['atomic_operations'])) {
+            $this->setAtomicOperations((bool) $options['atomic_operations']);
+        }
+
+        if (isset($options['enable_events'])) {
+            $this->setEnableEvents((bool) $options['enable_events']);
+        }
+
+        if (isset($options['mapper']) && $options['mapper'] instanceof MapperInterface) {
+            $this->setMapper($options['mapper']);
+        }
+
+        if (isset($options['service_listeners']) && is_array($options['service_listeners'])) {
+            $this->configureServiceListeners($options['service_listeners']);
+        }
+
+        if (! $this->getMapper()) {
+            throw new RuntimeException("Entity service class expects a MapperInterface to be set");
+        }
     }
 
     /**
@@ -283,5 +322,23 @@ class EntityService implements ServiceInterface, EntityServiceListenerAwareInter
     {
         $this->atomicOperations = $atomicOperations;
         return $this;
+    }
+
+    /**
+     * @param $listeners
+     */
+    protected function configureServiceListeners($listeners)
+    {
+        foreach ($listeners as $listener) {
+            if (!$listener instanceof EntityServiceListenerInterface) {
+                throw new InvalidArgumentException(sprintf(
+                    'Provided entity service listener of type "%s" is not valid. Expected class of type %s',
+                    is_object($listener) ? get_class($listener) : gettype($listener),
+                    EntityServiceListenerInterface::class
+                ));
+            }
+
+            $this->attachEntityServiceListener($listener);
+        }
     }
 }

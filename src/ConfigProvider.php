@@ -27,12 +27,11 @@ class ConfigProvider
 
             'dot_ems' => [
 
-                'service' => [],
+                'services' => [],
 
                 'mapper_manager' => [],
 
                 'relation_manager' => [],
-
             ],
         ];
     }
@@ -41,13 +40,15 @@ class ConfigProvider
     {
         return [
             'factories' => [
-                MapperPluginManager::class => MapperPluginManagerFactory::class,
-                RelationPluginManager::class => RelationPluginManagerFactory::class,
+                'MapperManager' => MapperPluginManagerFactory::class,
+                'RelationManager' => RelationPluginManagerFactory::class,
             ],
-
+            'aliases' => [
+                MapperPluginManager::class => 'MapperManager',
+                RelationPluginManager::class => 'RelationManager',
+            ],
             'abstract_factories' => [
                 EntityServiceAbstractFactory::class,
-                EntityServiceOptionsAbstractFactory::class,
             ],
 
             'delegators' => [
