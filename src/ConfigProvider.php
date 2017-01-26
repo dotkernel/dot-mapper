@@ -49,6 +49,7 @@ class ConfigProvider
             ],
             'abstract_factories' => [
                 EntityServiceAbstractFactory::class,
+                EntityServiceOptionsAbstractFactory::class,
             ],
 
             'delegators' => [

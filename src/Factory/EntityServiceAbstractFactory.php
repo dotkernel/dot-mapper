@@ -9,7 +9,9 @@
 
 namespace Dot\Ems\Factory;
 
+use Dot\Ems\Event\EntityServiceListenerAwareInterface;
 use Dot\Ems\Event\EntityServiceListenerInterface;
+use Dot\Ems\Exception\InvalidArgumentException;
 use Dot\Ems\Exception\RuntimeException;
 use Dot\Ems\Mapper\MapperPluginManager;
 use Dot\Ems\Options\ServiceOptions;
@@ -19,53 +21,19 @@ use Dot\Helpers\DependencyHelperTrait;
 use Interop\Container\ContainerInterface;
 use Zend\EventManager\EventManager;
 use Zend\EventManager\EventManagerInterface;
-use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 
 /**
  * Class EntityServiceAbstractFactory
  * @package Dot\Ems\Factory
  */
-class EntityServiceAbstractFactory implements AbstractFactoryInterface
+class EntityServiceAbstractFactory extends AbstractServiceFactory
 {
     use DependencyHelperTrait;
 
-    const PREFIX = 'dot-ems.service';
-
-    /** @var  array */
-    protected $config;
-
-    /** @var string  */
-    protected $configKey = 'dot_ems';
-
-    /** @var string  */
-    protected $servicesConfigKey = 'services';
+    const SPECIFIC_PART = 'service';
 
     /** @var  ServiceOptions */
     protected $serviceOptions;
-
-    /**
-     * @param ContainerInterface $container
-     * @param string $requestedName
-     * @return bool
-     */
-    public function canCreate(ContainerInterface $container, $requestedName)
-    {
-        $parts = explode('.', $requestedName);
-        if (count($parts) !== 3) {
-            return false;
-        }
-
-        if (($parts[0] . '.' . $parts[1]) !== static::PREFIX) {
-            return false;
-        }
-
-        $config = $this->getConfig($container);
-        if (empty($config)) {
-            return false;
-        }
-
-        return isset($config[$parts[2]]);
-    }
 
     /**
      * @param ContainerInterface $container
@@ -75,81 +43,74 @@ class EntityServiceAbstractFactory implements AbstractFactoryInterface
      */
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $requestedName = explode('.', $requestedName)[2];
-        $config = $this->getConfig($container)[$requestedName];
+        $specificServiceName = explode('.', $requestedName)[2];
+        /** @var ServiceOptions $serviceOptions */
+        $serviceOptions = $container->get(sprintf(
+            '%s.%s.%s',
+            self::DOT_EMS_PART,
+            EntityServiceOptionsAbstractFactory::SPECIFIC_PART,
+            $specificServiceName
+        ));
 
-        $type = isset($config['type']) ? $config['type'] : EntityService::class;
-        $this->processConfig($config, $container);
+        $this->serviceOptions = $serviceOptions;
 
-        $config['name'] = $requestedName;
-        $config['event_manager'] = $container->has(EventManagerInterface::class)
-            ? $container->get(EventManagerInterface::class)
-            : new EventManager();
+        /** @var MapperPluginManager $mapperManager */
+        $mapperManager = $container->get(MapperPluginManager::class);
 
-        $service = new $type($config);
+        $service = null;
+        $serviceClass = $serviceOptions->getType() ?: EntityService::class;
+        if ($container->has($serviceClass)) {
+            $service = $container->get($serviceClass);
+        } elseif (is_string($serviceClass) && class_exists($serviceClass)) {
+            $service = new $serviceClass;
+        }
 
         if (!$service instanceof ServiceInterface) {
             throw new RuntimeException('Could not load entity service '
                 . $requestedName . '. Make sure the defined type is implementing ' . ServiceInterface::class);
         }
 
+        $mapperOptions = $serviceOptions->getMapper();
+        $mapper = $mapperManager->get(key($mapperOptions), current($mapperOptions));
+
+        $service->setMapper($mapper);
+        $service->setAtomicOperations($serviceOptions->isAtomicOperations());
+
+        $eventManager = $container->has(EventManagerInterface::class)
+            ? $container->get(EventManagerInterface::class)
+            : new EventManager();
+        $service->setEventManager($eventManager);
+
+        //set the name after setting the event manager, because the name will be added as identifier
+        $service->setName($requestedName);
+        $service->setEnableEvents($serviceOptions->isEnableEvents());
+
+        $this->attachServiceListeners($service, $container);
+
         return $service;
     }
 
     /**
-     * @param $config
+     * @param EntityServiceListenerAwareInterface $service
      * @param ContainerInterface $container
      */
-    protected function processConfig(&$config, ContainerInterface $container)
-    {
-        /** @var MapperPluginManager $mapperManager */
-        $mapperManager = $container->get('MapperManager');
+    protected function attachServiceListeners(
+        EntityServiceListenerAwareInterface $service,
+        ContainerInterface $container
+    ) {
+        $listeners = $this->serviceOptions->getServiceListeners();
+        foreach ($listeners as $listener) {
+            $listener = $this->getDependencyObject($container, $listener);
 
-        if (isset($config['mapper']) && is_array($config['mapper'])) {
-            $mapperType = key($config['mapper']);
-            $mapperConfig = current($config['mapper']);
-            $config['mapper'] = $mapperManager->get($mapperType, $mapperConfig);
-        }
-
-        if (isset($config['service_listeners']) && is_array($config['service_listeners'])) {
-            foreach ($config['service_listeners'] as $k => $listener) {
-                if (is_string($listener)) {
-                    $listener = $this->getDependencyObject($container, $listener);
-                }
-
-                if (! $listener instanceof EntityServiceListenerInterface) {
-                    throw new RuntimeException(sprintf(
-                        "Entity service listener must be an instance of %s. %s was given",
-                        EntityServiceListenerInterface::class,
-                        is_object($listener) ? get_class($listener) : gettype($listener)
-                    ));
-                }
-
-                $config['service_listeners'][$k] = $listener;
+            if (!$listener instanceof EntityServiceListenerInterface) {
+                throw new InvalidArgumentException(sprintf(
+                    'Provided entity service listener of type "%s" is not valid. Expected string or %s',
+                    is_object($listener) ? get_class($listener) : gettype($listener),
+                    EntityServiceListenerInterface::class
+                ));
             }
-        }
-    }
 
-    /**
-     * @param ContainerInterface $container
-     * @return array
-     */
-    protected function getConfig(ContainerInterface $container)
-    {
-        if ($this->config) {
-            return $this->config;
+            $service->attachEntityServiceListener($listener);
         }
-
-        if (! $container->has('config')) {
-            return $this->config = [];
-        }
-
-        $config = $container->get('config');
-        if (isset($config[$this->configKey][$this->servicesConfigKey])
-            && is_array($config[$this->configKey][$this->servicesConfigKey])) {
-            return $this->config = $config[$this->configKey][$this->servicesConfigKey];
-        }
-
-        return $this->config = [];
     }
 }
