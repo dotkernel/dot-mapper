@@ -20,16 +20,16 @@ interface EntityServiceListenerAwareInterface
      * @param int $priority
      * @return mixed
      */
-    public function attachEntityServiceListener(EntityServiceListenerInterface $listener, $priority = 1);
+    public function attachListener(EntityServiceListenerInterface $listener, $priority = 1);
 
     /**
      * @param EntityServiceListenerInterface $listener
      * @return mixed
      */
-    public function detachEntityServiceListener(EntityServiceListenerInterface $listener);
+    public function detachListener(EntityServiceListenerInterface $listener);
 
     /**
      * @return mixed
      */
-    public function clearEntityServiceListeners();
+    public function clearListeners();
 }

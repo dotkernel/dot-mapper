@@ -19,9 +19,6 @@ use Zend\EventManager\EventManagerInterface;
 abstract class AbstractEntityServiceListener extends AbstractListenerAggregate implements
     EntityServiceListenerInterface
 {
-    /** @var array */
-    protected $listeners = [];
-
     /**
      * @param EventManagerInterface $events
      * @param int $priority
@@ -81,5 +78,50 @@ abstract class AbstractEntityServiceListener extends AbstractListenerAggregate i
             [$this, 'onDeleteError'],
             $priority
         );
+    }
+
+    public function onPreCreate(EntityServiceEvent $e)
+    {
+        // noop - left for implementors
+    }
+
+    public function onPostCreate(EntityServiceEvent $e)
+    {
+        // noop - left for implementors
+    }
+
+    public function onCreateError(EntityServiceEvent $e)
+    {
+        // noop - left for implementors
+    }
+
+    public function onPreUpdate(EntityServiceEvent $e)
+    {
+        // noop - left for implementors
+    }
+
+    public function onPostUpdate(EntityServiceEvent $e)
+    {
+        // noop - left for implementors
+    }
+
+    public function onUpdateError(EntityServiceEvent $e)
+    {
+        // noop - left for implementors
+    }
+
+    public function onPreDelete(EntityServiceEvent $e)
+    {
+        // noop - left for implementors
+    }
+
+    public function onPostDelete(EntityServiceEvent $e)
+    {
+        // noop - left for implementors
+    }
+
+    public function onDeleteError(EntityServiceEvent $e)
+    {
+        // noop - left for implementors
     }
 }

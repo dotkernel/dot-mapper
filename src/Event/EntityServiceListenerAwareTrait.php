@@ -27,7 +27,7 @@ trait EntityServiceListenerAwareTrait
      * @param int $priority
      * @return $this
      */
-    public function attachEntityServiceListener(EntityServiceListenerInterface $listener, $priority = 1)
+    public function attachListener(EntityServiceListenerInterface $listener, $priority = 1)
     {
         $listener->attach($this->getEventManager(), $priority);
         $this->listeners[] = $listener;
@@ -38,7 +38,7 @@ trait EntityServiceListenerAwareTrait
      * @param EntityServiceListenerInterface $listener
      * @return $this
      */
-    public function detachEntityServiceListener(EntityServiceListenerInterface $listener)
+    public function detachListener(EntityServiceListenerInterface $listener)
     {
         $listener->detach($this->getEventManager());
 
@@ -58,7 +58,7 @@ trait EntityServiceListenerAwareTrait
     /**
      * @return $this
      */
-    public function clearEntityServiceListeners()
+    public function clearListeners()
     {
         foreach ($this->listeners as $listener) {
             $listener->detach($this->getEventManager());

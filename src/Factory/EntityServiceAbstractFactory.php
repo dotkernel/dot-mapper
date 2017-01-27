@@ -98,7 +98,7 @@ class EntityServiceAbstractFactory extends AbstractServiceFactory
         EntityServiceListenerAwareInterface $service,
         ContainerInterface $container
     ) {
-        $listeners = $this->serviceOptions->getServiceListeners();
+        $listeners = $this->serviceOptions->getEventListeners();
         foreach ($listeners as $listener) {
             $listener = $this->getDependencyObject($container, $listener);
 
@@ -110,7 +110,7 @@ class EntityServiceAbstractFactory extends AbstractServiceFactory
                 ));
             }
 
-            $service->attachEntityServiceListener($listener);
+            $service->attachListener($listener);
         }
     }
 }

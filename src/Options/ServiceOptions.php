@@ -31,7 +31,7 @@ class ServiceOptions extends AbstractOptions
     protected $mapper;
 
     /** @var array */
-    protected $serviceListeners = [];
+    protected $eventListeners = [];
 
     /**
      * @return boolean
@@ -108,18 +108,18 @@ class ServiceOptions extends AbstractOptions
     /**
      * @return array
      */
-    public function getServiceListeners()
+    public function getEventListeners()
     {
-        return $this->serviceListeners;
+        return $this->eventListeners;
     }
 
     /**
      * @param array $serviceListeners
      * @return ServiceOptions
      */
-    public function setServiceListeners($serviceListeners)
+    public function setEventListeners($serviceListeners)
     {
-        $this->serviceListeners = (array)$serviceListeners;
+        $this->eventListeners = (array)$serviceListeners;
         return $this;
     }
 }

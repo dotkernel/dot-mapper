@@ -9,7 +9,7 @@ return [
                 //enable events triggering for create/update/delete(operations that do change the state of the application
                 'enable_events' => true,
 
-                'service_listeners' => [
+                'event_listeners' => [
                     //list of entity service listeners as class names or service names
 
                 ],
