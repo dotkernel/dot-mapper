@@ -7,6 +7,8 @@
  * Time: 8:03 PM
  */
 
+declare(strict_types=1);
+
 namespace Dot\Ems\Event;
 
 use Zend\EventManager\EventManagerAwareTrait;

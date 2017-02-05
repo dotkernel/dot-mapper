@@ -7,6 +7,8 @@
  * Time: 8:05 PM
  */
 
+declare(strict_types=1);
+
 namespace Dot\Ems\Factory;
 
 use Dot\Ems\Event\EntityServiceListenerAwareInterface;

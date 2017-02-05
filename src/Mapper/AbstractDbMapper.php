@@ -7,6 +7,8 @@
  * Time: 7:56 PM
  */
 
+declare(strict_types=1);
+
 namespace Dot\Ems\Mapper;
 
 use Dot\Ems\Entity\IgnorePropertyProvider;

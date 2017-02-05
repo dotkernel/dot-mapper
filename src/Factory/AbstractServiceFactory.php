@@ -7,6 +7,8 @@
  * Time: 8:09 PM
  */
 
+declare(strict_types=1);
+
 namespace Dot\Ems\Factory;
 
 use Interop\Container\ContainerInterface;

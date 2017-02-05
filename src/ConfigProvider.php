@@ -7,6 +7,8 @@
  * Time: 4:26 PM
  */
 
+declare(strict_types=1);
+
 namespace Dot\Ems;
 
 use Dot\Ems\Factory\EntityServiceAbstractFactory;

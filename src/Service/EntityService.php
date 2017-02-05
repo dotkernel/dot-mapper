@@ -7,13 +7,19 @@
  * Time: 3:01 AM
  */
 
+declare(strict_types=1);
+
 namespace Dot\Ems\Service;
 
 use Dot\Ems\Event\EntityServiceEvent;
 use Dot\Ems\Event\EntityServiceListenerAwareInterface;
 use Dot\Ems\Event\EntityServiceListenerAwareTrait;
+use Dot\Ems\Exception\RuntimeException;
 use Dot\Ems\Mapper\MapperInterface;
 use Dot\Ems\ObjectPropertyTrait;
+use Dot\Ems\Result\DeleteResult;
+use Dot\Ems\Result\FindResult;
+use Dot\Ems\Result\SaveResult;
 
 /**
  * Class EntityService
@@ -28,9 +34,6 @@ class EntityService implements ServiceInterface, EntityServiceListenerAwareInter
     protected $name;
 
     /** @var bool */
-    protected $atomicOperations = true;
-
-    /** @var bool */
     protected $enableEvents = true;
 
     /** @var  MapperInterface */
@@ -38,49 +41,70 @@ class EntityService implements ServiceInterface, EntityServiceListenerAwareInter
 
     /**
      * EntityService constructor.
-     * @param MapperInterface|null $mapper
+     * @param array $options
      */
-    public function __construct(MapperInterface $mapper = null)
+    public function __construct(array $options = [])
     {
-        $this->mapper = $mapper;
+        if (isset($options['mapper']) && $options['mapper'] instanceof MapperInterface) {
+            $this->setMapper($options['mapper']);
+        }
+
+        if (isset($options['enable_events'])) {
+            $this->setEnableEvents((bool) $options['enable_events']);
+        }
+
+        if (isset($options['name']) && is_string($options['name'])) {
+            $this->setName($options['name']);
+        }
+
+        if (! $this->mapper) {
+            throw new RuntimeException('Mapper object is required and was not set');
+        }
     }
 
     /**
-     * @param $where
-     * @return mixed
+     * @param array $options
+     * @return FindResult
      */
-    public function find($where)
+    public function find(array $options = []): FindResult
     {
-        return $this->mapper->fetch($where);
+        try {
+            $data = $this->mapper->find($options);
+            return new FindResult($this, $data);
+        } catch (\Exception $e) {
+            return new FindResult($this, null, $e);
+        }
     }
 
     /**
-     * @param array $where
-     * @param array $filters
-     * @param bool $paginated
-     * @return mixed
+     * @param array $options
+     * @return FindResult
      */
-    public function findAll($where = [], $filters = [], $paginated = false)
+    public function findAll(array $options = []): FindResult
     {
-        return $this->mapper->fetchAll($where, $filters, $paginated);
+        try {
+            $data = $this->mapper->findAll($options);
+            return new FindResult($this, $data);
+        } catch (\Exception $e) {
+            return new FindResult($this, [], $e);
+        }
     }
 
     /**
      * @param $entity
-     * @return int
+     * @param array $options
+     * @return SaveResult
      * @throws \Exception
      */
-    public function save($entity)
+    public function save(object $entity, array $options = []): SaveResult
     {
-        $type = 0;
+        $type = '';
         try {
-            if ($this->atomicOperations) {
-                $this->mapper->beginTransaction();
-            }
+            $result = new SaveResult($this, $entity);
 
             $id = $this->getProperty($entity, $this->mapper->getIdentifierName());
             if ($id) {
-                $type = 1;
+                $type = 'update';
 
                 //trigger pre event
                 if ($this->isEnableEvents()) {
@@ -91,7 +115,7 @@ class EntityService implements ServiceInterface, EntityServiceListenerAwareInter
                 }
 
                 //do the actual operation
-                $result = $this->mapper->update($entity);
+                $affectedRows = $this->mapper->update($entity, $options);
 
                 //trigger post event
                 if ($this->isEnableEvents()) {
@@ -101,7 +125,7 @@ class EntityService implements ServiceInterface, EntityServiceListenerAwareInter
                     ));
                 }
             } else {
-                $type = 2;
+                $type = 'create';
 
                 if ($this->isEnableEvents()) {
                     $this->getEventManager()->triggerEvent($this->createEntityServiceEvent(
@@ -110,7 +134,7 @@ class EntityService implements ServiceInterface, EntityServiceListenerAwareInter
                     ));
                 }
 
-                $result = $this->mapper->create($entity);
+                $affectedRows = $this->mapper->create($entity, $options);
 
                 if ($this->isEnableEvents()) {
                     $this->getEventManager()->triggerEvent($this->createEntityServiceEvent(
@@ -120,18 +144,13 @@ class EntityService implements ServiceInterface, EntityServiceListenerAwareInter
                 }
             }
 
-            if ($this->atomicOperations) {
-                $this->mapper->commit();
-            }
+            $result->setAffectedRows($affectedRows);
+            $result->setData($entity);
 
             return $result;
         } catch (\Exception $e) {
-            if ($this->atomicOperations) {
-                $this->mapper->rollback();
-            }
-
             if ($this->isEnableEvents()) {
-                $name = ($type === 1)
+                $name = ($type === 'update')
                     ? EntityServiceEvent::EVENT_ENTITY_UPDATE_ERROR
                     : EntityServiceEvent::EVENT_ENTITY_CREATE_ERROR;
 
@@ -142,30 +161,94 @@ class EntityService implements ServiceInterface, EntityServiceListenerAwareInter
                 ));
             }
 
-            throw $e;
+            return new SaveResult($this, $entity, $e);
+        }
+    }
+
+    /**
+     * @param object|null $entity
+     * @param array $options
+     * @return DeleteResult
+     */
+    public function deleteEntity(object $entity, array $options = []): DeleteResult
+    {
+        $id = $this->getProperty($entity, $this->mapper->getIdentifierName());
+        $options['condition'] = [];
+        if ($id) {
+            $options['condition'] = [$this->mapper->getIdentifierName() => $id];
+        }
+
+        $result = $this->delete($options);
+        $result->setData($entity);
+
+        return $result;
+    }
+
+    public function delete(array $options = []): DeleteResult
+    {
+        try {
+            $result = new DeleteResult($this, $options);
+
+            if ($this->isEnableEvents()) {
+                $this->getEventManager()->triggerEvent($this->createEntityServiceEvent(
+                    EntityServiceEvent::EVENT_ENTITY_PRE_DELETE,
+                    $options
+                ));
+            }
+
+            $affectedRows = $this->mapper->delete($options);
+
+            if ($this->isEnableEvents()) {
+                $this->getEventManager()->triggerEvent($this->createEntityServiceEvent(
+                    EntityServiceEvent::EVENT_ENTITY_POST_DELETE,
+                    $options
+                ));
+            }
+
+            $result->setAffectedRows($affectedRows);
+            return $result;
+        } catch (\Exception $e) {
+            if ($this->isEnableEvents()) {
+                $this->getEventManager()->triggerEvent($this->createEntityServiceEvent(
+                    EntityServiceEvent::EVENT_ENTITY_DELETE_ERROR,
+                    $options,
+                    $e
+                ));
+            }
+
+            return new DeleteResult($this, $options, $e);
         }
     }
 
     /**
      * @return boolean
      */
-    public function isEnableEvents()
+    public function isEnableEvents(): bool
     {
         return $this->enableEvents;
     }
 
     /**
      * @param boolean $enableEvents
-     * @return EntityService
      */
-    public function setEnableEvents($enableEvents)
+    public function setEnableEvents(bool $enableEvents)
     {
         $this->enableEvents = $enableEvents;
-        return $this;
     }
 
-    protected function createEntityServiceEvent($name, $data = null, $error = null, $params = null)
-    {
+    /**
+     * @param $name
+     * @param string $data
+     * @param mixed $error
+     * @param array $params
+     * @return EntityServiceEvent
+     */
+    protected function createEntityServiceEvent(
+        string $name,
+        $data = null,
+        $error = null,
+        array $params = null
+    ): EntityServiceEvent {
         $event = new EntityServiceEvent($name, $this, $params);
 
         if ($data) {
@@ -180,108 +263,35 @@ class EntityService implements ServiceInterface, EntityServiceListenerAwareInter
     }
 
     /**
-     * @param $where
-     * @throws \Exception
-     * @return int
-     */
-    public function delete($where)
-    {
-        try {
-            if ($this->atomicOperations) {
-                $this->mapper->beginTransaction();
-            }
-
-            if ($this->isEnableEvents()) {
-                $this->getEventManager()->triggerEvent($this->createEntityServiceEvent(
-                    EntityServiceEvent::EVENT_ENTITY_PRE_DELETE,
-                    $where
-                ));
-            }
-
-            $result = $this->mapper->delete($where);
-
-            if ($this->isEnableEvents()) {
-                $this->getEventManager()->triggerEvent($this->createEntityServiceEvent(
-                    EntityServiceEvent::EVENT_ENTITY_POST_DELETE,
-                    $where
-                ));
-            }
-
-            if ($this->atomicOperations) {
-                $this->mapper->commit();
-            }
-
-            return $result;
-        } catch (\Exception $e) {
-            if ($this->atomicOperations) {
-                $this->mapper->rollback();
-            }
-
-            if ($this->isEnableEvents()) {
-                $this->getEventManager()->triggerEvent($this->createEntityServiceEvent(
-                    EntityServiceEvent::EVENT_ENTITY_DELETE_ERROR,
-                    $where,
-                    $e
-                ));
-            }
-
-            throw $e;
-        }
-    }
-
-    /**
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
      * @param $name
-     * @return $this
      */
-    public function setName($name)
+    public function setName(string $name)
     {
         $this->name = $name;
         $this->getEventManager()->addIdentifiers([$name]);
-
-        return $this;
     }
 
     /**
      * @return MapperInterface
      */
-    public function getMapper()
+    public function getMapper(): MapperInterface
     {
         return $this->mapper;
     }
 
     /**
      * @param MapperInterface $mapper
-     * @return EntityService
      */
     public function setMapper(MapperInterface $mapper)
     {
         $this->mapper = $mapper;
-        return $this;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isAtomicOperations()
-    {
-        return $this->atomicOperations;
-    }
-
-    /**
-     * @param boolean $atomicOperations
-     * @return EntityService
-     */
-    public function setAtomicOperations($atomicOperations)
-    {
-        $this->atomicOperations = $atomicOperations;
-        return $this;
     }
 }

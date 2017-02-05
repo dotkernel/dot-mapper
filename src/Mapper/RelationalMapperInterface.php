@@ -7,6 +7,8 @@
  * Time: 7:27 PM
  */
 
+declare(strict_types=1);
+
 namespace Dot\Ems\Mapper;
 
 use Dot\Ems\Mapper\Relation\RelationInterface;

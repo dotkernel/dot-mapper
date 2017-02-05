@@ -7,6 +7,8 @@
  * Time: 10:46 PM
  */
 
+declare(strict_types=1);
+
 namespace Dot\Ems\Mapper;
 
 /**
