@@ -7,8 +7,6 @@
  * Time: 8:02 PM
  */
 
-declare(strict_types=1);
-
 namespace Dot\Ems\Event;
 
 /**

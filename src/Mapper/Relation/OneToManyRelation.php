@@ -7,8 +7,6 @@
  * Time: 11:01 PM
  */
 
-declare(strict_types=1);
-
 namespace Dot\Ems\Mapper\Relation;
 
 use Dot\Ems\Exception\InvalidArgumentException;

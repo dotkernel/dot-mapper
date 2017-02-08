@@ -7,81 +7,90 @@
  * Time: 10:03 PM
  */
 
-declare(strict_types=1);
-
 namespace Dot\Ems\Service;
 
 use Dot\Ems\Mapper\MapperInterface;
-use Dot\Ems\Result\DeleteResult;
-use Dot\Ems\Result\FindResult;
-use Dot\Ems\Result\SaveResult;
-use Zend\EventManager\EventManagerAwareInterface;
+use Zend\EventManager\EventManagerInterface;
 
 /**
  * Interface ServiceInterface
  * @package Dot\Ems\Service
  */
-interface ServiceInterface extends EventManagerAwareInterface
+interface ServiceInterface
 {
     /**
-     * @param array $options
-     * @return FindResult
+     * @param $where
+     * @return mixed
      */
-    public function find(array $options = []): FindResult;
+    public function find($where);
 
     /**
-     * @param array $options
-     * @return FindResult
+     * @param array $where
+     * @param array $filters
+     * @param bool $paginated
+     * @return mixed
      */
-    public function findAll(array $options = []): FindResult;
+    public function findAll($where = [], $filters = [], $paginated = false);
 
     /**
-     * @param object $entity
-     * @param array $options
-     * @return SaveResult
+     * @param $entity
+     * @return mixed
      */
-    public function save(object $entity, array $options = []): SaveResult;
+    public function save($entity);
 
     /**
-     * @param object $entity
-     * @param array $options
-     * @return DeleteResult
+     * @param $where
+     * @return mixed
      */
-    public function deleteEntity(object $entity, array $options = []): DeleteResult;
-
-    /**
-     * @param array $options
-     * @return DeleteResult
-     */
-    public function delete(array $options = []): DeleteResult;
+    public function delete($where);
 
     /**
      * @return string
      */
-    public function getName(): string;
+    public function getName();
 
     /**
      * @param $name
+     * @return mixed
      */
-    public function setName(string $name);
+    public function setName($name);
 
     /**
      * @param bool $value
+     * @return mixed
      */
-    public function setEnableEvents(bool $value);
+    public function setAtomicOperations($value);
 
     /**
      * @return bool
      */
-    public function isEnableEvents(): bool;
+    public function isAtomicOperations();
+
+    /**
+     * @param bool $value
+     * @return mixed
+     */
+    public function setEnableEvents($value);
+
+    /**
+     * @return bool
+     */
+    public function isEnableEvents();
 
     /**
      * @return MapperInterface
      */
-    public function getMapper(): MapperInterface;
+    public function getMapper();
 
     /**
      * @param MapperInterface $mapper
+     * @return mixed
      */
     public function setMapper(MapperInterface $mapper);
+
+    /**
+     * @param EventManagerInterface $eventManager
+     * @return mixed
+     */
+    public function setEventManager(EventManagerInterface $eventManager);
 }

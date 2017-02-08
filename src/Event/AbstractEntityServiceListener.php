@@ -7,8 +7,6 @@
  * Time: 8:08 PM
  */
 
-declare(strict_types=1);
-
 namespace Dot\Ems\Event;
 
 use Zend\EventManager\AbstractListenerAggregate;

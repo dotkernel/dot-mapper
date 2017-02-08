@@ -7,8 +7,6 @@
  * Time: 2:47 AM
  */
 
-declare(strict_types=1);
-
 namespace Dot\Ems\Event;
 
 use Dot\Event\Event;
@@ -51,26 +49,12 @@ class EntityServiceEvent extends Event
 
     /**
      * @param mixed $data
+     * @return EntityServiceEvent
      */
     public function setData($data)
     {
         $this->data = $data;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasError(): bool
-    {
-        return $this->error !== null;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasException(): bool
-    {
-        return $this->error instanceof \Exception;
+        return $this;
     }
 
     /**
@@ -83,9 +67,11 @@ class EntityServiceEvent extends Event
 
     /**
      * @param mixed $error
+     * @return EntityServiceEvent
      */
     public function setError($error)
     {
         $this->error = $error;
+        return $this;
     }
 }

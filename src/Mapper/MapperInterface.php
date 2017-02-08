@@ -7,8 +7,6 @@
  * Time: 10:24 PM
  */
 
-declare(strict_types=1);
-
 namespace Dot\Ems\Mapper;
 
 use Zend\Hydrator\HydratorInterface;
@@ -21,105 +19,78 @@ interface MapperInterface
 {
     /**
      * Gets the last inserted id value
-     * @return string
+     * @return mixed
      */
-    public function lastInsertValue(): string;
+    public function lastInsertValue();
 
     /**
      * Begins a backend transaction, may vary between backend types
+     * @return mixed
      */
     public function beginTransaction();
 
     /**
      * Saves the operations from a transaction
+     * @return mixed
      */
     public function commit();
 
     /**
      * In case of error, revert changes to backend
+     * @return mixed
      */
     public function rollback();
 
     /**
-     * @param array $options
-     * @return object
+     * @param $where
+     * @return mixed
      */
-    public function find(array $options = []): ?object;
+    public function fetch($where);
 
     /**
-     * @param array $options
-     * @return array
+     * @param array $where
+     * @param array $filters
+     * @param bool $paginated
+     * @return mixed
      */
-    public function findAll(array $options = []): array;
-
-    /**
-     * @param object $entity
-     * @param array $options
-     * @return int
-     */
-    public function create(object $entity, array $options = []): int;
+    public function fetchAll($where = [], $filters = [], $paginated = false);
 
     /**
      * @param $entity
-     * @param array $options
-     * @return int
+     * @return mixed
      */
-    public function update(object $entity, array $options = []): int;
+    public function create($entity);
 
     /**
-     * @param array $options
-     * @return int
+     * @param $entity
+     * @return mixed
      */
-    public function delete(array $options = []): int;
+    public function update($entity);
+
+    /**
+     * @param $where
+     * @return mixed
+     */
+    public function delete($where);
 
     /**
      * @return object
      */
-    public function getPrototype(): object;
+    public function getPrototype();
 
     /**
      * @return HydratorInterface
      */
-    public function getHydrator(): HydratorInterface;
+    public function getHydrator();
 
     /**
      * @return mixed
      */
-    public function getIdentifierName(): string;
+    public function getIdentifierName();
 
     /**
      * @param $name
      * @return mixed
      */
-    public function setIdentifierName(string $name);
-
-    /**
-     * @param string $name
-     * @param array $specs
-     */
-    public function addRelation(string $name, array $specs = []);
-
-    /**
-     * @param string $name
-     * @param array $options
-     */
-    public function hasOne(string $name, array $options = []);
-
-    /**
-     * @param string $name
-     * @param array $options
-     */
-    public function belongsTo(string $name, array $options = []);
-
-    /**
-     * @param string $name
-     * @param array $options
-     */
-    public function hasMany(string $name, array $options = []);
-
-    /**
-     * @param string $name
-     * @param array $options
-     */
-    public function hasManyBelongsToMany(string $name, array $options = []);
+    public function setIdentifierName($name);
 }

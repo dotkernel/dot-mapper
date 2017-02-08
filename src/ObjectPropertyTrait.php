@@ -7,8 +7,6 @@
  * Time: 1:39 AM
  */
 
-declare(strict_types=1);
-
 namespace Dot\Ems;
 
 /**

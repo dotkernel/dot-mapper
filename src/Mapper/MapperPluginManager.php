@@ -7,8 +7,6 @@
  * Time: 7:23 PM
  */
 
-declare(strict_types=1);
-
 namespace Dot\Ems\Mapper;
 
 use Dot\Ems\Factory\DbMapperFactory;

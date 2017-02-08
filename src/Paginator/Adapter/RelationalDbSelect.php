@@ -7,8 +7,6 @@
  * Time: 2:30 AM
  */
 
-declare(strict_types=1);
-
 namespace Dot\Ems\Paginator\Adapter;
 
 use Dot\Ems\Exception\RuntimeException;

@@ -7,8 +7,6 @@
  * Time: 3:10 AM
  */
 
-declare(strict_types=1);
-
 namespace Dot\Ems\Paginator\Factory;
 
 use Dot\Ems\Paginator\Adapter\DbSelect;

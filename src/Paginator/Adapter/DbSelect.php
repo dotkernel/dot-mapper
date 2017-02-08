@@ -7,8 +7,6 @@
  * Time: 2:51 AM
  */
 
-declare(strict_types=1);
-
 namespace Dot\Ems\Paginator\Adapter;
 
 use Zend\Stdlib\ArrayUtils;

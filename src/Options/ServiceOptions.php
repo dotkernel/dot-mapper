@@ -7,8 +7,6 @@
  * Time: 8:15 PM
  */
 
-declare(strict_types=1);
-
 namespace Dot\Ems\Options;
 
 use Dot\Ems\Service\EntityService;
