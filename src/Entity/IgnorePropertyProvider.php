@@ -7,6 +7,8 @@
  * Time: 2:03 AM
  */
 
+declare(strict_types=1);
+
 namespace Dot\Ems\Entity;
 
 /**
@@ -16,7 +18,12 @@ namespace Dot\Ems\Entity;
 interface IgnorePropertyProvider
 {
     /**
-     * @return string[]
+     * @return array
      */
-    public function ignoredProperties();
+    public function ignoredPropertiesCreate(): array;
+
+    /**
+     * @return array
+     */
+    public function ignoredPropertiesUpdate(): array;
 }

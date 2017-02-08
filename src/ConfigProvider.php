@@ -27,11 +27,6 @@ class ConfigProvider
 
             'dot_ems' => [
 
-                'services' => [],
-
-                'mapper_manager' => [],
-
-                'relation_manager' => [],
             ],
         ];
     }
@@ -39,24 +34,7 @@ class ConfigProvider
     public function getDependencyConfig()
     {
         return [
-            'factories' => [
-                'MapperManager' => MapperPluginManagerFactory::class,
-                'RelationManager' => RelationPluginManagerFactory::class,
-            ],
-            'aliases' => [
-                MapperPluginManager::class => 'MapperManager',
-                RelationPluginManager::class => 'RelationManager',
-            ],
-            'abstract_factories' => [
-                EntityServiceAbstractFactory::class,
-                EntityServiceOptionsAbstractFactory::class,
-            ],
 
-            'delegators' => [
-                AdapterPluginManager::class => [
-                    AdapterPluginManagerDelegator::class,
-                ]
-            ]
         ];
     }
 }

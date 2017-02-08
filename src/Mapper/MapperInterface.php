@@ -1,15 +1,17 @@
 <?php
 /**
  * @copyright: DotKernel
- * @library: dotkernel/dot-ems
- * @author: n3vrax
- * Date: 11/15/2016
- * Time: 10:24 PM
+ * @library: dot-ems
+ * @author: n3vra
+ * Date: 2/8/2017
+ * Time: 4:02 PM
  */
+
+declare(strict_types = 1);
 
 namespace Dot\Ems\Mapper;
 
-use Zend\Hydrator\HydratorInterface;
+use Dot\Ems\Entity\EntityInterface;
 
 /**
  * Interface MapperInterface
@@ -18,79 +20,53 @@ use Zend\Hydrator\HydratorInterface;
 interface MapperInterface
 {
     /**
-     * Gets the last inserted id value
+     * Used to get lists of entities
+     * @param string $type
+     * @param array $options
      * @return mixed
      */
-    public function lastInsertValue();
+    public function find(string $type, array $options = []);
 
     /**
-     * Begins a backend transaction, may vary between backend types
+     * Gets an entity by its ID
+     *
+     * @param $id
+     * @param array $options
      * @return mixed
      */
-    public function beginTransaction();
+    public function get($id, array $options = []);
 
     /**
-     * Saves the operations from a transaction
+     * @param EntityInterface $entity
+     * @param array $options
      * @return mixed
      */
-    public function commit();
+    public function insert(EntityInterface $entity, array $options = []);
 
     /**
-     * In case of error, revert changes to backend
+     * @param EntityInterface $entity
+     * @param array $options
      * @return mixed
      */
-    public function rollback();
+    public function update(EntityInterface $entity, array $options = []);
 
     /**
-     * @param $where
+     * @param EntityInterface $entity
+     * @param array $options
      * @return mixed
      */
-    public function fetch($where);
+    public function delete(EntityInterface $entity, array $options = []);
 
     /**
-     * @param array $where
-     * @param array $filters
-     * @param bool $paginated
+     * @param array $fields
+     * @param array $options
      * @return mixed
      */
-    public function fetchAll($where = [], $filters = [], $paginated = false);
+    public function updateAll(array $fields, array $options = []);
 
     /**
-     * @param $entity
+     * @param array $options
      * @return mixed
      */
-    public function create($entity);
-
-    /**
-     * @param $entity
-     * @return mixed
-     */
-    public function update($entity);
-
-    /**
-     * @param $where
-     * @return mixed
-     */
-    public function delete($where);
-
-    /**
-     * @return object
-     */
-    public function getPrototype();
-
-    /**
-     * @return HydratorInterface
-     */
-    public function getHydrator();
-
-    /**
-     * @return mixed
-     */
-    public function getIdentifierName();
-
-    /**
-     * @param $name
-     * @return mixed
-     */
-    public function setIdentifierName($name);
+    public function deleteAll(array $options = []);
 }
