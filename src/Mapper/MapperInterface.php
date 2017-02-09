@@ -25,30 +25,23 @@ interface MapperInterface
      * @param array $options
      * @return mixed
      */
-    public function find(string $type, array $options = []);
+    public function find(string $type, array $options = []): array;
 
     /**
      * Gets an entity by its ID
      *
-     * @param $id
+     * @param $primaryKey
      * @param array $options
      * @return mixed
      */
-    public function get($id, array $options = []);
+    public function get($primaryKey, array $options = []): ?EntityInterface;
 
     /**
      * @param EntityInterface $entity
      * @param array $options
      * @return mixed
      */
-    public function insert(EntityInterface $entity, array $options = []);
-
-    /**
-     * @param EntityInterface $entity
-     * @param array $options
-     * @return mixed
-     */
-    public function update(EntityInterface $entity, array $options = []);
+    public function save(EntityInterface $entity, array $options = []);
 
     /**
      * @param EntityInterface $entity

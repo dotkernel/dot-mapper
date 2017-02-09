@@ -22,17 +22,6 @@ abstract class Entity implements EntityInterface
     /** @var string */
     protected $hydrator = ClassMethodsCamelCase::class;
 
-    /** @var string  */
-    protected $primaryKey = 'id';
-
-    /**
-     * @return string
-     */
-    public function primaryKey(): string
-    {
-        return $this->primaryKey;
-    }
-
     /**
      * @return string
      */

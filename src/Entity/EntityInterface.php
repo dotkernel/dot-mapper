@@ -18,16 +18,6 @@ namespace Dot\Ems\Entity;
 interface EntityInterface
 {
     /**
-     * @return mixed
-     */
-    public function primaryKey(): string;
-
-    /**
-     * @return mixed
-     */
-    public function primaryKeyValue();
-
-    /**
      * @return string
      */
     public function hydrator(): string;
