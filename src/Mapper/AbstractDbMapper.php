@@ -12,6 +12,10 @@ declare(strict_types = 1);
 namespace Dot\Ems\Mapper;
 
 use Dot\Ems\Entity\EntityInterface;
+use Dot\Ems\Event\DispatchMapperEventsTrait;
+use Dot\Ems\Event\MapperEvent;
+use Dot\Ems\Event\MapperEventListenerInterface;
+use Dot\Ems\Event\MapperEventListenerTrait;
 use Dot\Ems\Exception\BadMethodCallException;
 use Dot\Ems\Exception\InvalidArgumentException;
 use Dot\Ems\Exception\RuntimeException;
@@ -27,17 +31,22 @@ use Zend\Db\Metadata\Source\Factory;
 use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Select;
 use Zend\Db\Sql\Sql;
+use Zend\EventManager\EventManagerInterface;
+use Zend\EventManager\ResponseCollection;
 use Zend\Hydrator\HydratorInterface;
 use Zend\Hydrator\HydratorPluginManager;
 use Zend\ServiceManager\ServiceManager;
 
 /**
  * Class AbstractDbMapper
- * @package Dot\Ems\Mapper
+ * @package Test\Ems\Mapper
  */
-abstract class AbstractDbMapper implements MapperInterface
+abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerInterface
 {
-    /** @var array  */
+    use DispatchMapperEventsTrait;
+    use MapperEventListenerTrait;
+
+    /** @var array */
     protected $identityMap = [];
 
     /** @var  HydratorPluginManager */
@@ -113,13 +122,20 @@ abstract class AbstractDbMapper implements MapperInterface
             $this->setMetadata($options['metadata']);
         }
 
-        if (! $this->adapter instanceof Adapter) {
+        if (isset($options['event_manager']) && $options['event_manager'] instanceof EventManagerInterface) {
+            $this->setEventManager($options['event_manager']);
+        }
+
+        if (!$this->adapter instanceof Adapter) {
             throw new RuntimeException('Db adapter is required and was not set');
         }
 
-        if (! $this->prototype instanceof EntityInterface) {
+        if (!$this->prototype instanceof EntityInterface) {
             throw new RuntimeException('Entity prototype is required and was not set');
         }
+
+        // the mapper is a listener for itself, for callbacks
+        $this->attach($this->getEventManager(), 1000);
     }
 
     /**
@@ -132,13 +148,13 @@ abstract class AbstractDbMapper implements MapperInterface
         $select = $this->getSlaveSql()->select()->from([$this->getAlias() => $this->getTable()]);
         $select = $this->callFinder($type, $select, $options);
 
-        // TODO: dispatch beforeFind
+        $this->dispatchEvent(MapperEvent::EVENT_MAPPER_BEFORE_FIND, ['select' => $select, 'options' => $options]);
 
         $stmt = $this->getSlaveSql()->prepareStatementForSqlObject($select);
         $result = $stmt->execute();
 
         if ($result instanceof ResultInterface && $result->isQueryResult()) {
-            $resultSet = new ResultSet();
+            $resultSet = new ResultSet(ResultSet::TYPE_ARRAY);
             $resultSet->initialize($result);
             return $this->loadAll($resultSet);
         }
@@ -151,16 +167,16 @@ abstract class AbstractDbMapper implements MapperInterface
      * @param array $options
      * @return EntityInterface|mixed|null|object
      */
-    public function get($primaryKey, array $options = []) : ?EntityInterface
+    public function get($primaryKey, array $options = []): ?EntityInterface
     {
-        $primaryKey = (array) $primaryKey;
+        $primaryKey = (array)$primaryKey;
         $mapKey = implode(',', $primaryKey);
 
         if (isset($this->identityMap[$mapKey])) {
             return $this->identityMap[$mapKey];
         }
 
-        $keys = (array) $this->getPrimaryKey();
+        $keys = (array)$this->getPrimaryKey();
         foreach ($keys as $index => $keyname) {
             $keys[$index] = $this->aliasField($keyname);
         }
@@ -173,7 +189,7 @@ abstract class AbstractDbMapper implements MapperInterface
 
         $options['conditions'] = array_combine($keys, $primaryKey);
 
-        $finder = (string) ($options['finder'] ?? 'all');
+        $finder = (string)($options['finder'] ?? 'all');
         $result = $this->find($finder, $options);
         if (!empty($result) && $result[0] instanceof EntityInterface) {
             return $result[0];
@@ -189,7 +205,7 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     public function save(EntityInterface $entity, array $options = [])
     {
-        $atomic = (bool) ($options['atomic'] ?? false);
+        $atomic = (bool)($options['atomic'] ?? false);
         if ($atomic) {
             try {
                 $this->getConnection()->beginTransaction();
@@ -205,7 +221,10 @@ abstract class AbstractDbMapper implements MapperInterface
 
         if ($success) {
             if ($atomic) {
-                //TODO: dispatch afterSaveCommit event
+                $this->dispatchEvent(
+                    MapperEvent::EVENT_MAPPER_AFTER_SAVE_COMMIT,
+                    ['entity' => $entity, 'options' => $options]
+                );
             }
         }
 
@@ -219,7 +238,7 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     protected function processSave(EntityInterface $entity, array $options)
     {
-        $primaryColumns = (array) $this->getPrimaryKey();
+        $primaryColumns = (array)$this->getPrimaryKey();
         $tableColumns = $this->getColumns();
 
         $data = $this->getHydrator()->extract($entity);
@@ -229,7 +248,15 @@ abstract class AbstractDbMapper implements MapperInterface
         $primaryKey = array_filter($primaryKey);
         $mapKey = implode(',', $primaryKey);
 
-        // TODO: dispatch beforeSave
+        /** @var ResponseCollection $event */
+        $event = $this->dispatchEvent(
+            MapperEvent::EVENT_MAPPER_BEFORE_SAVE,
+            ['entity' => $entity, 'options' => $options]
+        );
+
+        if ($event->stopped()) {
+            return $event->last();
+        }
 
         $isNew = empty($primaryKey) && !isset($this->identityMap[$mapKey]);
 
@@ -240,7 +267,7 @@ abstract class AbstractDbMapper implements MapperInterface
         }
 
         if ($success) {
-            $success = $this->onSaveSuccess($entity, $options);
+            $success = $this->onSaveSuccess($entity, $isNew, $options);
         }
 
         if (!$success & $isNew) {
@@ -256,14 +283,19 @@ abstract class AbstractDbMapper implements MapperInterface
 
     /**
      * @param EntityInterface $entity
+     * @param bool $isNew
      * @param array $options
      * @return bool
      */
-    protected function onSaveSuccess(EntityInterface $entity, array $options)
+    protected function onSaveSuccess(EntityInterface $entity, bool $isNew, array $options)
     {
-        //TODO: implement more
+        //TODO: implement save associations in the future
 
-        //TODO: dispatch afterSave event
+        $this->dispatchEvent(
+            MapperEvent::EVENT_MAPPER_AFTER_SAVE,
+            ['entity' => $entity, 'options' => $options, 'isNew' => $isNew]
+        );
+
         return true;
     }
 
@@ -274,7 +306,7 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     protected function insert(EntityInterface $entity, array $data)
     {
-        $primary = (array) $this->getPrimaryKey();
+        $primary = (array)$this->getPrimaryKey();
         if (empty($primary)) {
             throw new RuntimeException('Cannot insert entity into table. It does not have a primary key');
         }
@@ -317,7 +349,7 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     protected function update(EntityInterface $entity, array $data)
     {
-        $primaryColumns = (array) $this->getPrimaryKey();
+        $primaryColumns = (array)$this->getPrimaryKey();
         $primaryKey = array_intersect_key($data, array_flip($primaryColumns));
 
         $data = array_diff_key($data, $primaryKey);
@@ -352,7 +384,7 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     public function delete(EntityInterface $entity, array $options = [])
     {
-        $atomic = (bool) ($options['atomic'] ?? false);
+        $atomic = (bool)($options['atomic'] ?? false);
         if ($atomic) {
             try {
                 $this->getConnection()->beginTransaction();
@@ -368,7 +400,10 @@ abstract class AbstractDbMapper implements MapperInterface
 
         if ($success) {
             if ($atomic) {
-                //TODO: dispatch afterDeleteCommit event
+                $this->dispatchEvent(
+                    MapperEvent::EVENT_MAPPER_AFTER_DELETE_COMMIT,
+                    ['entity' => $entity, 'options' => $options]
+                );
             }
         }
 
@@ -382,7 +417,7 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     protected function processDelete(EntityInterface $entity, array $options)
     {
-        $primaryColumns = (array) $this->getPrimaryKey();
+        $primaryColumns = (array)$this->getPrimaryKey();
 
         $data = $this->getHydrator()->extract($entity);
 
@@ -394,7 +429,15 @@ abstract class AbstractDbMapper implements MapperInterface
             throw new RuntimeException('Could not delete and entity without all primary keys specified');
         }
 
-        // TODO: dispatch beforeDelete
+        /** @var ResponseCollection $event */
+        $event = $this->dispatchEvent(
+            MapperEvent::EVENT_MAPPER_BEFORE_DELETE,
+            ['entity' => $entity, 'options' => $options]
+        );
+
+        if ($event->stopped()) {
+            return $event->last();
+        }
 
         $delete = $this->getSql()->delete($this->getTable())
             ->where($primaryKey);
@@ -410,7 +453,7 @@ abstract class AbstractDbMapper implements MapperInterface
             unset($this->identityMap[$mapKey]);
         }
 
-        // TODO: dispatch afterDelete
+        $this->dispatchEvent(MapperEvent::EVENT_MAPPER_AFTER_DELETE, ['entity' => $entity, 'options' => $options]);
 
         return $success;
     }
@@ -463,7 +506,7 @@ abstract class AbstractDbMapper implements MapperInterface
         $data = $resultSet->current();
 
         //extract primary keys from entity
-        $primaryColumns = (array) $this->getPrimaryKey();
+        $primaryColumns = (array)$this->getPrimaryKey();
         $primaryKey = array_intersect_key($data, array_flip($primaryColumns));
         $primaryKey = array_filter($primaryKey);
 
@@ -473,17 +516,30 @@ abstract class AbstractDbMapper implements MapperInterface
 
         $mapKey = implode(',', $primaryKey);
 
-        if (isset($this->identityMap[$mapKey])) {
-            return $this->identityMap[$mapKey];
+        /** @var ResponseCollection $event */
+        $event = $this->dispatchEvent(
+            MapperEvent::EVENT_MAPPER_BEFORE_LOAD,
+            ['resultSet' => $resultSet, 'data' => $data]
+        );
+
+        if ($event->stopped()) {
+            return $event->last();
         }
 
-        $entity = $this->loadEntity($primaryKey, $data);
+        if (isset($this->identityMap[$mapKey])) {
+            $entity = $this->identityMap[$mapKey];
+        } else {
+            $entity = $this->getHydrator()->hydrate($data, clone $this->getPrototype());
+        }
+
+        $this->dispatchEvent(
+            MapperEvent::EVENT_MAPPER_AFTER_LOAD,
+            ['entity' => $entity, 'data' => $data, 'resultSet' => $resultSet]
+        );
 
         $this->identityMap[$mapKey] = $entity;
         return $entity;
     }
-
-    abstract public function loadEntity(array $primaryKey, array $data): EntityInterface;
 
     /**
      * @param ResultSet $resultSet
@@ -545,34 +601,38 @@ abstract class AbstractDbMapper implements MapperInterface
         }
 
         if (isset($options['limit'])) {
-            $select->limit((int) $options['limit']);
+            $select->limit((int)$options['limit']);
         }
 
         if (isset($options['offset'])) {
-            $select->offset((int) $options['offset']);
+            $select->offset((int)$options['offset']);
         }
 
         if (isset($options['page'])) {
             $limit = 25;
             if (isset($options['limit'])) {
-                $limit = (int) $options['limit'];
+                $limit = (int)$options['limit'];
             }
 
-            $offset = ((int) $options['page'] - 1) * $limit;
+            $offset = ((int)$options['page'] - 1) * $limit;
             if (PHP_INT_MAX <= $offset) {
                 $offset = PHP_INT_MAX;
             }
 
-            $select->offset((int) $offset);
+            $select->offset((int)$offset);
         }
 
         if (isset($options['join']) && is_array($options['join'])) {
-            $joinTable = $options['join']['table'] ?? '';
-            $on = $options['join']['on'] ?? '';
-            $columns = $options['joins']['fields'] ?? Select::SQL_STAR;
-            $type = $options['join']['type'] ?? Select::JOIN_INNER;
+            foreach ($options['join'] as $table => $join) {
+                $alias = $join['alias'] ?? '';
+                $on = $join['on'] ?? '';
+                $columns = $join['fields'] ?? Select::SQL_STAR;
+                $type = $join['type'] ?? Select::JOIN_INNER;
 
-            $select->join($joinTable, $on, $columns, $type);
+                $table = empty($alias) ? $table : [$alias => $table];
+
+                $select->join($table, $on, $columns, $type);
+            }
         }
 
         return $select;
@@ -623,7 +683,7 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     public function getSql(): Sql
     {
-        if (! $this->sql instanceof Sql) {
+        if (!$this->sql instanceof Sql) {
             $this->sql = new Sql($this->getAdapter());
         }
         return $this->sql;
@@ -642,8 +702,8 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     public function getSlaveSql(): Sql
     {
-        if (! $this->slaveSql instanceof Sql) {
-            $this->sql = new Sql($this->getSlaveAdapter());
+        if (!$this->slaveSql instanceof Sql) {
+            $this->slaveSql = new Sql($this->getSlaveAdapter());
         }
         return $this->slaveSql;
     }
@@ -702,7 +762,7 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     public function getSchema(): TableObject
     {
-        if (! $this->schema instanceof TableObject) {
+        if (!$this->schema instanceof TableObject) {
             $this->schema = $this->getMetadata()->getTable($this->getTable());
         }
         return $this->schema;
@@ -721,7 +781,7 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     public function getMetadata(): MetadataInterface
     {
-        if (! $this->metadata instanceof MetadataInterface) {
+        if (!$this->metadata instanceof MetadataInterface) {
             $this->metadata = Factory::createSourceFromAdapter($this->getAdapter());
         }
         return $this->metadata;
@@ -758,7 +818,7 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     public function getColumns(): array
     {
-        if (! $this->columns) {
+        if (!$this->columns) {
             $this->columns = [];
             /** @var ColumnObject $column */
             foreach ($this->getSchema()->getColumns() as $column) {
@@ -774,17 +834,13 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     public function getPrimaryKey(): array
     {
-        if (! $this->primaryKey) {
+        if (!$this->primaryKey) {
             $keys = [];
             /** @var ConstraintObject $constraint */
             foreach ($this->getSchema()->getConstraints() as $constraint) {
                 if ($constraint->isPrimaryKey() && $constraint->hasColumns()) {
                     $keys = array_merge($keys, $constraint->getColumns());
                 }
-            }
-
-            if (count($keys) === 1) {
-                $keys = $keys[0];
             }
 
             $this->primaryKey = $keys;
@@ -825,7 +881,7 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     public function getHydrator(): HydratorInterface
     {
-        if (! $this->hydrator) {
+        if (!$this->hydrator) {
             if ($this->getHydratorPluginManager()->has($this->getPrototype()->hydrator())) {
                 $this->hydrator = $this->getHydratorPluginManager()->get($this->getPrototype()->hydrator());
             } else {
@@ -865,7 +921,7 @@ abstract class AbstractDbMapper implements MapperInterface
      */
     public function getHydratorPluginManager(): HydratorPluginManager
     {
-        if (! $this->hydratorPluginManager instanceof HydratorPluginManager) {
+        if (!$this->hydratorPluginManager instanceof HydratorPluginManager) {
             $this->hydratorPluginManager = new HydratorPluginManager(new ServiceManager());
         }
 
