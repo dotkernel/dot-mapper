@@ -2,7 +2,7 @@
 /**
  * @copyright: DotKernel
  * @library: dot-ems
- * @author: n3vra
+ * @author: n3vrax
  * Date: 2/8/2017
  * Time: 4:03 PM
  */
@@ -132,6 +132,8 @@ abstract class AbstractDbMapper implements MapperInterface
         $select = $this->getSlaveSql()->select()->from([$this->getAlias() => $this->getTable()]);
         $select = $this->callFinder($type, $select, $options);
 
+        // TODO: dispatch beforeFind
+
         $stmt = $this->getSlaveSql()->prepareStatementForSqlObject($select);
         $result = $stmt->execute();
 
@@ -180,9 +182,15 @@ abstract class AbstractDbMapper implements MapperInterface
         return null;
     }
 
+    /**
+     * @param EntityInterface $entity
+     * @param array $options
+     * @return bool|EntityInterface
+     */
     public function save(EntityInterface $entity, array $options = [])
     {
-        if (isset($options['atomic']) && $options['atomic']) {
+        $atomic = (bool) ($options['atomic'] ?? false);
+        if ($atomic) {
             try {
                 $this->getConnection()->beginTransaction();
                 $success = $this->processSave($entity, $options);
@@ -195,9 +203,20 @@ abstract class AbstractDbMapper implements MapperInterface
             $success = $this->processSave($entity, $options);
         }
 
+        if ($success) {
+            if ($atomic) {
+                //TODO: dispatch afterSaveCommit event
+            }
+        }
+
         return $success;
     }
 
+    /**
+     * @param EntityInterface $entity
+     * @param array $options
+     * @return bool|EntityInterface
+     */
     protected function processSave(EntityInterface $entity, array $options)
     {
         $primaryColumns = (array) $this->getPrimaryKey();
@@ -206,26 +225,223 @@ abstract class AbstractDbMapper implements MapperInterface
         $data = $this->getHydrator()->extract($entity);
         $data = array_intersect_key($data, array_flip($tableColumns));
 
-        $conditions = [];
-        foreach ($primaryColumns as $column) {
-            if (isset($data[$column])) {
-                $conditions[$this->getAlias() . '.' . $column] = $data[$column];
-            }
-        }
-        $isNew = empty($conditions);
+        $primaryKey = array_intersect_key($data, array_flip($primaryColumns));
+        $primaryKey = array_filter($primaryKey);
+        $mapKey = implode(',', $primaryKey);
 
-        $data = array_diff_key($data, array_flip($primaryColumns));
+        // TODO: dispatch beforeSave
+
+        $isNew = empty($primaryKey) && !isset($this->identityMap[$mapKey]);
+
         if ($isNew) {
-
+            $success = $this->insert($entity, $data);
         } else {
-
+            $success = $this->update($entity, $data);
         }
 
+        if ($success) {
+            $success = $this->onSaveSuccess($entity, $options);
+        }
+
+        if (!$success & $isNew) {
+            $entity->unsetProperties($primaryColumns);
+        }
+
+        if ($success && $isNew) {
+            $this->identityMap[$mapKey] = $entity;
+        }
+
+        return $success ? $entity : false;
     }
 
+    /**
+     * @param EntityInterface $entity
+     * @param array $options
+     * @return bool
+     */
+    protected function onSaveSuccess(EntityInterface $entity, array $options)
+    {
+        //TODO: implement more
+
+        //TODO: dispatch afterSave event
+        return true;
+    }
+
+    /**
+     * @param EntityInterface $entity
+     * @param array $data
+     * @return bool|EntityInterface
+     */
+    protected function insert(EntityInterface $entity, array $data)
+    {
+        $primary = (array) $this->getPrimaryKey();
+        if (empty($primary)) {
+            throw new RuntimeException('Cannot insert entity into table. It does not have a primary key');
+        }
+
+        $data = array_diff_key($data, array_flip($primary));
+        $success = false;
+        if (empty($data)) {
+            return $success;
+        }
+
+        $insert = $this->getSql()->insert()->into($this->getTable())
+            ->columns(array_keys($data))
+            ->values($data);
+
+        $stmt = $this->getSql()->prepareStatementForSqlObject($insert);
+        $result = $stmt->execute();
+
+        if ($result->getAffectedRows() !== 0) {
+            //populate entity with generated values
+            $ids = [];
+            foreach ($primary as $column) {
+                if (!isset($data[$column])) {
+                    $ids[] = $this->getConnection()->getLastGeneratedValue($column);
+                }
+            }
+
+            $ids = array_combine($primary, $ids);
+            /** @var EntityInterface $entity */
+            $entity = $this->getHydrator()->hydrate($ids, $entity);
+            $success = $entity;
+        }
+
+        return $success;
+    }
+
+    /**
+     * @param EntityInterface $entity
+     * @param array $data
+     * @return bool|EntityInterface
+     */
+    protected function update(EntityInterface $entity, array $data)
+    {
+        $primaryColumns = (array) $this->getPrimaryKey();
+        $primaryKey = array_intersect_key($data, array_flip($primaryColumns));
+
+        $data = array_diff_key($data, $primaryKey);
+        if (empty($data)) {
+            return $entity;
+        }
+
+        $filteredKeys = array_filter($primaryKey);
+        if (count($filteredKeys) !== count($primaryKey)) {
+            throw new RuntimeException('Entity cannot be updated. All primary keys must be given');
+        }
+
+        $update = $this->getSql()->update()->table($this->getTable())
+            ->set($data)
+            ->where($primaryKey);
+
+        $stmt = $this->getSql()->prepareStatementForSqlObject($update);
+        $result = $stmt->execute();
+
+        $success = false;
+        if ($result->getAffectedRows() !== 0) {
+            $success = $entity;
+        }
+
+        return $success;
+    }
+
+    /**
+     * @param EntityInterface $entity
+     * @param array $options
+     * @return bool
+     */
     public function delete(EntityInterface $entity, array $options = [])
     {
-        // TODO: Implement delete() method.
+        $atomic = (bool) ($options['atomic'] ?? false);
+        if ($atomic) {
+            try {
+                $this->getConnection()->beginTransaction();
+                $success = $this->processDelete($entity, $options);
+                $this->getConnection()->commit();
+            } catch (\Exception $e) {
+                $success = false;
+                $this->getConnection()->rollback();
+            }
+        } else {
+            $success = $this->processDelete($entity, $options);
+        }
+
+        if ($success) {
+            if ($atomic) {
+                //TODO: dispatch afterDeleteCommit event
+            }
+        }
+
+        return $success;
+    }
+
+    /**
+     * @param EntityInterface $entity
+     * @param array $options
+     * @return bool
+     */
+    protected function processDelete(EntityInterface $entity, array $options)
+    {
+        $primaryColumns = (array) $this->getPrimaryKey();
+
+        $data = $this->getHydrator()->extract($entity);
+
+        $primaryKey = array_intersect_key($data, array_flip($primaryColumns));
+        $primaryKey = array_filter($primaryKey);
+        $mapKey = implode(',', $primaryKey);
+
+        if (count($primaryKey) !== count($primaryColumns)) {
+            throw new RuntimeException('Could not delete and entity without all primary keys specified');
+        }
+
+        // TODO: dispatch beforeDelete
+
+        $delete = $this->getSql()->delete($this->getTable())
+            ->where($primaryKey);
+
+        $stmt = $this->getSql()->prepareStatementForSqlObject($delete);
+        $result = $stmt->execute();
+
+        $success = $result->getAffectedRows() > 0;
+        if (!$success) {
+            return $success;
+        } else {
+            //remove from identity map
+            unset($this->identityMap[$mapKey]);
+        }
+
+        // TODO: dispatch afterDelete
+
+        return $success;
+    }
+
+    /**
+     * @param array $conditions
+     * @return int
+     */
+    public function deleteAll(array $conditions)
+    {
+        $delete = $this->getSql()->delete($this->getTable());
+        $delete->where($conditions);
+
+        $stmt = $this->getSql()->prepareStatementForSqlObject($delete);
+        $result = $stmt->execute();
+
+        return $result->getAffectedRows();
+    }
+
+    /**
+     * @param array $fields
+     * @param array $conditions
+     * @return int
+     */
+    public function updateAll(array $fields, array $conditions)
+    {
+        $update = $this->getSql()->update($this->getTable());
+        $update->set($fields)->where($conditions);
+
+        $stmt = $this->getSql()->prepareStatementForSqlObject($update);
+        return $stmt->execute()->getAffectedRows();
     }
 
     /**
@@ -249,6 +465,7 @@ abstract class AbstractDbMapper implements MapperInterface
         //extract primary keys from entity
         $primaryColumns = (array) $this->getPrimaryKey();
         $primaryKey = array_intersect_key($data, array_flip($primaryColumns));
+        $primaryKey = array_filter($primaryKey);
 
         if (count($primaryKey) !== count($primaryColumns)) {
             throw new RuntimeException('Could not load entity due to primary key mismatch');

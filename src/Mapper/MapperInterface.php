@@ -2,7 +2,7 @@
 /**
  * @copyright: DotKernel
  * @library: dot-ems
- * @author: n3vra
+ * @author: n3vrax
  * Date: 2/8/2017
  * Time: 4:02 PM
  */
@@ -52,14 +52,14 @@ interface MapperInterface
 
     /**
      * @param array $fields
-     * @param array $options
+     * @param array $conditions
      * @return mixed
      */
-    public function updateAll(array $fields, array $options = []);
+    public function updateAll(array $fields, array $conditions);
 
     /**
-     * @param array $options
+     * @param array $conditions
      * @return mixed
      */
-    public function deleteAll(array $options = []);
+    public function deleteAll(array $conditions);
 }
