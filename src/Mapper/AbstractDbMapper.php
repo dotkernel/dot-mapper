@@ -19,6 +19,7 @@ use Dot\Ems\Event\MapperEventListenerTrait;
 use Dot\Ems\Exception\BadMethodCallException;
 use Dot\Ems\Exception\InvalidArgumentException;
 use Dot\Ems\Exception\RuntimeException;
+use Dot\Ems\Utility;
 use Dot\Hydrator\ClassMethodsCamelCase;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\Driver\ConnectionInterface;
@@ -500,14 +501,12 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     }
 
     /**
-     * @param ResultSet $resultSet
+     * @param array $data
      * @param array $options
      * @return EntityInterface
      */
-    public function load(ResultSet $resultSet, array $options = []): EntityInterface
+    public function load(array $data, array $options = []): EntityInterface
     {
-        $data = $resultSet->current();
-
         //extract primary keys from entity
         $primaryColumns = (array)$this->getPrimaryKey();
         $primaryKey = array_intersect_key($data, array_flip($primaryColumns));
@@ -522,7 +521,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         /** @var ResponseCollection $event */
         $event = $this->dispatchEvent(
             MapperEvent::EVENT_MAPPER_BEFORE_LOAD,
-            ['resultSet' => $resultSet, 'data' => $data, 'options' => $options]
+            ['data' => $data, 'options' => $options]
         );
 
         if ($event->stopped()) {
@@ -540,7 +539,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
 
         $this->dispatchEvent(
             MapperEvent::EVENT_MAPPER_AFTER_LOAD,
-            ['entity' => $entity, 'data' => $data, 'resultSet' => $resultSet, 'options' => $options]
+            ['entity' => $entity, 'data' => $data, 'options' => $options]
         );
 
         $this->identityMap[$mapKey] = $entity;
@@ -557,7 +556,10 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         $entities = [];
         $resultSet->next();
         while ($resultSet->valid()) {
-            $entities[] = $this->load($resultSet, $options);
+            $data = $resultSet->current();
+            $data = Utility::arrayInflate($data);
+
+            $entities[] = $this->load($data, $options);
             $resultSet->next();
         }
         return $entities;
@@ -752,7 +754,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
                 }
             }
 
-            $this->table = $this->underscore($table);
+            $this->table = Utility::underscore($table);
         }
 
         return $this->table;
@@ -872,7 +874,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     public function getAlias(): string
     {
         if (is_null($this->alias)) {
-            $this->alias = $this->camelCase($this->getTable());
+            $this->alias = Utility::camelCase($this->getTable());
         }
         return $this->alias;
     }
@@ -946,38 +948,6 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     }
 
     /**
-     * @param string $string
-     * @return string
-     */
-    protected function underscore(string $string): string
-    {
-        return $this->delimit(str_replace('-', '_', $string), '_');
-    }
-
-    /**
-     * @param string $string
-     * @param string $delimiter
-     * @return string
-     */
-    protected function delimit(string $string, string $delimiter = '_'): string
-    {
-        return mb_strtolower(preg_replace('/(?<=\\w)([A-Z])/', $delimiter . '\\1', $string));
-    }
-
-    /**
-     * @param string $string
-     * @param string $delimiter
-     * @return string
-     */
-    protected function camelCase(string $string, string $delimiter = '_'): string
-    {
-        $string = explode($delimiter, $string);
-        $string = implode(' ', $string);
-        $string = ucwords($string, ' ');
-        return str_replace(' ', '', $string);
-    }
-
-    /**
      * @param Select $select
      * @param array $joins
      * @param string $parentAlias
@@ -988,9 +958,9 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         foreach ($joins as $alias => $join) {
             if (is_string($join)) {
                 $alias = $join;
-                $table = $this->underscore($alias);
+                $table = Utility::underscore($alias);
             } elseif (is_array($join)) {
-                $table = $join['table'] ?? $this->underscore($alias);
+                $table = $join['table'] ?? Utility::underscore($alias);
             } else {
                 throw new InvalidArgumentException('Invalid joins specification');
             }
