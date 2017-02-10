@@ -156,7 +156,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         if ($result instanceof ResultInterface && $result->isQueryResult()) {
             $resultSet = new ResultSet(ResultSet::TYPE_ARRAY);
             $resultSet->initialize($result);
-            return $this->loadAll($resultSet);
+            return $this->loadAll($resultSet, $options);
         }
 
         return [];
@@ -172,7 +172,9 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         $primaryKey = (array)$primaryKey;
         $mapKey = implode(',', $primaryKey);
 
-        if (isset($this->identityMap[$mapKey])) {
+        $reload = (bool) $options['reload'] ?? false;
+
+        if (isset($this->identityMap[$mapKey]) && !$reload) {
             return $this->identityMap[$mapKey];
         }
 
@@ -499,9 +501,10 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
 
     /**
      * @param ResultSet $resultSet
+     * @param array $options
      * @return EntityInterface
      */
-    public function load(ResultSet $resultSet): EntityInterface
+    public function load(ResultSet $resultSet, array $options = []): EntityInterface
     {
         $data = $resultSet->current();
 
@@ -519,7 +522,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         /** @var ResponseCollection $event */
         $event = $this->dispatchEvent(
             MapperEvent::EVENT_MAPPER_BEFORE_LOAD,
-            ['resultSet' => $resultSet, 'data' => $data]
+            ['resultSet' => $resultSet, 'data' => $data, 'options' => $options]
         );
 
         if ($event->stopped()) {
@@ -529,12 +532,15 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         if (isset($this->identityMap[$mapKey])) {
             $entity = $this->identityMap[$mapKey];
         } else {
-            $entity = $this->getHydrator()->hydrate($data, clone $this->getPrototype());
+            $entity = clone $this->getPrototype();
         }
+
+        /** @var EntityInterface $entity */
+        $entity = $this->getHydrator()->hydrate($data, $entity);
 
         $this->dispatchEvent(
             MapperEvent::EVENT_MAPPER_AFTER_LOAD,
-            ['entity' => $entity, 'data' => $data, 'resultSet' => $resultSet]
+            ['entity' => $entity, 'data' => $data, 'resultSet' => $resultSet, 'options' => $options]
         );
 
         $this->identityMap[$mapKey] = $entity;
@@ -543,14 +549,15 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
 
     /**
      * @param ResultSet $resultSet
+     * @param array $options
      * @return array
      */
-    protected function loadAll(ResultSet $resultSet): array
+    protected function loadAll(ResultSet $resultSet, array $options = []): array
     {
         $entities = [];
         $resultSet->next();
         while ($resultSet->valid()) {
-            $entities[] = $this->load($resultSet);
+            $entities[] = $this->load($resultSet, $options);
             $resultSet->next();
         }
         return $entities;
@@ -622,17 +629,8 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
             $select->offset((int)$offset);
         }
 
-        if (isset($options['join']) && is_array($options['join'])) {
-            foreach ($options['join'] as $table => $join) {
-                $alias = $join['alias'] ?? '';
-                $on = $join['on'] ?? '';
-                $columns = $join['fields'] ?? Select::SQL_STAR;
-                $type = $join['type'] ?? Select::JOIN_INNER;
-
-                $table = empty($alias) ? $table : [$alias => $table];
-
-                $select->join($table, $on, $columns, $type);
-            }
+        if (isset($options['joins']) && is_array($options['joins'])) {
+            $select = $this->applyJoins($select, $options['joins']);
         }
 
         return $select;
@@ -723,14 +721,25 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     {
         if (is_null($this->table)) {
             $table = explode('\\', get_class($this));
-            $table = substr(end($table), 0, -6);
+            $table = end($table);
+
+            $offset = -6;
+            if (strpos($table, 'DbMapper') !== false) {
+                $offset = 8;
+            }
+
+            $table = substr($table, 0, $offset);
 
             if (empty($table) || $table === 'Entity') {
                 //try to get table name from entity name
                 $entityClass = get_class($this->getPrototype());
 
                 $table = explode('\\', get_class($entityClass));
-                $table = substr(end($table), 0, -6);
+                $table = end($table);
+
+                if (strpos($table, 'Entity') !== false) {
+                    $table = substr($table, 0, -6);
+                }
 
                 if (empty($table) || $table === 'Entity') {
                     throw new RuntimeException(
@@ -863,7 +872,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     public function getAlias(): string
     {
         if (is_null($this->alias)) {
-            $this->alias = $this->getTable();
+            $this->alias = $this->camelCase($this->getTable());
         }
         return $this->alias;
     }
@@ -953,5 +962,64 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     protected function delimit(string $string, string $delimiter = '_'): string
     {
         return mb_strtolower(preg_replace('/(?<=\\w)([A-Z])/', $delimiter . '\\1', $string));
+    }
+
+    /**
+     * @param string $string
+     * @param string $delimiter
+     * @return string
+     */
+    protected function camelCase(string $string, string $delimiter = '_'): string
+    {
+        $string = explode($delimiter, $string);
+        $string = implode(' ', $string);
+        $string = ucwords($string, ' ');
+        return str_replace(' ', '', $string);
+    }
+
+    /**
+     * @param Select $select
+     * @param array $joins
+     * @param string $parentAlias
+     * @return Select
+     */
+    protected function applyJoins(Select $select, array $joins, string $parentAlias = ''): Select
+    {
+        foreach ($joins as $alias => $join) {
+            if (is_string($join)) {
+                $alias = $join;
+                $table = $this->underscore($alias);
+            } elseif (is_array($join)) {
+                $table = $join['table'] ?? $this->underscore($alias);
+            } else {
+                throw new InvalidArgumentException('Invalid joins specification');
+            }
+
+            $on = $join['on'] ?? '';
+            if (empty($on)) {
+                throw new InvalidArgumentException('ON clause must be specified in join');
+            }
+
+            // for a join, explicitly alias the columns, in order to be able to map reduce results
+            $columns = $join['fields'] ?? Select::SQL_STAR;
+            if ($columns === Select::SQL_STAR) {
+                $columns = $this->getMetadata()->getColumnNames($table);
+            }
+
+            $columnAlias = empty($parentAlias) ? $alias : $parentAlias . '.' . $alias;
+            $aliasedColumns = [];
+            foreach ($columns as $k => $column) {
+                $aliasedColumns[$columnAlias . '.' . $column] = $column;
+            }
+
+            $type = $join['type'] ?? Select::JOIN_INNER;
+            $select->join([$alias => $table], $on, $aliasedColumns, $type);
+
+            if (is_array($join) && isset($join['joins']) && is_array($join['joins'])) {
+                $this->applyJoins($select, $join['joins'], $columnAlias);
+            }
+        }
+
+        return $select;
     }
 }

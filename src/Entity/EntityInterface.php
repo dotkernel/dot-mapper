@@ -18,6 +18,16 @@ namespace Dot\Ems\Entity;
 interface EntityInterface
 {
     /**
+     * @param array $options
+     */
+    public function save(array $options = []);
+
+    /**
+     * @param array $options
+     */
+    public function delete(array $options = []);
+
+    /**
      * @return string
      */
     public function hydrator(): string;

@@ -32,7 +32,7 @@ trait DispatchMapperEventsTrait
     public function dispatchEvent(string $name, array $data = [], $target = null)
     {
         if (!$this instanceof MapperInterface) {
-            throw new RuntimeException('Only MapperInterface can dispatch mapper events');
+            throw new RuntimeException('Only a MapperInterface instance can dispatch mapper events');
         }
 
         if ($target === null) {
