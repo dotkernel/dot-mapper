@@ -554,15 +554,48 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     protected function loadAll(ResultSet $resultSet, array $options = []): array
     {
         $entities = [];
+        //extract primary keys from entity
+        $primaryKey = $this->getPrimaryKey()[0];
+
         $resultSet->next();
         while ($resultSet->valid()) {
             $data = $resultSet->current();
             $data = Utility::arrayInflate($data);
+            $data = $this->processInflatedResult($data, $options);
+
+            $id = $data[$primaryKey] . '_entity';
+            $entities = ArrayUtils::merge($entities, [$id => $data], true);
+            $resultSet->next();
+            continue;
+
 
             $entities[] = $this->load($data, $options);
             $resultSet->next();
         }
+        var_dump($entities);
+        exit;
         return $entities;
+    }
+
+    protected function processInflatedResult(array $data, array $options)
+    {
+        foreach ($data as $k => $v) {
+            if (is_array($v)) {
+                $nested = $this->processInflatedResult($v, $options['joins'][$k]);
+                if (count(array_filter($nested)) === 0) {
+                    $nested = null;
+                }
+
+                $relation = $options['joins'][$k]['relation'] ?? 'hasOne';
+                if ($relation === 'hasMany' && !empty($nested)) {
+                    $nested = [$nested];
+                }
+
+                $data[$k] = $nested;
+            }
+        }
+
+        return $data;
     }
 
     /**
