@@ -11,6 +11,8 @@ declare(strict_types = 1);
 
 namespace Dot\Ems\Entity;
 
+use Dot\Ems\Mapper\MapperInterface;
+
 /**
  * Interface EntityInterface
  * @package Dot\Ems\Entity
@@ -48,4 +50,14 @@ interface EntityInterface
      * @return array
      */
     public function extractProperties(array $properties): array;
+
+    /**
+     * @param MapperInterface $mapper
+     */
+    public function setMapper(MapperInterface $mapper);
+
+    /**
+     * @return MapperInterface
+     */
+    public function getMapper(): MapperInterface;
 }

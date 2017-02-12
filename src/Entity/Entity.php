@@ -11,6 +11,7 @@ declare(strict_types = 1);
 
 namespace Dot\Ems\Entity;
 
+use Dot\Ems\Mapper\MapperInterface;
 use Dot\Hydrator\ClassMethodsCamelCase;
 
 /**
@@ -21,6 +22,20 @@ abstract class Entity implements EntityInterface
 {
     /** @var string */
     protected $hydrator = ClassMethodsCamelCase::class;
+
+    /** @var  MapperInterface */
+    protected $mapper;
+
+    /**
+     * Entity constructor.
+     * @param array $options
+     */
+    public function __construct(array $options = [])
+    {
+        if (isset($options['mapper']) && $options['mapper'] instanceof MapperInterface) {
+            $this->setMapper($options['mapper']);
+        }
+    }
 
     /**
      * @return string
@@ -71,5 +86,31 @@ abstract class Entity implements EntityInterface
             }
         }
         return $result;
+    }
+
+    public function save(array $options = [])
+    {
+        return $this->getMapper()->save($this, $options);
+    }
+
+    public function delete(array $options = [])
+    {
+        return $this->getMapper()->delete($this, $options);
+    }
+
+    /**
+     * @return MapperInterface
+     */
+    public function getMapper(): MapperInterface
+    {
+        return $this->mapper;
+    }
+
+    /**
+     * @param MapperInterface $mapper
+     */
+    public function setMapper(MapperInterface $mapper)
+    {
+        $this->mapper = $mapper;
     }
 }

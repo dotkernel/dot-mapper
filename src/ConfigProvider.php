@@ -9,6 +9,9 @@
 
 namespace Dot\Ems;
 
+use Dot\Ems\Factory\MapperManagerFactory;
+use Dot\Ems\Mapper\MapperManager;
+
 class ConfigProvider
 {
     public function __invoke()
@@ -18,6 +21,14 @@ class ConfigProvider
 
             'dot_ems' => [
 
+                'mapper_manager' => [
+
+                ],
+
+                'options' => [
+
+                ]
+
             ],
         ];
     }
@@ -25,7 +36,12 @@ class ConfigProvider
     public function getDependencyConfig()
     {
         return [
-
+            'factories' => [
+                MapperManager::class => MapperManagerFactory::class,
+            ],
+            'aliases' => [
+                'MapperManager' => MapperManager::class,
+            ]
         ];
     }
 }
