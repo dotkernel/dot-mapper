@@ -20,6 +20,9 @@ use Dot\Hydrator\ClassMethodsCamelCase;
  */
 abstract class Entity implements EntityInterface
 {
+    /** @var array  */
+    protected $ignoreProperties = ['hydrator', 'mapper'];
+
     /** @var string */
     protected $hydrator = ClassMethodsCamelCase::class;
 
@@ -48,8 +51,12 @@ abstract class Entity implements EntityInterface
     /**
      * @param array $properties
      */
-    public function unsetProperties(array $properties)
+    public function unsetProperties(array $properties = [])
     {
+        if (empty($properties)) {
+            $properties = array_diff(array_keys(get_object_vars($this)), $this->ignoreProperties);
+        }
+
         foreach ($properties as $property) {
             if (property_exists($this, $property)) {
                 $this->{$properties} = null;
@@ -77,9 +84,13 @@ abstract class Entity implements EntityInterface
      * @param array $properties
      * @return array
      */
-    public function extractProperties(array $properties): array
+    public function extractProperties(array $properties = []): array
     {
         $result = [];
+        if (empty($properties)) {
+            $properties = array_diff(array_keys(get_object_vars($this)), $this->ignoreProperties);
+        }
+
         foreach ($properties as $property) {
             if (!property_exists($this, $property)) {
                 $result[$property] = $this->{$property};
@@ -88,11 +99,19 @@ abstract class Entity implements EntityInterface
         return $result;
     }
 
+    /**
+     * @param array $options
+     * @return mixed
+     */
     public function save(array $options = [])
     {
         return $this->getMapper()->save($this, $options);
     }
 
+    /**
+     * @param array $options
+     * @return mixed
+     */
     public function delete(array $options = [])
     {
         return $this->getMapper()->delete($this, $options);
