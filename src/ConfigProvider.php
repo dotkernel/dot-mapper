@@ -9,6 +9,7 @@
 
 namespace Dot\Ems;
 
+use Dot\Ems\Factory\MapperManagerAwareInitializer;
 use Dot\Ems\Factory\MapperManagerFactory;
 use Dot\Ems\Mapper\MapperManager;
 
@@ -38,6 +39,9 @@ class ConfigProvider
         return [
             'factories' => [
                 MapperManager::class => MapperManagerFactory::class,
+            ],
+            'initializers' => [
+                MapperManagerAwareInitializer::class,
             ],
             'aliases' => [
                 'MapperManager' => MapperManager::class,
