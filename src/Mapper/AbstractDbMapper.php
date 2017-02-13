@@ -190,8 +190,8 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     {
         $primaryKey = (array)$primaryKey;
 
-        //$mapKey = implode(',', $primaryKey);
-        /*if (isset($this->identityMap[$mapKey])) {
+        /*$mapKey = implode(',', $primaryKey);
+        if (isset($this->identityMap[$mapKey])) {
             return $this->identityMap[$mapKey];
         }*/
 
@@ -525,9 +525,9 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     {
         // gives the possibility to output raw data arrays
         // note that it won't trigger load events
-        if (isset($options['output']) && $options['output'] === 'array') {
+        /*if (isset($options['output']) && $options['output'] === 'array') {
             return $data;
-        }
+        }*/
 
         //extract primary keys from entity
         $primaryColumns = $this->getPrimaryKey();
@@ -577,9 +577,9 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     {
         $entities = [];
 
-        $primaryColumns = array_flip($this->getPrimaryKey());
+        //$primaryColumns = array_flip($this->getPrimaryKey());
 
-        foreach ($resultSet as $row) {
+        /*foreach ($resultSet as $row) {
             $key = array_diff_key($row, $primaryColumns);
             $key = array_filter($key);
             $key = implode(',', $key);
@@ -595,7 +595,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
             }
 
             // TODO: load additional data
-        }
+        }*/
 
         $resultSet->next();
         while ($resultSet->valid()) {
@@ -609,7 +609,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         return $entities;
     }
 
-    protected function cleanJoinData(array $data, array $options = [])
+    /*protected function cleanJoinData(array $data, array $options = [])
     {
         $joins = $options['joins'] ?? [];
         foreach ($joins as $alias => $join) {
@@ -621,7 +621,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
                 $data[$alias] = $this->cleanJoinData($data[$alias], $join);
             }
         }
-    }
+    }*/
 
     /**
      * @param $type
