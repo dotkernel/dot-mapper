@@ -517,6 +517,17 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     }
 
     /**
+     * @return EntityInterface
+     */
+    public function newEntity(): EntityInterface
+    {
+        $entity = clone $this->getPrototype();
+        $entity->unsetProperties([]);
+
+        return $entity;
+    }
+
+    /**
      * @param array $data
      * @param array $options
      * @return mixed
