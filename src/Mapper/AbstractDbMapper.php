@@ -37,7 +37,6 @@ use Zend\EventManager\ResponseCollection;
 use Zend\Hydrator\HydratorInterface;
 use Zend\Hydrator\HydratorPluginManager;
 use Zend\ServiceManager\ServiceManager;
-use Zend\Stdlib\ArrayUtils;
 
 /**
  * Class AbstractDbMapper
@@ -224,7 +223,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
      */
     public function save(EntityInterface $entity, array $options = [])
     {
-        $atomic = (bool)($options['atomic'] ?? false);
+        $atomic = (bool)($options['atomic'] ?? true);
         if ($atomic) {
             try {
                 $this->getConnection()->beginTransaction();
@@ -403,7 +402,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
      */
     public function delete(EntityInterface $entity, array $options = [])
     {
-        $atomic = (bool)($options['atomic'] ?? false);
+        $atomic = (bool)($options['atomic'] ?? true);
         if ($atomic) {
             try {
                 $this->getConnection()->beginTransaction();
