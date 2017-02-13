@@ -21,6 +21,8 @@ interface MapperEventListenerInterface extends ListenerAggregateInterface
 {
     public function onBeforeFind(MapperEvent $e);
 
+    public function onAfterFind(MapperEvent $e);
+
     public function onBeforeLoad(MapperEvent $e);
 
     public function onAfterLoad(MapperEvent $e);

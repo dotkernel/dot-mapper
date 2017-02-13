@@ -20,6 +20,7 @@ use Dot\Event\Event;
 class MapperEvent extends Event
 {
     const EVENT_MAPPER_BEFORE_FIND = 'event.mapper.beforeFind';
+    const EVENT_MAPPER_AFTER_FIND = 'event.mapper.afterFind';
     const EVENT_MAPPER_BEFORE_LOAD = 'event.mapper.beforeLoad';
     const EVENT_MAPPER_AFTER_LOAD = 'event.mapper.afterLoad';
     const EVENT_MAPPER_BEFORE_SAVE = 'event.mapper.beforeSave';

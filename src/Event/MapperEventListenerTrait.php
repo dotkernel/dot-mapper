@@ -30,6 +30,11 @@ trait MapperEventListenerTrait
             $priority
         );
         $this->listeners[] = $events->attach(
+            MapperEvent::EVENT_MAPPER_AFTER_FIND,
+            [$this, 'onAfterFind'],
+            $priority
+        );
+        $this->listeners[] = $events->attach(
             MapperEvent::EVENT_MAPPER_BEFORE_LOAD,
             [$this, 'onBeforeLoad'],
             $priority
@@ -74,6 +79,11 @@ trait MapperEventListenerTrait
     public function onBeforeFind(MapperEvent $e)
     {
         // NO-OP: Implement onBeforeFind() method.
+    }
+
+    public function onAfterFind(MapperEvent $e)
+    {
+        // NO-OP: Implement onAfterFind() method
     }
 
     public function onBeforeLoad(MapperEvent $e)

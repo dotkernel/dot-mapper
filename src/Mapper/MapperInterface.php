@@ -34,7 +34,7 @@ interface MapperInterface
      * @param array $options
      * @return mixed
      */
-    public function get($primaryKey, array $options = []): ?EntityInterface;
+    public function get($primaryKey, array $options = []);
 
     /**
      * @param EntityInterface $entity

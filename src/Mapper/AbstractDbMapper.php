@@ -37,6 +37,7 @@ use Zend\EventManager\ResponseCollection;
 use Zend\Hydrator\HydratorInterface;
 use Zend\Hydrator\HydratorPluginManager;
 use Zend\ServiceManager\ServiceManager;
+use Zend\Stdlib\ArrayUtils;
 
 /**
  * Class AbstractDbMapper
@@ -167,7 +168,14 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         if ($result instanceof ResultInterface && $result->isQueryResult()) {
             $resultSet = new ResultSet(ResultSet::TYPE_ARRAY);
             $resultSet->initialize($result);
-            return $this->loadAll($resultSet, $options);
+            $entities = $this->loadAll($resultSet, $options);
+
+            $this->dispatchEvent(
+                MapperEvent::EVENT_MAPPER_AFTER_FIND,
+                ['entities' => $entities, 'options' => $options]
+            );
+
+            return $entities;
         }
 
         return [];
@@ -176,9 +184,9 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     /**
      * @param $primaryKey
      * @param array $options
-     * @return EntityInterface|mixed|null|object
+     * @return mixed
      */
-    public function get($primaryKey, array $options = []): ?EntityInterface
+    public function get($primaryKey, array $options = [])
     {
         $primaryKey = (array)$primaryKey;
 
@@ -202,7 +210,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
 
         $finder = (string)($options['finder'] ?? 'all');
         $result = $this->find($finder, $options);
-        if (!empty($result) && $result[0] instanceof EntityInterface) {
+        if (!empty($result) && isset($result[0])) {
             return $result[0];
         }
 
@@ -511,12 +519,18 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     /**
      * @param array $data
      * @param array $options
-     * @return EntityInterface
+     * @return mixed
      */
-    public function load(array $data, array $options = []): EntityInterface
+    public function load(array $data, array $options = [])
     {
+        // gives the possibility to output raw data arrays
+        // note that it won't trigger load events
+        if (isset($options['output']) && $options['output'] === 'array') {
+            return $data;
+        }
+
         //extract primary keys from entity
-        $primaryColumns = (array)$this->getPrimaryKey();
+        $primaryColumns = $this->getPrimaryKey();
         $primaryKey = array_intersect_key($data, array_flip($primaryColumns));
         $primaryKey = array_filter($primaryKey);
 
@@ -562,48 +576,51 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     protected function loadAll(ResultSet $resultSet, array $options = []): array
     {
         $entities = [];
-        //extract primary keys from entity
-        $primaryKey = $this->getPrimaryKey()[0];
+
+        $primaryColumns = array_flip($this->getPrimaryKey());
+
+        foreach ($resultSet as $row) {
+            $key = array_diff_key($row, $primaryColumns);
+            $key = array_filter($key);
+            $key = implode(',', $key);
+
+            $row = Utility::arrayInflate($row);
+            $row = $this->cleanJoinData($row, $options);
+
+            if (isset($this->identityMap[$key])) {
+                $entity = $this->identityMap[$key];
+            } else {
+                $entity = $this->load($row, $options);
+                $entities[] = $entity;
+            }
+
+            // TODO: load additional data
+        }
 
         $resultSet->next();
         while ($resultSet->valid()) {
             $data = $resultSet->current();
             $data = Utility::arrayInflate($data);
-            $data = $this->processInflatedResult($data, $options);
-
-            $id = $data[$primaryKey] . '_entity';
-            $entities = ArrayUtils::merge($entities, [$id => $data], true);
-            $resultSet->next();
-            continue;
-
 
             $entities[] = $this->load($data, $options);
             $resultSet->next();
         }
-        var_dump($entities);
-        exit;
+
         return $entities;
     }
 
-    protected function processInflatedResult(array $data, array $options)
+    protected function cleanJoinData(array $data, array $options = [])
     {
-        foreach ($data as $k => $v) {
-            if (is_array($v)) {
-                $nested = $this->processInflatedResult($v, $options['joins'][$k]);
-                if (count(array_filter($nested)) === 0) {
-                    $nested = null;
-                }
+        $joins = $options['joins'] ?? [];
+        foreach ($joins as $alias => $join) {
+            if (is_numeric($alias)) {
+                continue;
+            }
 
-                $relation = $options['joins'][$k]['relation'] ?? 'hasOne';
-                if ($relation === 'hasMany' && !empty($nested)) {
-                    $nested = [$nested];
-                }
-
-                $data[$k] = $nested;
+            if (isset($join['joins']) && is_array($join['joins'])) {
+                $data[$alias] = $this->cleanJoinData($data[$alias], $join);
             }
         }
-
-        return $data;
     }
 
     /**
@@ -1022,9 +1039,10 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
 
             $columnAlias = empty($parentAlias)
                 ? $alias
-                : empty($alias)
+                : (empty($alias)
                     ? $parentAlias
-                    : $parentAlias . '.' . $alias;
+                    : $parentAlias . '.' . $alias
+                );
 
             $aliasedColumns = [];
             foreach ($columns as $k => $column) {
