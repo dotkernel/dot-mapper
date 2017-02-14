@@ -20,6 +20,27 @@ use Dot\Ems\Entity\EntityInterface;
 interface MapperInterface
 {
     /**
+     * Begins a transaction if backend is accepting
+     */
+    public function beginTransaction();
+
+    /**
+     * Commits the opened transactions
+     */
+    public function commit();
+
+    /**
+     * Rollback the transaction
+     */
+    public function rollback();
+
+    /**
+     * @param string $name
+     * @return mixed
+     */
+    public function lastGeneratedValue(string $name = null);
+
+    /**
      * Used to get lists of entities
      * @param string $type
      * @param array $options

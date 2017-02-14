@@ -18,11 +18,12 @@ use Dot\Ems\Event\MapperEventListenerInterface;
 use Dot\Ems\Event\MapperEventListenerTrait;
 use Dot\Ems\Exception\BadMethodCallException;
 use Dot\Ems\Exception\InvalidArgumentException;
+use Dot\Ems\Exception\RolledbackTransactionException;
 use Dot\Ems\Exception\RuntimeException;
 use Dot\Ems\Utility;
 use Dot\Hydrator\ClassMethodsCamelCase;
 use Zend\Db\Adapter\Adapter;
-use Zend\Db\Adapter\Driver\ConnectionInterface;
+use Zend\Db\Adapter\Driver\AbstractConnection;
 use Zend\Db\Adapter\Driver\ResultInterface;
 use Zend\Db\Metadata\MetadataInterface;
 use Zend\Db\Metadata\Object\ColumnObject;
@@ -61,6 +62,9 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
 
     /** @var  Adapter */
     protected $adapter;
+
+    /** @var  AbstractConnection */
+    protected $connection;
 
     /** @var  Adapter */
     protected $slaveAdapter;
@@ -223,8 +227,11 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
      */
     public function save(EntityInterface $entity, array $options = [])
     {
-        $atomic = (bool)($options['atomic'] ?? true);
-        if ($atomic) {
+        $options += [
+            'atomic' => true
+        ];
+
+        if ($options['atomic']) {
             try {
                 $this->getConnection()->beginTransaction();
                 $success = $this->processSave($entity, $options);
@@ -238,7 +245,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         }
 
         if ($success) {
-            if ($atomic) {
+            if ($options['atomic']) {
                 $this->dispatchEvent(
                     MapperEvent::EVENT_MAPPER_AFTER_SAVE_COMMIT,
                     ['entity' => $entity, 'options' => $options]
@@ -304,6 +311,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
      * @param bool $isNew
      * @param array $options
      * @return bool
+     * @throws RolledbackTransactionException
      */
     protected function onSaveSuccess(EntityInterface $entity, bool $isNew, array $options)
     {
@@ -313,6 +321,15 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
             MapperEvent::EVENT_MAPPER_AFTER_SAVE,
             ['entity' => $entity, 'options' => $options, 'isNew' => $isNew]
         );
+
+        if ($options['atomic'] && ! $this->getConnection()->inTransaction()) {
+            throw new RolledbackTransactionException(
+                sprintf(
+                    'The afterSave event in `%s` is aborting the transaction before the save process is done',
+                    get_class($this)
+                )
+            );
+        }
 
         return true;
     }
@@ -402,8 +419,11 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
      */
     public function delete(EntityInterface $entity, array $options = [])
     {
-        $atomic = (bool)($options['atomic'] ?? true);
-        if ($atomic) {
+        $options += [
+            'atomic' => true,
+        ];
+
+        if ($options['atomic']) {
             try {
                 $this->getConnection()->beginTransaction();
                 $success = $this->processDelete($entity, $options);
@@ -417,7 +437,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         }
 
         if ($success) {
-            if ($atomic) {
+            if ($options['atomic']) {
                 $this->dispatchEvent(
                     MapperEvent::EVENT_MAPPER_AFTER_DELETE_COMMIT,
                     ['entity' => $entity, 'options' => $options]
@@ -707,11 +727,15 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     }
 
     /**
-     * @return ConnectionInterface
+     * @return AbstractConnection
      */
-    public function getConnection(): ConnectionInterface
+    public function getConnection(): AbstractConnection
     {
-        return $this->getAdapter()->getDriver()->getConnection();
+        if (! $this->connection) {
+            $this->connection = $this->getAdapter()->getDriver()->getConnection();
+        }
+
+        return $this->connection;
     }
 
     /**
@@ -1071,4 +1095,39 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
 
         return $select;
     }
+
+    /**
+     * @return \Zend\Db\Adapter\Driver\ConnectionInterface
+     */
+    public function beginTransaction()
+    {
+        return $this->getConnection()->beginTransaction();
+    }
+
+    /**
+     * @return \Zend\Db\Adapter\Driver\ConnectionInterface
+     */
+    public function commit()
+    {
+        return $this->getConnection()->commit();
+    }
+
+    /**
+     * @return \Zend\Db\Adapter\Driver\ConnectionInterface
+     */
+    public function rollback()
+    {
+        return $this->getConnection()->rollback();
+    }
+
+    /**
+     * @param string|null $name
+     * @return int
+     */
+    public function lastGeneratedValue(string $name = null)
+    {
+        return $this->getConnection()->getLastGeneratedValue($name);
+    }
+
+
 }
