@@ -12,6 +12,7 @@ declare(strict_types = 1);
 namespace Dot\Ems\Mapper;
 
 use Dot\Ems\Entity\EntityInterface;
+use Zend\Hydrator\HydratorInterface;
 
 /**
  * Interface MapperInterface
@@ -88,4 +89,9 @@ interface MapperInterface
      * @return EntityInterface
      */
     public function newEntity(): EntityInterface;
+
+    /**
+     * @return HydratorInterface
+     */
+    public function getHydrator(): HydratorInterface;
 }

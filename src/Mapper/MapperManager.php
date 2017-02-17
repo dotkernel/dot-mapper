@@ -30,10 +30,10 @@ class MapperManager extends AbstractPluginManager
         EntityDbMapper::class => DbMapperFactory::class,
     ];
 
-    /** @var array  */
+    /** @var array */
     protected $mappers = [];
 
-    /** @var array  */
+    /** @var array */
     protected $metadata = [];
 
     /** @var  array */
@@ -71,14 +71,15 @@ class MapperManager extends AbstractPluginManager
             return $this->mappers[$name];
         }
 
-        if (! class_exists($name)) {
+        if (!class_exists($name)) {
             throw new RuntimeException(sprintf('Entity `%s` is not a valid class'));
         }
 
         $entityOptions = [];
         if (isset($this->options[$name])
             && isset($this->options[$name]['entity'])
-            && is_array($this->options[$name]['entity'])) {
+            && is_array($this->options[$name]['entity'])
+        ) {
             $entityOptions = array_merge($entityOptions, $this->options[$name]['entity']);
         }
 
@@ -100,7 +101,8 @@ class MapperManager extends AbstractPluginManager
         ];
         if (isset($this->options[$name])
             && isset($this->options[$name]['mapper'])
-            && is_array($this->options[$name]['mapper'])) {
+            && is_array($this->options[$name]['mapper'])
+        ) {
             $mapperOptions = array_merge($mapperOptions, $this->options[$name]['mapper']);
         }
 
@@ -108,7 +110,7 @@ class MapperManager extends AbstractPluginManager
 
         $adapterName = $options['adapter'];
         $options['adapter'] = $this->creationContext->get($options['adapter']);
-        if (! isset($this->metadata[$adapterName])) {
+        if (!isset($this->metadata[$adapterName])) {
             $this->metadata[$adapterName] = Factory::createSourceFromAdapter($options['adapter']);
         }
 

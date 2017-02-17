@@ -322,7 +322,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
             ['entity' => $entity, 'options' => $options, 'isNew' => $isNew]
         );
 
-        if ($options['atomic'] && ! $this->getConnection()->inTransaction()) {
+        if ($options['atomic'] && !$this->getConnection()->inTransaction()) {
             throw new RolledbackTransactionException(
                 sprintf(
                     'The afterSave event in `%s` is aborting the transaction before the save process is done',
@@ -731,7 +731,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
      */
     public function getConnection(): AbstractConnection
     {
-        if (! $this->connection) {
+        if (!$this->connection) {
             $this->connection = $this->getAdapter()->getDriver()->getConnection();
         }
 
@@ -1128,6 +1128,4 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     {
         return $this->getConnection()->getLastGeneratedValue($name);
     }
-
-
 }

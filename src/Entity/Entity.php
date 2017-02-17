@@ -20,7 +20,7 @@ use Dot\Hydrator\ClassMethodsCamelCase;
  */
 abstract class Entity implements EntityInterface
 {
-    /** @var array  */
+    /** @var array */
     protected $ignoreProperties = ['hydrator', 'mapper'];
 
     /** @var string */
