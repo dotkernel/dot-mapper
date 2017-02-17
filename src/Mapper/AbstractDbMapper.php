@@ -224,6 +224,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
      * @param EntityInterface $entity
      * @param array $options
      * @return bool|EntityInterface
+     * @throws \Exception
      */
     public function save(EntityInterface $entity, array $options = [])
     {
@@ -237,8 +238,8 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
                 $success = $this->processSave($entity, $options);
                 $this->getConnection()->commit();
             } catch (\Exception $e) {
-                $success = false;
                 $this->getConnection()->rollback();
+                throw $e;
             }
         } else {
             $success = $this->processSave($entity, $options);
@@ -416,6 +417,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
      * @param EntityInterface $entity
      * @param array $options
      * @return bool
+     * @throws \Exception
      */
     public function delete(EntityInterface $entity, array $options = [])
     {
@@ -429,8 +431,8 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
                 $success = $this->processDelete($entity, $options);
                 $this->getConnection()->commit();
             } catch (\Exception $e) {
-                $success = false;
                 $this->getConnection()->rollback();
+                throw $e;
             }
         } else {
             $success = $this->processDelete($entity, $options);
