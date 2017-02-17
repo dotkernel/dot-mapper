@@ -536,17 +536,6 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     }
 
     /**
-     * @return EntityInterface
-     */
-    public function newEntity(): EntityInterface
-    {
-        $entity = clone $this->getPrototype();
-        $entity->unsetProperties([]);
-
-        return $entity;
-    }
-
-    /**
      * @param array $data
      * @param array $options
      * @return mixed
@@ -555,9 +544,9 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     {
         // gives the possibility to output raw data arrays
         // note that it won't trigger load events
-        /*if (isset($options['output']) && $options['output'] === 'array') {
+        if (isset($options['output']) && $options['output'] === 'array') {
             return $data;
-        }*/
+        }
 
         //extract primary keys from entity
         $primaryColumns = $this->getPrimaryKey();

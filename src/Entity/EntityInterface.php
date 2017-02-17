@@ -20,16 +20,6 @@ use Dot\Ems\Mapper\MapperInterface;
 interface EntityInterface
 {
     /**
-     * @param array $options
-     */
-    public function save(array $options = []);
-
-    /**
-     * @param array $options
-     */
-    public function delete(array $options = []);
-
-    /**
      * @return string
      */
     public function hydrator(): string;
@@ -50,14 +40,4 @@ interface EntityInterface
      * @return array
      */
     public function extractProperties(array $properties): array;
-
-    /**
-     * @param MapperInterface $mapper
-     */
-    public function setMapper(MapperInterface $mapper);
-
-    /**
-     * @return MapperInterface
-     */
-    public function getMapper(): MapperInterface;
 }

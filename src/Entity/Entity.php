@@ -21,24 +21,10 @@ use Dot\Hydrator\ClassMethodsCamelCase;
 abstract class Entity implements EntityInterface
 {
     /** @var array */
-    protected $ignoreProperties = ['hydrator', 'mapper'];
+    protected $ignoreProperties = ['hydrator'];
 
     /** @var string */
     protected $hydrator = ClassMethodsCamelCase::class;
-
-    /** @var  MapperInterface */
-    protected $mapper;
-
-    /**
-     * Entity constructor.
-     * @param array $options
-     */
-    public function __construct(array $options = [])
-    {
-        if (isset($options['mapper']) && $options['mapper'] instanceof MapperInterface) {
-            $this->setMapper($options['mapper']);
-        }
-    }
 
     /**
      * @return string
@@ -97,39 +83,5 @@ abstract class Entity implements EntityInterface
             }
         }
         return $result;
-    }
-
-    /**
-     * @param array $options
-     * @return mixed
-     */
-    public function save(array $options = [])
-    {
-        return $this->getMapper()->save($this, $options);
-    }
-
-    /**
-     * @param array $options
-     * @return mixed
-     */
-    public function delete(array $options = [])
-    {
-        return $this->getMapper()->delete($this, $options);
-    }
-
-    /**
-     * @return MapperInterface
-     */
-    public function getMapper(): MapperInterface
-    {
-        return $this->mapper;
-    }
-
-    /**
-     * @param MapperInterface $mapper
-     */
-    public function setMapper(MapperInterface $mapper)
-    {
-        $this->mapper = $mapper;
     }
 }

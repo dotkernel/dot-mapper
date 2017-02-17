@@ -84,14 +84,4 @@ interface MapperInterface
      * @return mixed
      */
     public function deleteAll(array $conditions);
-
-    /**
-     * @return EntityInterface
-     */
-    public function newEntity(): EntityInterface;
-
-    /**
-     * @return HydratorInterface
-     */
-    public function getHydrator(): HydratorInterface;
 }

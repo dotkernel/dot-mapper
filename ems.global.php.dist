@@ -21,62 +21,7 @@ return [
                     'adapter' => 'database',
                     'table' => 'table name'
                 ],
-                'entity' => [
-                    'some_key' => 'some_value',
-                    //additional services to inject into the entity class
-                    'services' => [
-                        'additional_service' => 'service name'
-                    ],
-                ],
             ],
         ],
     ],
 ];
-
-/*
-'joins' => [
-	'details' => [
-		'table' => 'user_details',
-		'on' => 'details.userId = User.id',
-		'type' => Select::JOIN_LEFT,
-		'relation' => 'hasOne',
-		'entity' => UserDetailsEntity::class
-	],
-	'Order' => [
-		'on' => 'Order.userId = User.id',
-		'type' => Select::JOIN_LEFT,
-		'relation' => 'hasMany',
-		'entity' => OrderEntity::class,
-		'joins' => [
-			'Product' => [
-				'on' => 'Product.orderId = Order.id',
-				'type' => Select::JOIN_LEFT,
-				'relation' => 'hasMany',
-				'entity' => ProductEntity::class,
-				'joins' => [
-					[
-						'table' => 'product_category_intersect',
-						'on' => 'Product.id = product_category_intersect.productId',
-						'type' => Select::JOIN_LEFT,
-						'fields' => [],
-						'relation' => 'hasMany',
-						'joins' => [
-							'Category' => [
-								'table' => 'product_category',
-								'on' => 'Category.id = product_category_intersect.categoryId',
-								'type' => Select::JOIN_INNER,
-								'entity' => CategoryEntity::class
-							]
-						]
-					],
-				],
-			],
-		],
-	],
-	[
-		'table' => 'user_token',
-		'on' => 'user_token.userId = User.id',
-		'type' => Select::JOIN_LEFT,
-	]
-],
-*/

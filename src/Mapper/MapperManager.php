@@ -71,42 +71,29 @@ class MapperManager extends AbstractPluginManager
             return $this->mappers[$name];
         }
 
-        if (!class_exists($name)) {
-            throw new RuntimeException(sprintf('Entity `%s` is not a valid class'));
+        $entity = $name;
+        if ($this->creationContext->has($entity)) {
+            $entity = $this->creationContext->get($entity);
         }
 
-        $entityOptions = [];
-        if (isset($this->options[$name])
-            && isset($this->options[$name]['entity'])
-            && is_array($this->options[$name]['entity'])
-        ) {
-            $entityOptions = array_merge($entityOptions, $this->options[$name]['entity']);
+        if (is_string($entity) && class_exists($entity)) {
+            $entity = new $entity();
         }
 
-        $entityInject = [];
-        if (isset($entityOptions['services']) && is_array($entityOptions['services'])) {
-            $entityInject = $entityOptions['services'];
-            unset($entityOptions['services']);
+        if (!$entity instanceof EntityInterface) {
+            throw new RuntimeException(sprintf('Entity `%s` is not a valid EntityInterface instance', $name));
         }
 
-        foreach ($entityInject as $k => $v) {
-            $entityOptions[$k] = $this->creationContext->get($v);
-        }
-
-        /** @var EntityInterface $entity */
-        $entity = new $name($entityOptions);
-
-        $mapperOptions = [
-            'adapter' => $this->defaultAdapterName,
-        ];
+        $mapperOptions = [];
         if (isset($this->options[$name])
             && isset($this->options[$name]['mapper'])
             && is_array($this->options[$name]['mapper'])
         ) {
-            $mapperOptions = array_merge($mapperOptions, $this->options[$name]['mapper']);
+            $mapperOptions = $this->options[$name]['mapper'];
         }
+        $mapperOptions += ['adapter' => $this->defaultAdapterName];
 
-        $options = array_merge($mapperOptions, $options);
+        $options += $mapperOptions;
 
         $adapterName = $options['adapter'];
         $options['adapter'] = $this->creationContext->get($options['adapter']);
@@ -120,8 +107,6 @@ class MapperManager extends AbstractPluginManager
         $options['prototype'] = $entity;
 
         $mapper = parent::get($name, $options);
-
-        $entity->setMapper($mapper);
         $this->mappers[$name] = $mapper;
 
         return $mapper;
