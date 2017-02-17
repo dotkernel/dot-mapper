@@ -1117,4 +1117,12 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     {
         return $this->getConnection()->getLastGeneratedValue($name);
     }
+
+    /**
+     * @return EntityInterface
+     */
+    public function newEntity(): EntityInterface
+    {
+        return clone $this->getPrototype();
+    }
 }
