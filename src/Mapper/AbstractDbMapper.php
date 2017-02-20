@@ -274,17 +274,17 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         $primaryKey = array_filter($primaryKey);
         $mapKey = implode(',', $primaryKey);
 
+        $isNew = empty($primaryKey) && !isset($this->identityMap[$mapKey]);
+
         /** @var ResponseCollection $event */
         $event = $this->dispatchEvent(
             MapperEvent::EVENT_MAPPER_BEFORE_SAVE,
-            ['entity' => $entity, 'options' => $options]
+            ['entity' => $entity, 'options' => $options, 'isNew' => $isNew]
         );
 
         if ($event->stopped()) {
             return $event->last();
         }
-
-        $isNew = empty($primaryKey) && !isset($this->identityMap[$mapKey]);
 
         if ($isNew) {
             $success = $this->insert($entity, $data);
