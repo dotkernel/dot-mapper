@@ -31,8 +31,10 @@ use Zend\Db\Metadata\Object\ConstraintObject;
 use Zend\Db\Metadata\Object\TableObject;
 use Zend\Db\Metadata\Source\Factory;
 use Zend\Db\ResultSet\ResultSet;
+use Zend\Db\Sql\Predicate\PredicateSet;
 use Zend\Db\Sql\Select;
 use Zend\Db\Sql\Sql;
+use Zend\Db\Sql\Where;
 use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ResponseCollection;
 use Zend\Hydrator\HydratorInterface;
@@ -1086,6 +1088,32 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
 
         return $select;
     }
+
+    /*protected $operatorToFunction = [
+        '=' => 'equalsTo',
+        '<' => 'lessThan',
+        '>' => 'greaterThan',
+        '!=' => 'notEqualsTo',
+        '<>' => 'between',
+        '~' => 'like'
+    ];
+    protected function applyConditions(Select $select, array $conditions)
+    {
+        $select->where(function (Where $where) use ($conditions) {
+            foreach ($conditions as $k => $v) {
+                if (in_array($k, [Where::OP_AND, Where::OP_OR])) {
+                    foreach ($v as $condition) {
+                        $field = $condition['field'] ?? '';
+                        $value = $condition['value'] ?? '';
+                        $op = $this->operatorToFunction[$condition['op'] ?? '='];
+                        $where->{$k}->{$op}($field, $value);
+                    }
+                } else {
+
+                }
+            }
+        });
+    }*/
 
     /**
      * @return \Zend\Db\Adapter\Driver\ConnectionInterface
