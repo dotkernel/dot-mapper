@@ -41,6 +41,18 @@ interface MapperInterface
     public function lastGeneratedValue(string $name = null);
 
     /**
+     * @param $identifier
+     * @return string
+     */
+    public function quoteIdentifier($identifier): string;
+
+    /**
+     * @param $value
+     * @return string
+     */
+    public function quoteValue($value): string;
+
+    /**
      * Used to get lists of entities
      * @param string $type
      * @param array $options

@@ -11,8 +11,6 @@ declare(strict_types = 1);
 
 namespace Dot\Ems\Entity;
 
-use Dot\Ems\Mapper\MapperInterface;
-
 /**
  * Interface EntityInterface
  * @package Dot\Ems\Entity
