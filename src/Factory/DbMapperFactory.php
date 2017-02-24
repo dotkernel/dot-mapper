@@ -29,8 +29,9 @@ class DbMapperFactory
      * @param array $options
      * @return mixed
      */
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = [])
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
+        $options = $options ?? [];
         if (isset($options['adapter']) && is_string($options['adapter'])) {
             $options['adapter'] = $container->get($options['adapter']);
         }

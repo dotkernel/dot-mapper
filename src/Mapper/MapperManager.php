@@ -93,6 +93,7 @@ class MapperManager extends AbstractPluginManager
         }
         $mapperOptions += ['adapter' => $this->defaultAdapterName];
 
+        $options = $options ?? [];
         $options += $mapperOptions;
 
         $adapterName = $options['adapter'];
