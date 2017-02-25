@@ -406,7 +406,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         $result = $stmt->execute();
 
         $success = false;
-        if ($result->getAffectedRows() !== 0) {
+        if ($result->valid()) {
             $success = $entity;
         }
 
