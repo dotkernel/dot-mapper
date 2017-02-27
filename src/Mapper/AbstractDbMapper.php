@@ -209,6 +209,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
             );
         }
 
+        $options['conditions'] = $options['conditions'] ?? [];
         $options['conditions'] += array_combine($keys, $primaryKey);
 
         $finder = (string)($options['finder'] ?? 'all');
