@@ -31,6 +31,7 @@ use Zend\Db\Metadata\Object\ConstraintObject;
 use Zend\Db\Metadata\Object\TableObject;
 use Zend\Db\Metadata\Source\Factory;
 use Zend\Db\ResultSet\ResultSet;
+use Zend\Db\Sql\Expression;
 use Zend\Db\Sql\Select;
 use Zend\Db\Sql\Sql;
 use Zend\EventManager\EventManagerInterface;
@@ -160,6 +161,11 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
      */
     public function find(string $type = 'all', array $options = []): array
     {
+        // make sure we bypass entity loading for count select
+        if ($type === 'count') {
+            $options['output'] = 'array';
+        }
+
         $select = $this->getSlaveSql()->select()->from([$this->getAlias() => $this->getTable()]);
         $select = $this->callFinder($type, $select, $options);
 
@@ -541,6 +547,16 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
      */
     public function findAll(Select $select): Select
     {
+        return $select;
+    }
+
+    /**
+     * @param Select $select
+     * @return Select
+     */
+    public function findCount(Select $select): Select
+    {
+        $select->columns(['count' => new Expression('COUNT(1)')]);
         return $select;
     }
 
