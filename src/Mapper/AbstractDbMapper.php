@@ -171,7 +171,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
 
         $event = $this->dispatchEvent(
             MapperEvent::EVENT_MAPPER_BEFORE_FIND,
-            ['select' => $select, 'options' => $options]
+            ['select' => $select, 'type' => $type, 'options' => $options]
         );
         if ($event->stopped()) {
             return $event->last();
@@ -187,7 +187,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
 
             $this->dispatchEvent(
                 MapperEvent::EVENT_MAPPER_AFTER_FIND,
-                ['entities' => $entities, 'options' => $options]
+                ['entities' => $entities, 'type' => $type, 'options' => $options]
             );
 
             return $entities;
