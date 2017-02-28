@@ -163,7 +163,13 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         $select = $this->getSlaveSql()->select()->from([$this->getAlias() => $this->getTable()]);
         $select = $this->callFinder($type, $select, $options);
 
-        $this->dispatchEvent(MapperEvent::EVENT_MAPPER_BEFORE_FIND, ['select' => $select, 'options' => $options]);
+        $event = $this->dispatchEvent(
+            MapperEvent::EVENT_MAPPER_BEFORE_FIND,
+            ['select' => $select, 'options' => $options]
+        );
+        if ($event->stopped()) {
+            return $event->last();
+        }
 
         $stmt = $this->getSlaveSql()->prepareStatementForSqlObject($select);
         $result = $stmt->execute();
