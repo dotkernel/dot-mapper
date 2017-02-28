@@ -215,7 +215,8 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
             );
         }
 
-        $options['conditions'] = array_combine($keys, $primaryKey);
+        $options['conditions'] = $options['conditions'] ?? [];
+        $options['conditions'] += array_combine($keys, $primaryKey);
 
         $finder = (string)($options['finder'] ?? 'all');
         $result = $this->find($finder, $options);
@@ -412,7 +413,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         $result = $stmt->execute();
 
         $success = false;
-        if ($result->getAffectedRows() !== 0) {
+        if ($result->valid()) {
             $success = $entity;
         }
 
