@@ -12,6 +12,7 @@ declare(strict_types = 1);
 namespace Dot\Ems\Mapper;
 
 use Dot\Ems\Entity\EntityInterface;
+use Dot\Ems\Exception\InvalidArgumentException;
 use Dot\Ems\Exception\RuntimeException;
 use Dot\Ems\Factory\DbMapperFactory;
 use Zend\Db\Metadata\MetadataInterface;
@@ -67,6 +68,12 @@ class MapperManager extends AbstractPluginManager
      */
     public function get($name, array $options = null)
     {
+        if (!is_string($name)) {
+            throw new InvalidArgumentException(sprintf(
+                'Invalid mapper name `%s` given',
+                is_object($name) ? get_class($name) : gettype($name)
+            ));
+        }
         if (isset($this->mappers[$name])) {
             return $this->mappers[$name];
         }
