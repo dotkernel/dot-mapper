@@ -77,7 +77,7 @@ abstract class Entity implements EntityInterface
         }
 
         foreach ($properties as $property) {
-            if (!property_exists($this, $property)) {
+            if (property_exists($this, $property)) {
                 $result[$property] = $this->{$property};
             }
         }
