@@ -28,14 +28,46 @@ interface EntityInterface
     public function unsetProperties(array $properties);
 
     /**
+     * @param string $property
+     */
+    public function unsetProperty(string $property);
+
+    /**
      * @param array $properties
      * @return bool
      */
     public function hasProperties(array $properties): bool;
 
     /**
+     * @param string $property
+     * @return bool
+     */
+    public function hasProperty(string $property): bool;
+
+    /**
      * @param array $properties
      * @return array
      */
     public function extractProperties(array $properties): array;
+
+    /**
+     * @param string $property
+     * @return mixed
+     */
+    public function extractProperty(string $property);
+
+    /**
+     * @return array
+     */
+    public function getIgnoredProperties(): array;
+
+    /**
+     * @param array $ignoredProperties
+     */
+    public function setIgnoredProperties(array $ignoredProperties);
+
+    /**
+     * @param array $ignoredProperties
+     */
+    public function addIgnoredProperties(array $ignoredProperties);
 }

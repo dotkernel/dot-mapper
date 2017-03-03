@@ -50,6 +50,14 @@ abstract class Entity implements EntityInterface
     }
 
     /**
+     * @param string $property
+     */
+    public function unsetProperty(string $property)
+    {
+        $this->unsetProperties([$property]);
+    }
+
+    /**
      * @param array $properties
      * @return bool
      */
@@ -63,6 +71,15 @@ abstract class Entity implements EntityInterface
             }
         }
         return $has;
+    }
+
+    /**
+     * @param string $property
+     * @return bool
+     */
+    public function hasProperty(string $property): bool
+    {
+        return $this->hasProperties([$property]);
     }
 
     /**
@@ -82,5 +99,42 @@ abstract class Entity implements EntityInterface
             }
         }
         return $result;
+    }
+
+    /**
+     * @param string $property
+     * @return mixed|null
+     */
+    public function extractProperty(string $property)
+    {
+        if ($this->hasProperty($property)) {
+            return $this->extractProperties([$property])[$property];
+        }
+
+        return null;
+    }
+
+    /**
+     * @return array
+     */
+    public function getIgnoredProperties(): array
+    {
+        return $this->ignoreProperties;
+    }
+
+    /**
+     * @param array $ignoredProperties
+     */
+    public function setIgnoredProperties(array $ignoredProperties)
+    {
+        $this->ignoreProperties = $ignoredProperties;
+    }
+
+    /**
+     * @param array $ignoredProperties
+     */
+    public function addIgnoredProperties(array $ignoredProperties)
+    {
+        $this->ignoreProperties = array_merge($this->ignoreProperties, $ignoredProperties);
     }
 }
