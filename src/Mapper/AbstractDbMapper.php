@@ -31,6 +31,7 @@ use Zend\Db\Metadata\Object\ConstraintObject;
 use Zend\Db\Metadata\Object\TableObject;
 use Zend\Db\Metadata\Source\Factory;
 use Zend\Db\ResultSet\ResultSet;
+use Zend\Db\Sql\Expression;
 use Zend\Db\Sql\Select;
 use Zend\Db\Sql\Sql;
 use Zend\EventManager\EventManagerInterface;
@@ -188,6 +189,32 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         }
 
         return [];
+    }
+
+    /**
+     * @param string $type
+     * @param array $options
+     * @return int
+     */
+    public function count(string $type = 'all', array $options = []): int
+    {
+        $select = $this->getSlaveSql()->select()->from([$this->getAlias() => $this->getTable()]);
+        $select = $this->callFinder($type, $select, $options);
+
+        $select->reset(Select::LIMIT);
+        $select->reset(Select::OFFSET);
+        $select->reset(Select::ORDER);
+
+        $select->columns(['count' => new Expression('COUNT(1)')]);
+
+        $stmt = $this->getSlaveSql()->prepareStatementForSqlObject($select);
+        $result = $stmt->execute();
+
+        if ($result->valid()) {
+            return (int) $result->current()['count'];
+        }
+
+        return -1;
     }
 
     /**
