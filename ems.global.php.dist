@@ -19,7 +19,9 @@ return [
             SomeEntity::class => [
                 'mapper' => [
                     'adapter' => 'database',
-                    'table' => 'table name'
+                    'table' => 'table name',
+
+                    'event_listeners' => [],
                 ],
             ],
         ],

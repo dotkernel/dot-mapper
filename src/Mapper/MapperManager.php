@@ -12,11 +12,13 @@ declare(strict_types = 1);
 namespace Dot\Ems\Mapper;
 
 use Dot\Ems\Entity\EntityInterface;
+use Dot\Ems\Event\MapperEventListenerInterface;
 use Dot\Ems\Exception\InvalidArgumentException;
 use Dot\Ems\Exception\RuntimeException;
 use Dot\Ems\Factory\DbMapperFactory;
 use Zend\Db\Metadata\MetadataInterface;
 use Zend\Db\Metadata\Source\Factory;
+use Zend\EventManager\EventManagerAwareInterface;
 use Zend\ServiceManager\AbstractPluginManager;
 
 /**
@@ -96,8 +98,9 @@ class MapperManager extends AbstractPluginManager
             && isset($this->options[$name]['mapper'])
             && is_array($this->options[$name]['mapper'])
         ) {
-            $mapperOptions = $this->options[$name]['mapper'];
+            $mapperOptions += $this->options[$name]['mapper'];
         }
+
         $mapperOptions += ['adapter' => $this->defaultAdapterName];
 
         $options = $options ?? [];
@@ -117,6 +120,54 @@ class MapperManager extends AbstractPluginManager
         $mapper = parent::get($name, $options);
         $this->mappers[$name] = $mapper;
 
+        if (isset($options['event_listeners']) && is_array($options['event_listeners'])) {
+            $this->attachMapperListeners($mapper, $options['event_listeners']);
+        }
+
         return $mapper;
+    }
+
+    /**
+     * @param EventManagerAwareInterface $mapper
+     * @param array $listenersConfig
+     */
+    protected function attachMapperListeners(EventManagerAwareInterface $mapper, array $listenersConfig)
+    {
+        foreach ($listenersConfig as $listener) {
+            if (is_string($listener)) {
+                $l = $this->getListenerObject($listener);
+                $p = 1;
+                $l->attach($mapper->getEventManager(), $p);
+            } elseif (is_array($listener)) {
+                $l = $listener['type'] ?? '';
+                $p = $listener['priority'] ?? 1;
+
+                $l = $this->getListenerObject($l);
+                $l->attach($mapper->getEventManager(), $p);
+            }
+        }
+    }
+
+    /**
+     * @param string $listener
+     * @return MapperEventListenerInterface
+     */
+    protected function getListenerObject(string $listener): MapperEventListenerInterface
+    {
+        $container = $this->creationContext;
+        if ($container->has($listener)) {
+            $listener = $container->get($listener);
+        }
+
+        if (is_string($listener) && class_exists($listener)) {
+            $listener = new $listener();
+        }
+
+        if (!$listener instanceof MapperEventListenerInterface) {
+            throw new RuntimeException('Mapper event listener is not an instance of '
+                . MapperEventListenerInterface::class);
+        }
+
+        return $listener;
     }
 }
