@@ -82,6 +82,13 @@ interface MapperInterface
     public function find(string $type, array $options = []): array;
 
     /**
+     * @param string $type
+     * @param array $options
+     * @return int
+     */
+    public function count(string $type, array $options = []): int;
+
+    /**
      * Gets an entity by its ID
      *
      * @param $primaryKey
