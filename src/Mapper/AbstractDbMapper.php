@@ -34,7 +34,6 @@ use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Expression;
 use Zend\Db\Sql\Select;
 use Zend\Db\Sql\Sql;
-use Zend\EventManager\EventManagerInterface;
 use Zend\EventManager\ResponseCollection;
 use Zend\Hydrator\HydratorInterface;
 use Zend\Hydrator\HydratorPluginManager;
@@ -136,10 +135,6 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
 
         if (isset($options['schema']) && $options['schema'] instanceof TableObject) {
             $this->setSchema($options['schema']);
-        }
-
-        if (isset($options['event_manager']) && $options['event_manager'] instanceof EventManagerInterface) {
-            $this->setEventManager($options['event_manager']);
         }
 
         if (!$this->adapter instanceof Adapter) {

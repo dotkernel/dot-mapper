@@ -13,8 +13,6 @@ namespace Dot\Ems\Factory;
 
 use Dot\Ems\Mapper\MapperManager;
 use Interop\Container\ContainerInterface;
-use Zend\EventManager\EventManager;
-use Zend\EventManager\EventManagerInterface;
 use Zend\Hydrator\HydratorPluginManager;
 
 /**
@@ -46,14 +44,6 @@ class DbMapperFactory
             $options['hydrator_manager'] = $container->has('HydratorManager')
                 ? $container->get('HydratorManager')
                 : new HydratorPluginManager($container, []);
-        }
-
-        if (isset($options['event_manager']) && is_string($options['event_manager'])) {
-            $options['event_manager'] = $container->get($options['event_manager']);
-        } else {
-            $options['event_manager'] = $container->has(EventManagerInterface::class)
-                ? $container->get(EventManagerInterface::class)
-                : new EventManager();
         }
 
         $mapperManager = $container->get(MapperManager::class);
