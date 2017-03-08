@@ -3,153 +3,25 @@
 return [
     'dot_ems' => [
 
-        'service' => [
-            'foo_service' => [
+        'default_adapter' => 'database',
 
-                //enable events triggering for create/update/delete(operations that do change the state of the application
-                'enable_events' => true,
+        //register mappers using the entity class name as key
+        'mapper_manager' => [
+            'factories' => [
+                SomeMapper::class => SomeMapperFactory::class,
+            ],
+            'aliases' => [
+                SomeEntity::class = > SomeMapper::class,
+            ],
+        ],
 
-                'service_listeners' => [
-                    //list of entity service listeners as class names or service names
-
-                ],
-
-                'atomic_operations' => true,
-                //'type' => 'optional concrete implementation class name, defaults to EntityService',
-
+        'options' => [
+            SomeEntity::class => [
                 'mapper' => [
-                    \Dot\Ems\Mapper\RelationalDbMapper::class => [
+                    'adapter' => 'database',
+                    'table' => 'table name',
 
-                        'adapter' => 'database',
-                        'table' => 'foo_table',
-
-                        //optional field name of the entity identifier, defaults to `id`
-                        //'identifier_name' => 'id',
-
-                        //optional paginator adapter, default ones will be used according to mapper type
-                        //'pagination_adapter' => 'paginator adapter to use, must be registerd in the paginator adapter plugin manager',
-
-                        'entity_prototype' => 'class name or service name of the entity object',
-                        //'entity_hydrator' => 'optional entity hydrator class or service name, defaults to ClassMethods',
-
-                        'relations' => [
-
-                            /**
-                             * This relation uses its mapper to fetch one object linked to the parent
-                             */
-                            \Dot\Ems\Mapper\Relation\OneToOneRelation::class => [
-
-                                'field_name' => 'property name of the parent object which will be populated by this relation',
-                                'ref_name' => 'column name which links the mappers',
-
-                                //delete references when parent entity is deleted
-                                'delete_refs' => false,
-
-                                //create/update references when parent is updated
-                                'change_refs' => true,
-
-                                /**
-                                 * Associated mapper, note you can use nested relational db mappers in order to create a hierarchy of objects
-                                 */
-                                'mapper' => [
-                                    \Dot\Ems\Mapper\DbMapper::class => [
-                                        'adapter' => 'database',
-                                        'table' => 'table_name',
-
-                                        //optional field name of the entity identifier, defaults to `id`
-                                        //'identifier_name' => 'id',
-
-                                        //optional paginator adapter, default ones will be used according to mapper type
-                                        //'pagination_adapter' => 'paginator adapter to use, must be registerd in the paginator adapter plugin manager',
-
-                                        'entity_prototype' => 'class name or service name of the entity object',
-                                        //'entity_hydrator' => 'optional entity hydrator class or service name, defaults to ClassMethods',
-                                    ]
-                                ]
-                            ],
-
-                            /**
-                             * This relation will use its mapper to fetch an array of objects that are linked to the parent entity
-                             */
-                            \Dot\Ems\Mapper\Relation\OneToManyRelation::class => [
-
-                                'field_name' => 'property name of the parent object which will be populated by this relation',
-                                'ref_name' => 'column name which links the tables',
-
-                                //delete references when parent entity is deleted
-                                'delete_refs' => false,
-
-                                //create/update references when parent is updated
-                                'change_refs' => true,
-
-                                'mapper' => [
-                                    \Dot\Ems\Mapper\DbMapper::class => [
-
-                                        'adapter' => 'database',
-                                        'table' => 'table_name',
-
-                                        //optional field name of the entity identifier, defaults to `id`
-                                        //'identifier_name' => 'id',
-
-                                        //optional paginator adapter, default ones will be used according to mapper type
-                                        //'pagination_adapter' => 'paginator adapter to use, must be registerd in the paginator adapter plugin manager',
-
-                                        'entity_prototype' => 'class name or service name of the entity object',
-                                        //'entity_hydrator' => 'optional entity hydrator class or service name, defaults to ClassMethods',
-
-                                    ]
-                                ],
-                            ],
-
-                            /**
-                             * This relation will use its mapper to fetch an array of objects that are linked to the parent entity through an intersection table
-                             */
-                            \Dot\Ems\Mapper\Relation\ManyToManyRelation::class => [
-
-                                'field_name' => 'property name of the parent object which will be populated by this relation',
-
-                                'ref_name' => 'column name which links the table to the intersection table',
-                                'target_ref_name' => 'column name which links the intersection table to the target table',
-
-                                //delete references when parent entity is deleted(in this case link from intersection table)
-                                'delete_refs' => false,
-
-                                //create/update link in the intersection table when parent property is changed
-                                'change_refs' => true,
-
-                                //enables creation of linked entities, only if they are detected as new
-                                //no other operation is made through this relation on the linked entities
-                                'create_target_refs' => true,
-
-                                //if a linked entity is new, enable creation
-                                'create_target_entities' => true,
-
-                                'intersection_mapper' => [
-                                    \Dot\Ems\Mapper\DbMapper::class => [
-                                        'adapter' => 'database',
-                                        'table' => 'intersection table name',
-
-                                        'entity_prototype' => 'class name or service name of the entity object',
-                                    ]
-                                ],
-
-                                'target_mapper' => [
-                                    \Dot\Ems\Mapper\DbMapper::class => [
-
-                                        'adapter' => 'database',
-                                        'table' => 'target table_name',
-
-                                        //optional field name of the entity identifier, defaults to `id`
-                                        //'identifier_name' => 'id',
-
-                                        'entity_prototype' => 'class name or service name of the entity object',
-                                        //'entity_hydrator' => 'optional entity hydrator class or service name, defaults to ClassMethods',
-
-                                    ],
-                                ],
-                            ]
-                        ],
-                    ]
+                    'event_listeners' => [],
                 ],
             ],
         ],

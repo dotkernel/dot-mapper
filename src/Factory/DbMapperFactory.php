@@ -1,21 +1,19 @@
 <?php
 /**
  * @copyright: DotKernel
- * @library: dotkernel/dot-ems
+ * @library: dot-ems
  * @author: n3vrax
- * Date: 11/29/2016
- * Time: 7:50 PM
+ * Date: 2/11/2017
+ * Time: 8:40 PM
  */
 
-namespace Dot\Ems\Factory;
+declare(strict_types = 1);
 
-use Dot\Ems\Exception\RuntimeException;
-use Dot\Ems\Mapper\DbMapper;
-use Dot\Helpers\DependencyHelperTrait;
+namespace Dot\Mapper\Factory;
+
+use Dot\Mapper\Mapper\MapperManager;
 use Interop\Container\ContainerInterface;
-use Zend\Hydrator\ClassMethods;
-use Zend\Hydrator\HydratorInterface;
-use Zend\Paginator\AdapterPluginManager;
+use Zend\Hydrator\HydratorPluginManager;
 
 /**
  * Class DbMapperFactory
@@ -23,62 +21,33 @@ use Zend\Paginator\AdapterPluginManager;
  */
 class DbMapperFactory
 {
-    use DependencyHelperTrait;
-
     /**
      * @param ContainerInterface $container
      * @param $requestedName
-     * @param array $config
-     * @return DbMapper
+     * @param array $options
+     * @return mixed
      */
-    public function __invoke(ContainerInterface $container, $requestedName, $config = [])
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        if (!isset($config['adapter']) || isset($config['adapter']) && !is_string($config['adapter'])) {
-            throw new RuntimeException('No db adapter specified');
+        $options = $options ?? [];
+        if (isset($options['adapter']) && is_string($options['adapter'])) {
+            $options['adapter'] = $container->get($options['adapter']);
         }
 
-        if (!isset($config['table']) || isset($config['table']) && !is_string($config['table'])) {
-            throw new RuntimeException('No table name specified');
+        if (isset($options['slave_adapter']) && is_string($options['slave_adapter'])) {
+            $options['slave_adapter'] = $container->get($options['slave_adapter']);
         }
 
-        if (!isset($config['entity_prototype'])) {
-            throw new RuntimeException('No entity prototype specified');
+        if (isset($options['hydrator_manager']) && is_string($options['hydrator_manager'])) {
+            $options['hydrator_manager'] = $container->get($options['hydrator_manager']);
+        } else {
+            $options['hydrator_manager'] = $container->has('HydratorManager')
+                ? $container->get('HydratorManager')
+                : new HydratorPluginManager($container, []);
         }
 
-        $hydratorName = isset($config['entity_hydrator']) && is_string($config['entity_hydrator'])
-            ? $config['entity_hydrator'] : '';
+        $mapperManager = $container->get(MapperManager::class);
 
-        $entityPrototype = $this->getDependencyObject($container, $config['entity_prototype']);
-        $hydrator = $this->getDependencyObject($container, $hydratorName);
-
-        if (!is_object($entityPrototype)) {
-            throw new RuntimeException('Entity prototype is not an object');
-        }
-        if (!$hydrator instanceof HydratorInterface) {
-            $hydrator = new ClassMethods(false);
-        }
-
-        /** @var DbMapper $mapper */
-        $mapper = new $requestedName(
-            $config['table'],
-            $container->get($config['adapter']),
-            $entityPrototype,
-            $hydrator
-        );
-
-        if (!$mapper instanceof DbMapper) {
-            throw new RuntimeException('Requested mapper is not an instance of ' . DbMapper::class);
-        }
-
-        $mapper->setPaginatorAdapterManager($container->get(AdapterPluginManager::class));
-        if (isset($config['paginator_adapter']) && is_string($config['paginator_adapter'])) {
-            $mapper->setPaginatorAdapterName($config['paginator_adapter']);
-        }
-
-        if (isset($config['identifier_name']) && is_string($config['identifier_name'])) {
-            $mapper->setIdentifierName($config['identifier_name']);
-        }
-
-        return $mapper;
+        return new $requestedName($mapperManager, $options);
     }
 }

@@ -7,16 +7,11 @@
  * Time: 4:26 PM
  */
 
-namespace Dot\Ems;
+namespace Dot\Mapper;
 
-use Dot\Ems\Factory\EntityServiceAbstractFactory;
-use Dot\Ems\Factory\EntityServiceOptionsAbstractFactory;
-use Dot\Ems\Factory\MapperPluginManagerFactory;
-use Dot\Ems\Factory\RelationPluginManagerFactory;
-use Dot\Ems\Mapper\MapperPluginManager;
-use Dot\Ems\Mapper\Relation\RelationPluginManager;
-use Dot\Ems\Paginator\Factory\AdapterPluginManagerDelegator;
-use Zend\Paginator\AdapterPluginManager;
+use Dot\Mapper\Factory\MapperManagerAwareInitializer;
+use Dot\Mapper\Factory\MapperManagerFactory;
+use Dot\Mapper\Mapper\MapperManager;
 
 class ConfigProvider
 {
@@ -27,11 +22,13 @@ class ConfigProvider
 
             'dot_ems' => [
 
-                'service' => [],
+                'mapper_manager' => [
 
-                'mapper_manager' => [],
+                ],
 
-                'relation_manager' => [],
+                'options' => [
+
+                ]
 
             ],
         ];
@@ -41,19 +38,13 @@ class ConfigProvider
     {
         return [
             'factories' => [
-                MapperPluginManager::class => MapperPluginManagerFactory::class,
-                RelationPluginManager::class => RelationPluginManagerFactory::class,
+                MapperManager::class => MapperManagerFactory::class,
             ],
-
-            'abstract_factories' => [
-                EntityServiceAbstractFactory::class,
-                EntityServiceOptionsAbstractFactory::class,
+            'initializers' => [
+                MapperManagerAwareInitializer::class,
             ],
-
-            'delegators' => [
-                AdapterPluginManager::class => [
-                    AdapterPluginManagerDelegator::class,
-                ]
+            'aliases' => [
+                'MapperManager' => MapperManager::class,
             ]
         ];
     }

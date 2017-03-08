@@ -1,14 +1,17 @@
 <?php
 /**
  * @copyright: DotKernel
- * @library: dotkernel/dot-ems
+ * @library: dot-ems
  * @author: n3vrax
- * Date: 11/15/2016
- * Time: 10:24 PM
+ * Date: 2/8/2017
+ * Time: 4:02 PM
  */
 
-namespace Dot\Ems\Mapper;
+declare(strict_types = 1);
 
+namespace Dot\Mapper\Mapper;
+
+use Dot\Mapper\Entity\EntityInterface;
 use Zend\Hydrator\HydratorInterface;
 
 /**
@@ -18,79 +21,111 @@ use Zend\Hydrator\HydratorInterface;
 interface MapperInterface
 {
     /**
-     * Gets the last inserted id value
-     * @return mixed
-     */
-    public function lastInsertValue();
-
-    /**
-     * Begins a backend transaction, may vary between backend types
-     * @return mixed
+     * Begins a transaction if backend is accepting
      */
     public function beginTransaction();
 
     /**
-     * Saves the operations from a transaction
-     * @return mixed
+     * Commits the opened transactions
      */
     public function commit();
 
     /**
-     * In case of error, revert changes to backend
-     * @return mixed
+     * Rollback the transaction
      */
     public function rollback();
 
     /**
-     * @param $where
+     * @param string $name
      * @return mixed
      */
-    public function fetch($where);
+    public function lastGeneratedValue(string $name = null);
 
     /**
-     * @param array $where
-     * @param array $filters
-     * @param bool $paginated
+     * @param $identifier
+     * @return string
+     */
+    public function quoteIdentifier($identifier): string;
+
+    /**
      * @return mixed
      */
-    public function fetchAll($where = [], $filters = [], $paginated = false);
+    public function getPrimaryKey(): array;
 
     /**
-     * @param $entity
-     * @return mixed
+     * @return array
      */
-    public function create($entity);
+    public function getColumns(): array;
 
     /**
-     * @param $entity
-     * @return mixed
+     * @return EntityInterface
      */
-    public function update($entity);
-
-    /**
-     * @param $where
-     * @return mixed
-     */
-    public function delete($where);
-
-    /**
-     * @return object
-     */
-    public function getPrototype();
+    public function getPrototype(): EntityInterface;
 
     /**
      * @return HydratorInterface
      */
-    public function getHydrator();
+    public function getHydrator(): HydratorInterface;
 
     /**
-     * @return mixed
+     * @param $value
+     * @return string
      */
-    public function getIdentifierName();
+    public function quoteValue($value): string;
 
     /**
-     * @param $name
+     * Used to get lists of entities
+     * @param string $type
+     * @param array $options
      * @return mixed
      */
-    public function setIdentifierName($name);
+    public function find(string $type, array $options = []): array;
+
+    /**
+     * @param string $type
+     * @param array $options
+     * @return int
+     */
+    public function count(string $type, array $options = []): int;
+
+    /**
+     * Gets an entity by its ID
+     *
+     * @param $primaryKey
+     * @param array $options
+     * @return mixed
+     */
+    public function get($primaryKey, array $options = []);
+
+    /**
+     * @param EntityInterface $entity
+     * @param array $options
+     * @return mixed
+     */
+    public function save(EntityInterface $entity, array $options = []);
+
+    /**
+     * @param EntityInterface $entity
+     * @param array $options
+     * @return mixed
+     */
+    public function delete(EntityInterface $entity, array $options = []);
+
+    /**
+     * @param array $fields
+     * @param array $conditions
+     * @return mixed
+     */
+    public function updateAll(array $fields, array $conditions);
+
+    /**
+     * @param array $conditions
+     * @return mixed
+     */
+    public function deleteAll(array $conditions);
+
+    /**
+     * @return EntityInterface
+     */
+    public function newEntity(): EntityInterface;
 }

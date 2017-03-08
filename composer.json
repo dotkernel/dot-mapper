@@ -1,7 +1,7 @@
 {
-  "name": "dotkernel/dot-ems",
+  "name": "dotkernel/dot-mapper",
   "type": "library",
-  "description": "Entity-mapper-service abstraction layer",
+  "description": "Mapper pattern implementation",
   "license": "MIT",
   "authors": [
     {
@@ -14,11 +14,11 @@
     "container-interop/container-interop": "^1.1",
 
     "zendframework/zend-servicemanager": "^3.0",
-    "zendframework/zend-hydrator": "^2.2",
     "zendframework/zend-paginator": "^2.7",
 
-    "dotkernel/dot-helpers": "0.6.x-dev",
-    "dotkernel/dot-event": "0.6.x-dev"
+    "dotkernel/dot-hydrator": "0.6.x-dev",
+    "dotkernel/dot-helpers": "dev-develop as 0.6.x-dev",
+    "dotkernel/dot-event": "dev-develop as 0.6.x-dev"
   },
   "require-dev": {
     "phpunit/phpunit": "^4.8",
@@ -32,14 +32,20 @@
     "zendframework/zend-db": "Needed if you use the db mappers",
     "zendframework/zend-validator": "Needed if you use the provided custom validators"
   },
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/dotkernel/dot-hydrator"
+    }
+  ],
   "autoload": {
     "psr-4": {
-      "Dot\\Ems\\": "src/"
+      "Dot\\Mapper\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "DotTest\\Ems\\": "test/"
+      "DotTest\\Mapper\\": "test/"
     }
   },
   "extra": {

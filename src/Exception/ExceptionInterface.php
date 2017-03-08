@@ -7,7 +7,7 @@
  * Time: 10:40 PM
  */
 
-namespace Dot\Ems\Exception;
+namespace Dot\Mapper\Exception;
 
 /**
  * Interface ExceptionInterface

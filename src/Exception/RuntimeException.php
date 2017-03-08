@@ -7,7 +7,7 @@
  * Time: 10:41 PM
  */
 
-namespace Dot\Ems\Exception;
+namespace Dot\Mapper\Exception;
 
 /**
  * Class RuntimeException
