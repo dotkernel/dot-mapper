@@ -10,34 +10,26 @@
     }
   ],
   "require": {
-    "php": "^5.6 || ^7.0",
+    "php": "^7.1",
     "container-interop/container-interop": "^1.1",
 
     "zendframework/zend-servicemanager": "^3.0",
     "zendframework/zend-paginator": "^2.7",
 
-    "dotkernel/dot-hydrator": "0.6.x-dev",
-    "dotkernel/dot-helpers": "dev-develop as 0.6.x-dev",
-    "dotkernel/dot-event": "dev-develop as 0.6.x-dev"
+    "dotkernel/dot-hydrator": "^1.0",
+    "dotkernel/dot-helpers": "~0.1",
+    "dotkernel/dot-event": "~0.1"
   },
   "require-dev": {
     "phpunit/phpunit": "^4.8",
     "squizlabs/php_codesniffer": "^2.3",
 
     "zendframework/zend-db": "^2.8",
-    "zendframework/zend-validator": "^2.8"
-
+    "dotkernel/dot-validator": "0.6.x-dev"
   },
   "suggest": {
-    "zendframework/zend-db": "Needed if you use the db mappers",
-    "zendframework/zend-validator": "Needed if you use the provided custom validators"
+    "zendframework/zend-db": "Needed if you use the db mappers"
   },
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/dotkernel/dot-hydrator"
-    }
-  ],
   "autoload": {
     "psr-4": {
       "Dot\\Mapper\\": "src/"
