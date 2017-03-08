@@ -7,11 +7,11 @@
  * Time: 4:26 PM
  */
 
-namespace Dot\Ems;
+namespace Dot\Mapper;
 
-use Dot\Ems\Factory\MapperManagerAwareInitializer;
-use Dot\Ems\Factory\MapperManagerFactory;
-use Dot\Ems\Mapper\MapperManager;
+use Dot\Mapper\Factory\MapperManagerAwareInitializer;
+use Dot\Mapper\Factory\MapperManagerFactory;
+use Dot\Mapper\Mapper\MapperManager;
 
 class ConfigProvider
 {

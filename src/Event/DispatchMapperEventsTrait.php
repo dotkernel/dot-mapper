@@ -9,10 +9,10 @@
 
 declare(strict_types = 1);
 
-namespace Dot\Ems\Event;
+namespace Dot\Mapper\Event;
 
-use Dot\Ems\Exception\RuntimeException;
-use Dot\Ems\Mapper\MapperInterface;
+use Dot\Mapper\Exception\RuntimeException;
+use Dot\Mapper\Mapper\MapperInterface;
 use Zend\EventManager\EventManagerAwareTrait;
 
 /**

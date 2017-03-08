@@ -9,13 +9,13 @@
 
 declare(strict_types = 1);
 
-namespace Dot\Ems\Mapper;
+namespace Dot\Mapper\Mapper;
 
-use Dot\Ems\Entity\EntityInterface;
-use Dot\Ems\Event\MapperEventListenerInterface;
-use Dot\Ems\Exception\InvalidArgumentException;
-use Dot\Ems\Exception\RuntimeException;
-use Dot\Ems\Factory\DbMapperFactory;
+use Dot\Mapper\Entity\EntityInterface;
+use Dot\Mapper\Event\MapperEventListenerInterface;
+use Dot\Mapper\Exception\InvalidArgumentException;
+use Dot\Mapper\Exception\RuntimeException;
+use Dot\Mapper\Factory\DbMapperFactory;
 use Zend\Db\Metadata\MetadataInterface;
 use Zend\Db\Metadata\Source\Factory;
 use Zend\EventManager\EventManagerAwareInterface;

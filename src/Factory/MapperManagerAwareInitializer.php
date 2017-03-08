@@ -9,10 +9,10 @@
 
 declare(strict_types = 1);
 
-namespace Dot\Ems\Factory;
+namespace Dot\Mapper\Factory;
 
-use Dot\Ems\Mapper\MapperManager;
-use Dot\Ems\Mapper\MapperManagerAwareInterface;
+use Dot\Mapper\Mapper\MapperManager;
+use Dot\Mapper\Mapper\MapperManagerAwareInterface;
 use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Initializer\InitializerInterface;
 

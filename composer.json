@@ -1,7 +1,7 @@
 {
-  "name": "dotkernel/dot-ems",
+  "name": "dotkernel/dot-mapper",
   "type": "library",
-  "description": "Entity-mapper-service abstraction layer",
+  "description": "Mapper pattern implementation",
   "license": "MIT",
   "authors": [
     {
@@ -40,12 +40,12 @@
   ],
   "autoload": {
     "psr-4": {
-      "Dot\\Ems\\": "src/"
+      "Dot\\Mapper\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "DotTest\\Ems\\": "test/"
+      "DotTest\\Mapper\\": "test/"
     }
   },
   "extra": {

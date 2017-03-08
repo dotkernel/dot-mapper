@@ -9,9 +9,9 @@
 
 declare(strict_types = 1);
 
-namespace Dot\Ems\Mapper;
+namespace Dot\Mapper\Mapper;
 
-use Dot\Ems\Entity\EntityInterface;
+use Dot\Mapper\Entity\EntityInterface;
 use Zend\Hydrator\HydratorInterface;
 
 /**

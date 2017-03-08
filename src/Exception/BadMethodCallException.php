@@ -9,7 +9,7 @@
 
 declare(strict_types = 1);
 
-namespace Dot\Ems\Exception;
+namespace Dot\Mapper\Exception;
 
 /**
  * Class BadMethodCall

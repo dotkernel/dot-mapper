@@ -9,7 +9,7 @@
 
 declare(strict_types = 1);
 
-namespace Dot\Ems\Entity;
+namespace Dot\Mapper\Entity;
 
 use Dot\Hydrator\ClassMethodsCamelCase;
 

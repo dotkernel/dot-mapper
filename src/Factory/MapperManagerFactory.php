@@ -9,9 +9,9 @@
 
 declare(strict_types = 1);
 
-namespace Dot\Ems\Factory;
+namespace Dot\Mapper\Factory;
 
-use Dot\Ems\Mapper\MapperManager;
+use Dot\Mapper\Mapper\MapperManager;
 use Interop\Container\ContainerInterface;
 
 /**

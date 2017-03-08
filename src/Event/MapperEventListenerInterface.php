@@ -9,7 +9,7 @@
 
 declare(strict_types = 1);
 
-namespace Dot\Ems\Event;
+namespace Dot\Mapper\Event;
 
 use Zend\EventManager\ListenerAggregateInterface;
 

@@ -9,19 +9,19 @@
 
 declare(strict_types = 1);
 
-namespace Dot\Ems\Mapper;
+namespace Dot\Mapper\Mapper;
 
-use Dot\Ems\Entity\EntityInterface;
-use Dot\Ems\Event\DispatchMapperEventsTrait;
-use Dot\Ems\Event\MapperEvent;
-use Dot\Ems\Event\MapperEventListenerInterface;
-use Dot\Ems\Event\MapperEventListenerTrait;
-use Dot\Ems\Exception\BadMethodCallException;
-use Dot\Ems\Exception\InvalidArgumentException;
-use Dot\Ems\Exception\RolledbackTransactionException;
-use Dot\Ems\Exception\RuntimeException;
-use Dot\Ems\Utility;
 use Dot\Hydrator\ClassMethodsCamelCase;
+use Dot\Mapper\Entity\EntityInterface;
+use Dot\Mapper\Event\DispatchMapperEventsTrait;
+use Dot\Mapper\Event\MapperEvent;
+use Dot\Mapper\Event\MapperEventListenerInterface;
+use Dot\Mapper\Event\MapperEventListenerTrait;
+use Dot\Mapper\Exception\BadMethodCallException;
+use Dot\Mapper\Exception\InvalidArgumentException;
+use Dot\Mapper\Exception\RolledbackTransactionException;
+use Dot\Mapper\Exception\RuntimeException;
+use Dot\Mapper\Utility;
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Adapter\Driver\AbstractConnection;
 use Zend\Db\Adapter\Driver\ResultInterface;
@@ -206,7 +206,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         $result = $stmt->execute();
 
         if ($result->valid()) {
-            return (int) $result->current()['count'];
+            return (int)$result->current()['count'];
         }
 
         return -1;
