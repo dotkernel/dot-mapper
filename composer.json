@@ -1,7 +1,7 @@
 {
   "name": "dotkernel/dot-mapper",
   "type": "library",
-  "description": "Mapper pattern implementation",
+  "description": "DotKernel mapper pattern implementation",
   "license": "MIT",
   "authors": [
     {
@@ -24,8 +24,7 @@
     "phpunit/phpunit": "^4.8",
     "squizlabs/php_codesniffer": "^2.3",
 
-    "zendframework/zend-db": "^2.8",
-    "dotkernel/dot-validator": "0.6.x-dev"
+    "zendframework/zend-db": "^2.8"
   },
   "suggest": {
     "zendframework/zend-db": "Needed if you use the db mappers"
@@ -42,7 +41,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "0.6-dev"
+      "dev-master": "0.2-dev"
     }
   }
 }
