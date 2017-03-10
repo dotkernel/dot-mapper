@@ -15,7 +15,7 @@ use Dot\Event\Event;
 
 /**
  * Class MapperEvent
- * @package Dot\Ems\Event
+ * @package Dot\Mapper\Event
  */
 class MapperEvent extends Event
 {

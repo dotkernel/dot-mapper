@@ -11,7 +11,7 @@ namespace Dot\Mapper\Exception;
 
 /**
  * Interface ExceptionInterface
- * @package Dot\Ems\Exception
+ * @package Dot\Mapper\Exception
  */
 interface ExceptionInterface
 {

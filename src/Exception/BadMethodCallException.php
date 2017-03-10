@@ -13,7 +13,7 @@ namespace Dot\Mapper\Exception;
 
 /**
  * Class BadMethodCall
- * @package Dot\Ems\Exception
+ * @package Dot\Mapper\Exception
  */
 class BadMethodCallException extends \BadMethodCallException implements ExceptionInterface
 {

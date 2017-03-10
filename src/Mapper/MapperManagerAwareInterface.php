@@ -13,7 +13,7 @@ namespace Dot\Mapper\Mapper;
 
 /**
  * Interface MapperManagerAwareInterface
- * @package Dot\Ems\Mapper
+ * @package Dot\Mapper\Mapper
  */
 interface MapperManagerAwareInterface
 {

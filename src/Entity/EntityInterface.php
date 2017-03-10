@@ -13,7 +13,7 @@ namespace Dot\Mapper\Entity;
 
 /**
  * Interface EntityInterface
- * @package Dot\Ems\Entity
+ * @package Dot\Mapper\Entity
  */
 interface EntityInterface
 {

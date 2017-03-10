@@ -13,7 +13,7 @@ namespace Dot\Mapper\Mapper;
 
 /**
  * Class EntityDbMapper
- * @package Dot\Ems\Mapper
+ * @package Dot\Mapper\Mapper
  */
 class EntityDbMapper extends AbstractDbMapper
 {

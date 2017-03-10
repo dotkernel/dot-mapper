@@ -17,7 +17,7 @@ use Zend\EventManager\EventManagerAwareTrait;
 
 /**
  * Class DispatchMapperEventsTrait
- * @package Dot\Ems\Event
+ * @package Dot\Mapper\Event
  */
 trait DispatchMapperEventsTrait
 {

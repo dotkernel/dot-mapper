@@ -13,7 +13,7 @@ namespace Dot\Mapper\Exception;
 
 /**
  * Class RolledbackTransactionException
- * @package Dot\Ems\Exception
+ * @package Dot\Mapper\Exception
  */
 class RolledbackTransactionException extends \Exception implements ExceptionInterface
 {

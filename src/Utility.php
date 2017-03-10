@@ -13,7 +13,7 @@ namespace Dot\Mapper;
 
 /**
  * Class Utility
- * @package Dot\Ems
+ * @package Dot\Mapper
  */
 class Utility
 {

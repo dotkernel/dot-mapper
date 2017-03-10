@@ -11,7 +11,7 @@ namespace Dot\Mapper\Exception;
 
 /**
  * Class RuntimeException
- * @package Dot\Ems\Exception
+ * @package Dot\Mapper\Exception
  */
 class RuntimeException extends \RuntimeException implements ExceptionInterface
 {

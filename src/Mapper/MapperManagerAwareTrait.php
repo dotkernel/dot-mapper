@@ -13,7 +13,7 @@ namespace Dot\Mapper\Mapper;
 
 /**
  * Class MapperManagerAwareTrait
- * @package Dot\Ems\Mapper
+ * @package Dot\Mapper\Mapper
  */
 trait MapperManagerAwareTrait
 {
