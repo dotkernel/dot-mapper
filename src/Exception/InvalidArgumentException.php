@@ -11,7 +11,7 @@ namespace Dot\Mapper\Exception;
 
 /**
  * Class InvalidArgumentException
- * @package Dot\Ems\Exception
+ * @package Dot\Mapper\Exception
  */
 class InvalidArgumentException extends \InvalidArgumentException implements ExceptionInterface
 {

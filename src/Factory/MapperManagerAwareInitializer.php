@@ -18,7 +18,7 @@ use Zend\ServiceManager\Initializer\InitializerInterface;
 
 /**
  * Class MapperManagerAwareInitializer
- * @package Dot\Ems\Factory
+ * @package Dot\Mapper\Factory
  */
 class MapperManagerAwareInitializer implements InitializerInterface
 {

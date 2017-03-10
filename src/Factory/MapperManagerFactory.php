@@ -16,7 +16,7 @@ use Interop\Container\ContainerInterface;
 
 /**
  * Class MapperManagerFactory
- * @package Dot\Ems\Factory
+ * @package Dot\Mapper\Factory
  */
 class MapperManagerFactory
 {

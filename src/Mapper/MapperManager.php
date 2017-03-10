@@ -23,7 +23,7 @@ use Zend\ServiceManager\AbstractPluginManager;
 
 /**
  * Class MapperManager
- * @package Dot\Ems\Mapper
+ * @package Dot\Mapper\Mapper
  */
 class MapperManager extends AbstractPluginManager
 {

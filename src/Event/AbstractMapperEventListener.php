@@ -15,7 +15,7 @@ use Zend\EventManager\AbstractListenerAggregate;
 
 /**
  * Class AbstractMapperEventListener
- * @package Dot\Ems\Event
+ * @package Dot\Mapper\Event
  */
 abstract class AbstractMapperEventListener extends AbstractListenerAggregate implements MapperEventListenerInterface
 {

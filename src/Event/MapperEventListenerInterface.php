@@ -15,7 +15,7 @@ use Zend\EventManager\ListenerAggregateInterface;
 
 /**
  * Interface MapperEventListenerInterface
- * @package Dot\Ems\Event
+ * @package Dot\Mapper\Event
  */
 interface MapperEventListenerInterface extends ListenerAggregateInterface
 {

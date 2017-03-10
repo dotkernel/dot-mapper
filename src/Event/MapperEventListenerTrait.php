@@ -16,7 +16,7 @@ use Zend\EventManager\ListenerAggregateTrait;
 
 /**
  * Class MapperEventListenerTrait
- * @package Dot\Ems\Event
+ * @package Dot\Mapper\Event
  */
 trait MapperEventListenerTrait
 {

@@ -17,7 +17,7 @@ use Zend\Hydrator\HydratorPluginManager;
 
 /**
  * Class DbMapperFactory
- * @package Dot\Ems\Factory
+ * @package Dot\Mapper\Factory
  */
 class DbMapperFactory
 {

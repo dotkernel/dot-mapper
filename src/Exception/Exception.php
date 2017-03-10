@@ -11,7 +11,7 @@ namespace Dot\Mapper\Exception;
 
 /**
  * Class Exception
- * @package Dot\Ems\Exception
+ * @package Dot\Mapper\Exception
  */
 class Exception extends \Exception implements ExceptionInterface
 {

@@ -15,7 +15,7 @@ use Dot\Hydrator\ClassMethodsCamelCase;
 
 /**
  * Class Entity
- * @package Dot\Ems\Entity
+ * @package Dot\Mapper\Entity
  */
 abstract class Entity implements EntityInterface
 {

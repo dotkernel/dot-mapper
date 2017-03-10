@@ -16,7 +16,7 @@ use Zend\Hydrator\HydratorInterface;
 
 /**
  * Interface MapperInterface
- * @package Dot\Ems\Mapper
+ * @package Dot\Mapper\Mapper
  */
 interface MapperInterface
 {
