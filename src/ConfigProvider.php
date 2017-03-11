@@ -1,10 +1,8 @@
 <?php
 /**
- * @copyright: DotKernel
- * @library: dotkernel/dot-ems
- * @author: n3vrax
- * Date: 11/16/2016
- * Time: 4:26 PM
+ * @see https://github.com/dotkernel/dot-mapper/ for the canonical source repository
+ * @copyright Copyright (c) 2017 Apidemia (https://www.apidemia.com)
+ * @license https://github.com/dotkernel/dot-mapper/blob/master/LICENSE.md MIT License
  */
 
 namespace Dot\Mapper;
