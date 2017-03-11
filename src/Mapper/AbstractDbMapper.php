@@ -39,7 +39,7 @@ use Zend\ServiceManager\ServiceManager;
 
 /**
  * Class AbstractDbMapper
- * @package Test\Ems\Mapper
+ * @package Dot\Mapper\Mapper
  */
 abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerInterface
 {
