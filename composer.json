@@ -11,14 +11,12 @@
   ],
   "require": {
     "php": "^7.1",
-    "container-interop/container-interop": "^1.1",
-
-    "zendframework/zend-servicemanager": "^3.0",
+    "zendframework/zend-servicemanager": "^3.3.0",
     "zendframework/zend-paginator": "^2.7",
 
-    "dotkernel/dot-hydrator": "^1.0",
-    "dotkernel/dot-helpers": "^0.1",
-    "dotkernel/dot-event": "^0.1"
+    "dotkernel/dot-hydrator": "^1.1",
+    "dotkernel/dot-helpers": "^0.2",
+    "dotkernel/dot-event": "^0.2"
   },
   "require-dev": {
     "phpunit/phpunit": "^4.8",
@@ -41,7 +39,8 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "0.2-dev"
+      "dev-master": "0.2-dev",
+      "dev-develop": "0.3-dev"
     }
   }
 }
