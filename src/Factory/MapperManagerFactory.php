@@ -10,7 +10,7 @@ declare(strict_types = 1);
 namespace Dot\Mapper\Factory;
 
 use Dot\Mapper\Mapper\MapperManager;
-use Interop\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * Class MapperManagerFactory

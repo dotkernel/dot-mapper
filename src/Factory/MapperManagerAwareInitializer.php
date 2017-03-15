@@ -11,14 +11,13 @@ namespace Dot\Mapper\Factory;
 
 use Dot\Mapper\Mapper\MapperManager;
 use Dot\Mapper\Mapper\MapperManagerAwareInterface;
-use Interop\Container\ContainerInterface;
-use Zend\ServiceManager\Initializer\InitializerInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * Class MapperManagerAwareInitializer
  * @package Dot\Mapper\Factory
  */
-class MapperManagerAwareInitializer implements InitializerInterface
+class MapperManagerAwareInitializer
 {
     public function __invoke(ContainerInterface $container, $instance)
     {
