@@ -20,6 +20,6 @@ class MapperManagerFactory
 {
     public function __invoke(ContainerInterface $container)
     {
-        return new MapperManager($container, $container->get('config')['dot_ems']);
+        return new MapperManager($container, $container->get('config')['dot_mapper']);
     }
 }

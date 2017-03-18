@@ -1,3 +1,21 @@
+## 0.3.0 - 2017-03-18
+
+### Changed
+* module config key from `dot_ems` to `dot_mapper`. Bumped version due to BC break
+
+### Added
+* Nothing
+
+### Deprecated
+* Nothing
+
+### Removed
+* Nothing
+
+### Fixed
+* Nothing
+
+
 ## 0.2.0 - 2017-03-15
 
 ### Changed

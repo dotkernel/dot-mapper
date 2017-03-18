@@ -18,7 +18,7 @@ class ConfigProvider
         return [
             'dependencies' => $this->getDependencyConfig(),
 
-            'dot_ems' => [
+            'dot_mapper' => [
 
                 'mapper_manager' => [
 
