@@ -1123,6 +1123,14 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     }
 
     /**
+     * @return bool
+     */
+    public function inTransaction(): bool
+    {
+        return $this->getConnection()->inTransaction();
+    }
+
+    /**
      * @return \Zend\Db\Adapter\Driver\ConnectionInterface
      */
     public function commit()

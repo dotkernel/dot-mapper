@@ -24,6 +24,11 @@ interface MapperInterface
     public function beginTransaction();
 
     /**
+     * @return bool
+     */
+    public function inTransaction(): bool;
+
+    /**
      * Commits the opened transactions
      */
     public function commit();

@@ -1,3 +1,21 @@
+## 0.4.0 - unreleased
+
+### Changed
+* Nothing
+
+### Added
+* mapper function `->inTransaction(): bool` to check if mapper is in an active transaction(if supported)
+
+### Deprecated
+* Nothing
+
+### Removed
+* Nothing
+
+### Fixed
+* Nothing
+
+
 ## 0.3.0 - 2017-03-18
 
 ### Changed
