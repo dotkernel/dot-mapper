@@ -1,4 +1,4 @@
-## 0.4.0 - unreleased
+## 0.4.0 - 2017-04-20
 
 ### Changed
 * Nothing
