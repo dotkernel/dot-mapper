@@ -1,3 +1,21 @@
+## 0.4.1 - 2017-05-02
+
+### Changed
+* Nothing
+
+### Added
+* Nothing
+
+### Deprecated
+* Nothing
+
+### Removed
+* Nothing
+
+### Fixed
+* abstract mappers must implement `EventManagerAwareInterface` too
+
+
 ## 0.4.0 - 2017-04-20
 
 ### Changed

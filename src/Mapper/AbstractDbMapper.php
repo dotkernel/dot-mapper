@@ -32,6 +32,7 @@ use Zend\Db\ResultSet\ResultSet;
 use Zend\Db\Sql\Expression;
 use Zend\Db\Sql\Select;
 use Zend\Db\Sql\Sql;
+use Zend\EventManager\EventManagerAwareInterface;
 use Zend\EventManager\ResponseCollection;
 use Zend\Hydrator\HydratorInterface;
 use Zend\Hydrator\HydratorPluginManager;
@@ -41,7 +42,7 @@ use Zend\ServiceManager\ServiceManager;
  * Class AbstractDbMapper
  * @package Dot\Mapper\Mapper
  */
-abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerInterface
+abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerInterface, EventManagerAwareInterface
 {
     use DispatchMapperEventsTrait;
     use MapperEventListenerTrait;
