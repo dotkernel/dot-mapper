@@ -186,6 +186,45 @@ class MyService implements MapperManagerAwareInterface
 
 ## Listening to mapper events
 
+A mapper event listener can be created by implementing the `MapperEventListenerInterface`. In order to make it easier, we provide ab abstract listener and a trait to help you setup the listener.
+
+The mapper event object is defined in the `MapperEvent` class.
+
+Please note that the provided abstract mappers act also as event listeners to themselfs. This can be usefull for adding additional functionality directly to the mapper.
+
+## Mapper events
+
+We list below the mapper event along with some tips on how you could use them and for what purpose. The grouped the events based on the mapper operation that triggers them and for each group we kept the order in which they are triggered.
+
+## Select(find) related events
+
+These are triggered when calling the `find` method of the mapper
+
+#### MapperEvent::EVENT_MAPPER_BEFORE_FIND
+* triggered after calling the mapper's `find` method. It is triggered before the query is run. It allows you to change the query at runtime or add find options. The parameters carried by this event are
+    * `select` - the query object specific to the underlying database adapter
+    * `type` - the finder type(defaults to 'all')
+    * `options` - the array of options that was set for find operation
+
+#### MapperEvent::EVENT_MAPPER_BEFORE_LOAD
+* this event is triggered after the query was run but the result was not hydrated into entities. The event is triggered for each entity individually, in case a list of entities are fetched. The event carries the following parameters
+    * `data` - the raw data of the entity as an associative array
+    * `options` - the options array that was used to select the results
+
+#### MapperEvent::EVENT_MAPPER_AFTER_LOAD
+* this is also triggered for each individual entity in the result, so it can trigger many times on a find operation. It is triggered after the raw data was used to hydrate the entity prototype. Can be used to further process the entity or load additional data into it. The event object carries the following parameters:
+    * `entity` - the single entity result object that was hydrated
+    * `data` - the raw entity data that was used to hydrate the prototype
+    * `options` - the same options array used to query the database
+
+#### MapperEvent::EVENT_MAPPER_AFTER_FIND
+* triggered after the query was run and the results were fetched and hydrated. It is triggered only once, no matter how many objects are in the result. It allows you to introspect the results and post-process them or add functionality after select operations. It can be used to load more data from other tables for example. Parameters carried by this event are:
+    * `entities` - the query result as an array of entities or an empty array if no results were found
+    * `type` - the finder type
+    * `options` - the find options array used
+
+## Save(insert/update) related events
+
 
 
 ## Advanced mapper usage
