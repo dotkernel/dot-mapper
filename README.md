@@ -79,6 +79,40 @@ class MyEntityDbMapper extends AbstractDbMapper
 }
 ```
 
+## Default mapper functions
+```php
+public function find(string $type = 'all', array $options = []): array
+```
+* finder method for select operations. There could be multiple finder methods defined, using the following name convetions `findFinderName` where FinderName is the name of the finder. There is a findAll finder defined by default that will leave the select query intact. You can defined custom finder methods too in order to modify the select for your needs. To specify which finder to use, the `find` method's first parameter is the `$type`. Parameters:
+    * `type` - the finder method to use
+    * `options` - an array containing find options.
+
+#### Find options(for SQL databases)
+* `fields` - the column/field names to select from the database
+* `conditions` - where conditions using boolean AND. For more complex conditions, you should use the custom finder method or define your own mapper method.
+* `group` - group by select clause
+* `having` - having select clause
+* `order` - order by clause
+* `limit` - limit number of results
+* `offset` - offset where the select should start
+* `page` - alternative to limit/offset pair(it will be converted to them internally)
+* `joins` - array of join conditions. This needs to be detailed below
+
+#### Join options
+* join options goes into the `joins` key of the find options array. The joins options must be an array of join configurations. The join format is as following
+```php
+$options['joins'] = [
+    'join_table_alias[optional]' => [
+        'table' => 'joined table name',
+        'on' => 'ON condition',
+        'fields' => 'joined table fields to select',
+        'type' => Select::INNER_JOIN,
+    ],
+    //...
+];
+```
+
+
 ## The Mapper Manager
 
 All defined mappers have to be registered and fetched from the mapper manager. The mapper manager is a special case of service container. It is an instance of the `AbstractPluginManager` type provided by Zend Service Manager.
@@ -246,9 +280,19 @@ The following events are triggered in the order listed below when calling the `s
 
 ## Delete related events
 
-Triggered when an entity is to be deleted by calling the mapper's `delete` method.
+Triggered when an entity is to be deleted by calling the mapper's `delete` method. It works only with the single entity deletion not with the `deleteAll`.
 
 #### MapperEvent::EVENT_MAPPER_BEFORE_DELETE
-* triggered before the actual release 
+* triggered before the actual entity deletion. Useful to add pre-delete operations or even stop the deletion at runtime. The event paramteres are:
+    * `entity` - entity object to be deleted
+    * `options` - the delete options array that was passed to the delete method
+
+#### MapperEvent::EVENT_MAPPER_AFTER_DELETE
+* triggered after the delete query was run. Useful to add post-delete operations(delete related entities etc.). It is triggered only if the deletion was succesful.
+    * `entity` - entity object that was deleted
+    * `options` - the delete options array as passed to the delete method
+
+#### MapperEvent::EVENT_MAPPER_AFTER_DELETE_COMMIT
+* triggered after the delete transaction was successfully commited. If you let the delete operation as atomic(by default) the delete will be wrapped in a transaction. This event marks that the transaction was a success and consequently the delete operation(along with any pre or post operations done in other delete events). The parameters are the same as for the previously described event.
 
 ## Advanced mapper usage
