@@ -79,7 +79,8 @@ class MyEntityDbMapper extends AbstractDbMapper
 }
 ```
 
-## Default mapper functions
+## Basic mapper functions
+### Selecting list of items
 ```php
 public function find(string $type = 'all', array $options = []): array
 ```
@@ -104,7 +105,7 @@ public function find(string $type = 'all', array $options = []): array
 $options['joins'] = [
     'join_table_alias[optional]' => [
         'table' => 'joined table name',
-        'on' => 'ON condition',
+        'on' => 'ON condition as string',
         'fields' => 'joined table fields to select',
         'type' => Select::INNER_JOIN,
     ],
@@ -112,6 +113,66 @@ $options['joins'] = [
 ];
 ```
 
+### Counting items
+```php
+public function count($type = 'all', array $options = []): int
+```
+* used to do a count on the database. Can be used paired with the find method in order to get the total items count for pagination as an example. If used with the find method, make sure you pass the same type and options to the count method too.
+* in case something went wrong, the returned value will be `-1`
+
+### Selecting one item/entity
+```php
+public function get($primaryKey, array $options = [])
+```
+* used to select one entity based on it primary key/id value. Internally, it uses the `find` method and limits the result to one element which is returned. If no element were found, the return will be `null`.
+* the options array are the same as for the `find` method with one additional supported parameter, `finder` which you can use to specify which finder method the `find` will use.
+
+### Saving an entity
+```php
+public function save(EntityInterface $entity, array $options = [])
+```
+* saves the given entity to the database. It will do an insertion if the entity's primary key is null, meaning it is a newly created entity. It will do an update otherwise, using the entity's primary key as a where condition.
+* the only default option supported is the `atomic` options($options['atomic'] = true|false) which you can use to toggle atomic save operation. It enabled the query will be wrapped in a transaction(on by default)
+* of course, other options might be created if you were to extend the saving method.
+
+### Deleting an entity
+```php
+public function delete(EntityInterface $entity, array $options = [])
+```
+* deletes the given entity. The entity should exist in the database, and the object should have its primary key/id present. The options are the same as for the save method.
+
+### Bulk delete
+```php
+public function deleteAll(array $conditions)
+```
+* deletes many rows at once using the provided array of conditions. **Note that using this method does not work on entity level, but rather directly to the database. Also delete event do not trigger for this method.**
+
+### Bulk update
+```php
+public function updateAll(array $fields, array $conditions)
+```
+* updates multiple rows at once, similar to bulk delete. **Again, this does not trigger save or update events.**
+
+### Creating new empty entities
+```php
+public function newEntity(): EntityInterface;
+```
+* this can be used to dynamically create empty/new entities at runtime by using the mapper instead to create it. It might be useful in situations were the entity creation process should be more dynamic, or you don't know beforehand what kind of entity you need and you rely on the mapper, which is already set with the prototype. This method also makes sure the returned object is new, by cloning the entity prototype in the mapper.
+
+### Other useful functions
+```php
+public function lastGeneratedValue(string $name = null);
+```
+* get the last generated id value(if supported)
+
+```php
+public function getPrototype(): EntityInterface;
+
+public function getHydrator(): HydratorInterface;
+```
+* get the entity prototype and its hydrator associated with the mapper
+
+Other methods will be described in the advanced mapper usage section. Their availability might be conditioned by the underlying backend engine used.
 
 ## The Mapper Manager
 
@@ -220,7 +281,7 @@ class MyService implements MapperManagerAwareInterface
 
 ## Listening to mapper events
 
-A mapper event listener can be created by implementing the `MapperEventListenerInterface`. In order to make it easier, we provide ab abstract listener and a trait to help you setup the listener.
+A mapper event listener can be created by implementing the `MapperEventListenerInterface`. In order to make it easier, we provide an abstract listener and a trait to help you setup the listener.
 
 The mapper event object is defined in the `MapperEvent` class.
 
@@ -232,7 +293,7 @@ We list below the mapper event along with some tips on how you could use them an
 
 ## Select(find) related events
 
-These are triggered when calling the `find` method of the mapper
+These are triggered when calling the `find` method of the mapper or the `get` method
 
 #### MapperEvent::EVENT_MAPPER_BEFORE_FIND
 * triggered after calling the mapper's `find` method. It is triggered before the query is run. It allows you to change the query at runtime or add find options. The parameters carried by this event are
@@ -296,3 +357,5 @@ Triggered when an entity is to be deleted by calling the mapper's `delete` metho
 * triggered after the delete transaction was successfully commited. If you let the delete operation as atomic(by default) the delete will be wrapped in a transaction. This event marks that the transaction was a success and consequently the delete operation(along with any pre or post operations done in other delete events). The parameters are the same as for the previously described event.
 
 ## Advanced mapper usage
+
+@ TODO: write more documentation
