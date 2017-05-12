@@ -1,3 +1,21 @@
+## 0.4.1 - 2017-05-12
+
+### Changed
+* Nothing
+
+### Added
+* Nothing
+
+### Deprecated
+* Nothing
+
+### Removed
+* Nothing
+
+### Fixed
+* fixed issue #12 - error when saving multiple new entities
+
+
 ## 0.4.1 - 2017-05-02
 
 ### Changed
