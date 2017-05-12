@@ -300,9 +300,8 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
 
         $primaryKey = array_intersect_key($data, array_flip($primaryColumns));
         $primaryKey = array_filter($primaryKey);
-        $mapKey = implode(',', $primaryKey);
 
-        $isNew = empty($primaryKey) && !isset($this->identityMap[$mapKey]);
+        $isNew = empty($primaryKey);
 
         /** @var ResponseCollection $event */
         $event = $this->dispatchEvent(
@@ -329,6 +328,8 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
         }
 
         if ($success && $isNew) {
+            $primaryKey = $entity->extractProperties($primaryColumns);
+            $mapKey = implode(',', $primaryKey);
             $this->identityMap[$mapKey] = $entity;
         }
 
