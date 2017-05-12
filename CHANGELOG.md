@@ -13,7 +13,7 @@
 * Nothing
 
 ### Fixed
-* fixed issue #12 - error when saving multiple new entities
+* fixed issue [#12](https://github.com/dotkernel/dot-mapper/issues/12) - error when saving multiple new entities
 
 
 ## 0.4.1 - 2017-05-02
