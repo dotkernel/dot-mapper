@@ -257,7 +257,8 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     public function save(EntityInterface $entity, array $options = [])
     {
         $options += [
-            'atomic' => true
+            'atomic' => true,
+            'force_nulls' => false,
         ];
 
         if ($options['atomic']) {
@@ -313,8 +314,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
             return $event->last();
         }
 
-        $forceNulls = (bool) $options['force_nulls'] ?? false;
-        if (!$forceNulls) {
+        if (isset($options['force_nulls']) && $options['force_nulls'] === false) {
             $data = array_filter($data);
         }
 

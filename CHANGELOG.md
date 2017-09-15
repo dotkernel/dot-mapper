@@ -1,3 +1,21 @@
+## 0.4.4 - 2017-09-15
+
+### Changed
+* Nothing
+
+### Added
+* Nothing
+
+### Deprecated
+* Nothing
+
+### Removed
+* Nothing
+
+### Fixed
+* Quick fixed previous release
+
+
 ## 0.4.3 - 2017-09-15
 
 ### Changed
