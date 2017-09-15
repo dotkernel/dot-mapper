@@ -313,6 +313,11 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
             return $event->last();
         }
 
+        $forceNulls = (bool) $options['force_nulls'] ?? false;
+        if (!$forceNulls) {
+            $data = array_filter($data);
+        }
+
         if ($isNew) {
             $success = $this->insert($entity, $data);
         } else {

@@ -1,3 +1,21 @@
+## 0.4.3 - 2017-09-15
+
+### Changed
+* Nothing
+
+### Added
+* array_filter on data before saving. Can be overridden with `force_nulls` option
+
+### Deprecated
+* Nothing
+
+### Removed
+* Nothing
+
+### Fixed
+* Nothing
+
+
 ## 0.4.2 - 2017-05-12
 
 ### Changed
