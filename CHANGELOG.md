@@ -1,3 +1,20 @@
+## 1.0.0 - 2018-04-13
+
+### Changed
+* Dependency version update
+
+### Added
+* Nothing
+
+### Deprecated
+* Nothing
+
+### Removed
+* Nothing
+
+### Fixed
+* Nothing
+
 ## 0.4.4 - 2017-09-15
 
 ### Changed
