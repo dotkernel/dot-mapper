@@ -17,7 +17,7 @@ $ composer required dotkernel/dot-mapper
 Entities are part of the domain model. They model real life objects or concepts. Usually in a web application they model the database objects and their relationships.
 In DotKernel we like to keep entities simple and as close to the database structure as possible. Usually they will model a table's row and can be composed into more complex objects via object composition
 To use our mapper package to save entities to the database, you have to implement the `EntityInterface` interface or better, extend the `Entity` class.
-Among some utility methods defined for object property handling, the Entity class defines internally the zend hydrator that is to be used when fetching or saving data to the backend.
+Among some utility methods defined for object property handling, the Entity class defines internally the laminas hydrator that is to be used when fetching or saving data to the backend.
 The mappers do this automatically when using the CRUD operations.
 
 To set the prefered hydrator, you can extend the Entity class and override the `protected $hydrator` property with the class name of the desired hydrator. The hydrator has to be registered in the hydrator manager beforehand.
@@ -65,7 +65,7 @@ class MyEntity extends Entity
 
 DotKernel mappers must implement the `MapperInterface` which defines the basic CRUD operations along with some specific database functions like transaction management, generated value and so on.
 
-We already provide an abstract mapper implementation for SQL databases. The abstract mapper is based on functions offered by [zend-db](https://github.com/zendframework/zend-db). We'll implement other types of backend support in the future.
+We already provide an abstract mapper implementation for SQL databases. The abstract mapper is based on functions offered by [laminas-db](https://github.com/laminas/laminas-db). We'll implement other types of backend support in the future.
 
 If you use an SQL database, in order to create a mapper, you should extend the `AbstractDbMapper` class. You don't have to write any database related code if all you need is CRUD operations. We'll detail later in this lesson how to create more complex mappers.
 
@@ -176,7 +176,7 @@ Other methods will be described in the advanced mapper usage section. Their avai
 
 ## The Mapper Manager
 
-All defined mappers have to be registered and fetched from the mapper manager. The mapper manager is a special case of service container. It is an instance of the `AbstractPluginManager` type provided by Zend Service Manager.
+All defined mappers have to be registered and fetched from the mapper manager. The mapper manager is a special case of service container. It is an instance of the `AbstractPluginManager` type provided by Laminas Service Manager.
 The mapper manager is responsible for proper mapper initialization. Another feature is mapper caching - multiple calls to a mapper will result in just one initialization. The mapper manager initializes the mapper following the configuration set including the backend adapters, associated entity, event listeners and so on.
 
 You'll use the mapper manager's single public method: `get($name, array $options = null)`; 
@@ -206,7 +206,7 @@ return [
 ];
 ```
 
-Even though it is a regular zend service plugin manager, in the case of mappers the mapper registration needs to be defined more strictly. Let's see next how to setup a mapper.
+Even though it is a regular laminas service plugin manager, in the case of mappers the mapper registration needs to be defined more strictly. Let's see next how to setup a mapper.
 
 ## Mapper setup
 

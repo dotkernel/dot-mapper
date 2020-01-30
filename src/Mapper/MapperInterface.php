@@ -10,7 +10,7 @@ declare(strict_types = 1);
 namespace Dot\Mapper\Mapper;
 
 use Dot\Mapper\Entity\EntityInterface;
-use Zend\Hydrator\HydratorInterface;
+use Laminas\Hydrator\HydratorInterface;
 
 /**
  * Interface MapperInterface

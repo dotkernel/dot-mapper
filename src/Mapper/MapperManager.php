@@ -14,10 +14,10 @@ use Dot\Mapper\Event\MapperEventListenerInterface;
 use Dot\Mapper\Exception\InvalidArgumentException;
 use Dot\Mapper\Exception\RuntimeException;
 use Dot\Mapper\Factory\DbMapperFactory;
-use Zend\Db\Metadata\MetadataInterface;
-use Zend\Db\Metadata\Source\Factory;
-use Zend\EventManager\EventManagerAwareInterface;
-use Zend\ServiceManager\AbstractPluginManager;
+use Laminas\Db\Metadata\MetadataInterface;
+use Laminas\Db\Metadata\Source\Factory;
+use Laminas\EventManager\EventManagerAwareInterface;
+use Laminas\ServiceManager\AbstractPluginManager;
 
 /**
  * Class MapperManager

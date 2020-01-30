@@ -9,7 +9,7 @@ declare(strict_types = 1);
 
 namespace Dot\Mapper\Event;
 
-use Zend\EventManager\ListenerAggregateInterface;
+use Laminas\EventManager\ListenerAggregateInterface;
 
 /**
  * Interface MapperEventListenerInterface

@@ -20,23 +20,23 @@ use Dot\Mapper\Exception\InvalidArgumentException;
 use Dot\Mapper\Exception\RolledbackTransactionException;
 use Dot\Mapper\Exception\RuntimeException;
 use Dot\Mapper\Utility;
-use Zend\Db\Adapter\Adapter;
-use Zend\Db\Adapter\Driver\AbstractConnection;
-use Zend\Db\Adapter\Driver\ResultInterface;
-use Zend\Db\Metadata\MetadataInterface;
-use Zend\Db\Metadata\Object\ColumnObject;
-use Zend\Db\Metadata\Object\ConstraintObject;
-use Zend\Db\Metadata\Object\TableObject;
-use Zend\Db\Metadata\Source\Factory;
-use Zend\Db\ResultSet\ResultSet;
-use Zend\Db\Sql\Expression;
-use Zend\Db\Sql\Select;
-use Zend\Db\Sql\Sql;
-use Zend\EventManager\EventManagerAwareInterface;
-use Zend\EventManager\ResponseCollection;
-use Zend\Hydrator\HydratorInterface;
-use Zend\Hydrator\HydratorPluginManager;
-use Zend\ServiceManager\ServiceManager;
+use Laminas\Db\Adapter\Adapter;
+use Laminas\Db\Adapter\Driver\AbstractConnection;
+use Laminas\Db\Adapter\Driver\ResultInterface;
+use Laminas\Db\Metadata\MetadataInterface;
+use Laminas\Db\Metadata\Object\ColumnObject;
+use Laminas\Db\Metadata\Object\ConstraintObject;
+use Laminas\Db\Metadata\Object\TableObject;
+use Laminas\Db\Metadata\Source\Factory;
+use Laminas\Db\ResultSet\ResultSet;
+use Laminas\Db\Sql\Expression;
+use Laminas\Db\Sql\Select;
+use Laminas\Db\Sql\Sql;
+use Laminas\EventManager\EventManagerAwareInterface;
+use Laminas\EventManager\ResponseCollection;
+use Laminas\Hydrator\HydratorInterface;
+use Laminas\Hydrator\HydratorPluginManager;
+use Laminas\ServiceManager\ServiceManager;
 
 /**
  * Class AbstractDbMapper
@@ -1122,7 +1122,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     }
 
     /**
-     * @return \Zend\Db\Adapter\Driver\ConnectionInterface
+     * @return \Laminas\Db\Adapter\Driver\ConnectionInterface
      */
     public function beginTransaction()
     {
@@ -1138,7 +1138,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     }
 
     /**
-     * @return \Zend\Db\Adapter\Driver\ConnectionInterface
+     * @return \Laminas\Db\Adapter\Driver\ConnectionInterface
      */
     public function commit()
     {
@@ -1146,7 +1146,7 @@ abstract class AbstractDbMapper implements MapperInterface, MapperEventListenerI
     }
 
     /**
-     * @return \Zend\Db\Adapter\Driver\ConnectionInterface
+     * @return \Laminas\Db\Adapter\Driver\ConnectionInterface
      */
     public function rollback()
     {

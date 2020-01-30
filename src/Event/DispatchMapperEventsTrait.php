@@ -11,7 +11,7 @@ namespace Dot\Mapper\Event;
 
 use Dot\Mapper\Exception\RuntimeException;
 use Dot\Mapper\Mapper\MapperInterface;
-use Zend\EventManager\EventManagerAwareTrait;
+use Laminas\EventManager\EventManagerAwareTrait;
 
 /**
  * Class DispatchMapperEventsTrait
@@ -25,7 +25,7 @@ trait DispatchMapperEventsTrait
      * @param string $name
      * @param array $data
      * @param mixed $target
-     * @return \Zend\EventManager\ResponseCollection
+     * @return \Laminas\EventManager\ResponseCollection
      */
     public function dispatchEvent(string $name, array $data = [], $target = null)
     {

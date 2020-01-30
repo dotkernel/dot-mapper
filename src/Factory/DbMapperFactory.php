@@ -11,7 +11,7 @@ namespace Dot\Mapper\Factory;
 
 use Dot\Mapper\Mapper\MapperManager;
 use Psr\Container\ContainerInterface;
-use Zend\Hydrator\HydratorPluginManager;
+use Laminas\Hydrator\HydratorPluginManager;
 
 /**
  * Class DbMapperFactory
