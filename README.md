@@ -1,7 +1,13 @@
 # dot-mapper
 
+![OSS Lifecycle](https://img.shields.io/osslifecycle/dotkernel/dot-mapper)
+[![GitHub license](https://img.shields.io/github/license/dotkernel/dot-mapper)](https://github.com/dotkernel/dot-mapper/blob/master/LICENSE.md)
+
 DotKernel backend abstraction that implements the [Data Mapper pattern](https://martinfowler.com/eaaCatalog/dataMapper.html).
 It does not offer a full ORM solution but rather a middle-ground solution for entity to database transfer with the possibility to be used with relationships too.
+
+##Note
+**dot-mapper** is **abandoned** and will receive no further development!
 
 **Required PHP version >= 7.1**
 
