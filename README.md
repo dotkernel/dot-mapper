@@ -14,9 +14,6 @@
 DotKernel backend abstraction that implements the [Data Mapper pattern](https://martinfowler.com/eaaCatalog/dataMapper.html).
 It does not offer a full ORM solution but rather a middle-ground solution for entity to database transfer with the possibility to be used with relationships too.
 
-##Note
-**dot-mapper** is **abandoned** and will receive no further development!
-
 
 ## Installation
 
