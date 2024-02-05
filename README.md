@@ -1,7 +1,7 @@
 # dot-mapper
 
 ![OSS Lifecycle](https://img.shields.io/osslifecycle/dotkernel/dot-mapper)
-![PHP from Packagist (specify version)](https://img.shields.io/packagist/php-v/dotkernel/dot-mapper/2.9.0)
+![PHP from Packagist (specify version)](https://img.shields.io/packagist/php-v/dotkernel/dot-mapper/2.9.2)
 
 [![GitHub issues](https://img.shields.io/github/issues/dotkernel/dot-mapper)](https://github.com/dotkernel/dot-mapper/issues)
 [![GitHub forks](https://img.shields.io/github/forks/dotkernel/dot-mapper)](https://github.com/dotkernel/dot-mapper/network)
