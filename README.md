@@ -1,8 +1,12 @@
 # dot-mapper
 
 ![OSS Lifecycle](https://img.shields.io/osslifecycle/dotkernel/dot-mapper)
-[![GitHub license](https://img.shields.io/github/license/dotkernel/dot-mapper)](https://github.com/dotkernel/dot-mapper/blob/2.0/LICENSE.md)
 ![PHP from Packagist (specify version)](https://img.shields.io/packagist/php-v/dotkernel/dot-mapper/2.9.0)
+
+[![GitHub issues](https://img.shields.io/github/issues/dotkernel/dot-mapper)](https://github.com/dotkernel/dot-mapper/issues)
+[![GitHub forks](https://img.shields.io/github/forks/dotkernel/dot-mapper)](https://github.com/dotkernel/dot-mapper/network)
+[![GitHub stars](https://img.shields.io/github/stars/dotkernel/dot-mapper)](https://github.com/dotkernel/dot-mapper/stargazers)
+[![GitHub license](https://img.shields.io/github/license/dotkernel/dot-mapper)](https://github.com/dotkernel/dot-mapper/blob/2.0/LICENSE.md)
 
 ## Note
 
