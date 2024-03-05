@@ -1,5 +1,11 @@
 # dot-mapper
 
+> [!CAUTION]
+> ## Security-Only Maintenance Mode
+> 
+> This package is considered feature-complete, and is now in **security-only** maintenance mode.
+
+
 ![OSS Lifecycle](https://img.shields.io/osslifecycle/dotkernel/dot-mapper)
 ![PHP from Packagist (specify version)](https://img.shields.io/packagist/php-v/dotkernel/dot-mapper/2.9.2)
 
@@ -8,11 +14,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/dotkernel/dot-mapper)](https://github.com/dotkernel/dot-mapper/stargazers)
 [![GitHub license](https://img.shields.io/github/license/dotkernel/dot-mapper)](https://github.com/dotkernel/dot-mapper/blob/2.0/LICENSE.md)
 
-## Note
 
-> **dot-mapper** is in **maintenance** mode.
-
-> This package is considered feature-complete, and is now in **security-only** maintenance mode.
 
 
 DotKernel backend abstraction that implements the [Data Mapper pattern](https://martinfowler.com/eaaCatalog/dataMapper.html).
