@@ -1,7 +1,7 @@
 # dot-mapper
 
 > [!IMPORTANT]
-> dot-mapper is a wrapper on top of [mezzio/mezzio-hal](https://github.com/laminas/laminas-db)
+> dot-mapper is a wrapper on top of [laminas/laminas-db](https://github.com/laminas/laminas-db)
 >
 > ![OSS Lifecycle](https://img.shields.io/osslifecycle/laminas/laminas-db)
 
